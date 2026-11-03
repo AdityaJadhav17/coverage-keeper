@@ -53,11 +53,18 @@ describe("shipped text contains no eligibility claims", () => {
     },
   );
 
-  it("fixed UI strings in the app screens", () => {
-    const ui = readFileSync(
-      path.join(__dirname, "..", "..", "src", "app", "page.tsx"),
-      "utf8",
-    );
+  const appDir = path.join(__dirname, "..", "..", "src", "app");
+  const uiFiles = readdirSync(appDir, { recursive: true, encoding: "utf8" })
+    .filter((f) => /\.tsx?$/.test(f))
+    .map((f) => f.replaceAll("\\", "/"));
+
+  it("scans the page and every component", () => {
+    expect(uiFiles).toContain("page.tsx");
+    expect(uiFiles).toContain("components/Result.tsx");
+  });
+
+  it.each(uiFiles)("fixed UI strings in src/app/%s", (file) => {
+    const ui = readFileSync(path.join(appDir, file), "utf8");
     expect(findForbiddenClaims(ui)).toEqual([]);
   });
 });
