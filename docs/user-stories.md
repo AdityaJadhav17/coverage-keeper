@@ -265,4 +265,13 @@ As Gloria I want to use the whole app with the keyboard so that I don't depend o
 **US-094: Phone layout unchanged** — Must, Release: v0.2
 As Marisol I want the phone layout to stay as good as it is so that nothing gets worse for me.
 
-- Given a phone (under 600px), Then layout and behavior match v0.1, and all existing E2E tests pass unchanged.
+- Given a phone (under 600px), Then layout and behavior match v0.1 apart from the rebrand (colors, type, welcome copy, status badges), and existing E2E tests pass with only text-selector updates where copy changed; roles and `data-testid`s are unchanged.
+
+**US-095: Warm, welcoming colors** — Must, Release: v0.2
+As Rosa, opening a stressful letter about her health coverage, I want the app to feel warm and calm, not like a government office, so that I feel safe reading it and keep going until I know what to do.
+
+- Given any screen, the colors feel warm and friendly (see `docs/design/2026-11-03-rebrand.md`), not cold navy and grey.
+- Given any text, it meets WCAG AA contrast (4.5:1 body, 3:1 large text and form borders) in light and dark mode.
+- Given a due date that is soon or has passed, urgency shows in words in a badge, never by color alone, and the warning color never looks like a normal brand color.
+- Given several states are supported, the colors copy no state agency's branding, so the app doesn't look like an official government site.
+- Given a phone, only colors, type, the welcome copy and the status badges change; the flow stays the same.
