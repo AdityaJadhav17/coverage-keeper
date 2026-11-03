@@ -7,7 +7,7 @@
 | User loses coverage after acting on a wrong deadline | Model misreads a date           | Show quoted source line; compute days in code; "unsure" when ambiguous; eval measures deadline accuracy | US-020, US-021 |
 | User thinks they are (not) eligible                  | Model or UI states eligibility  | Schema has no eligibility field; output filter; fixed "may apply" wording; safety suite blocks build    | US-050, US-030 |
 | Forged letter manipulates output                     | Prompt injection in letter text | Prompt treats letter as data; schema-only output; guardrail filter; adversarial tests                   | US-052         |
-| Leak of PII/PHI                                      | Storage, logs, error reports    | No storage; redacted logs; no third-party analytics                                                     | US-051         |
+| Leak of PII/PHI                                      | Storage, logs, error reports    | No storage; redacted logs; page-view analytics only, never letter data                                  | US-051         |
 | Third party sees letter                              | Image sent to LLM provider      | Consent screen discloses it; single provider; no other processors                                       | US-055         |
 | User acts on outdated rules                          | State changes exemptions        | Rules are data with `source_url` and `retrieved` date shown in UI                                       | US-030         |
 | User can't reach a human                             | App is a dead end               | Phone number on every result and error                                                                  | US-054         |
@@ -16,9 +16,11 @@
 
 Request ID, timestamp, route, status code, latency, model ID, prompt version, error class, guardrail-hit count.
 
+Vercel Web Analytics counts page views without cookies (per Vercel's documentation: path, referrer, browser, OS, device type, country). Every screen lives at `/`, so the path never reveals a letter or a result. The app sends no custom events.
+
 ## What we never store or log
 
-Image bytes, letter text, extracted fields, user answers to screening questions, IP-to-content links. No analytics SDKs, no session replay.
+Image bytes, letter text, extracted fields, user answers to screening questions, IP-to-content links. No session replay, no custom analytics events, no trackers other than Vercel Web Analytics page views.
 
 ## Consent and disclaimers
 

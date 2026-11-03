@@ -13,6 +13,7 @@ Medicaid letters contain names, addresses, case numbers and sometimes health inf
 - The browser keeps results in React state only (no localStorage).
 - Logs contain request ID, latency, status, model ID and error class only. Never letter text, image bytes or extracted fields.
 - The image goes to exactly one third party, the LLM provider ([ADR-0003](0003-model-provider.md)). This is disclosed on the consent screen (US-055).
+- Vercel Web Analytics (`@vercel/analytics`, added 2026-11-03) counts anonymous page views without cookies. It never receives letter content, extracted fields or screening answers, and the app sends no custom events. It only collects data when Web Analytics is enabled in the Vercel project.
 - The repo contains only public sample notices ([eval.md](../eval.md)); CI blocks anything else ([ci.md](../ci.md)).
 
 Assumption: provider API data is not used for model training and is kept only for a limited period. Verify against the provider's current commercial terms before any real-user pilot.
