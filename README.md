@@ -61,7 +61,7 @@ The model only reads. It returns one fixed shape ([`src/lib/schema.ts`](src/lib/
 ## Safety and privacy
 
 - **Never decides eligibility.** No eligibility field in the schema, fixed "may apply" wording, and a guardrail ([`src/lib/guardrails.ts`](src/lib/guardrails.ts)) that replaces any sentence like "you are eligible" or "you don't qualify" with a safe fallback and the OHP phone number. A safety test suite runs in CI and blocks the merge.
-- **Nothing stored.** The photo is processed in memory and dropped after the response. No database, no accounts, no analytics.
+- **Nothing stored.** The photo is processed in memory and dropped after the response. No database, no accounts. The only analytics is anonymous page-view counting (Vercel Web Analytics); no letter content, extracted fields or screening answers are ever sent.
 - **Logs carry no letter content.** The route logs status, latency, model and error class only.
 - **Prompt-injection defenses.** The prompt treats letter text as data, output is schema-only JSON, the guardrail runs after generation, and adversarial fixtures test it.
 
