@@ -136,3 +136,133 @@ As Darnell I want a phone number on every result so that I can reach a person.
 As Priya I want to know where my photo goes before I send it so that I can decide.
 
 - Given first use, When I tap scan, Then I see a one-screen notice (sent to an AI service to read it, not stored, not legal advice) and must tap "I understand".
+
+## v0.2 epics
+
+"Release: v0.2" stories are planned, not built. Each epic is one GitHub issue.
+
+## Epic G: Spanish
+
+**US-060: Choose Spanish** — Must, Release: v0.2
+As Rosa I want the app in Spanish so that I can use it without help.
+
+- Given my phone's language is Spanish, When I open the app, Then every screen shows in Spanish.
+- Given any language, When I tap "English / Español" on the consent screen, Then the app switches language without losing my place.
+
+**US-061: Spanish explanation of my letter** — Must, Release: v0.2
+As Rosa I want the summary, the action and the papers list in Spanish so that I understand what to do.
+
+- Given Spanish is selected, When my letter is read, Then summary, required action and documents are in Spanish, and the quoted deadline line stays in the letter's own words.
+
+**US-062: Spanish letter, any app language** — Must, Release: v0.2
+As Marisol I want a Spanish letter to be read correctly even if the app is in English so that I can choose either language.
+
+- Given a Spanish OHP letter, When read with the app in English, Then the deadline and documents are extracted correctly and explained in English.
+
+**US-063: Exemption questions in Spanish** — Must, Release: v0.2
+As Rosa I want the exemption questions in Spanish so that I answer them correctly.
+
+- Given Spanish, When I open the exemption questions, Then each question, answer and "may apply" line is in Spanish, and the source link still points to the official page.
+
+**US-064: No eligibility claims in Spanish** — Must, Release: v0.2
+As any Spanish user I want the app to never tell me "usted es elegible" so that I'm not misled.
+
+- Given any Spanish output, When displayed, Then it contains no Spanish or English eligibility claim; matches are replaced with the Spanish safe fallback.
+
+**US-065: Doctor note for an English-speaking doctor** — Should, Release: v0.2
+As Rosa I want the doctor note in English with a Spanish explanation so that my doctor can read it.
+
+- Given Spanish, When I open the doctor note, Then the note text is English and a Spanish line above it explains why.
+
+## Epic H: Full-letter reading
+
+**US-070: Several photos, one letter** — Must, Release: v0.2
+As Tuan I want to add every page of the letter so that the app sees the deadline and papers on later pages.
+
+- Given I took one photo, When I tap "Add another page", Then I can add up to 10 pages, see thumbnails, remove one, and tap "Read my letter".
+
+**US-071: Upload a PDF** — Must, Release: v0.2
+As Kim I want to upload the PDF from the client's online account so that I don't photograph the screen.
+
+- Given a PDF under 4 MB, When I choose it, Then all its pages are read as one letter.
+- Given a PDF over 4 MB, When I choose it, Then I see "This PDF is too big. Take photos of each page instead."
+
+**US-072: Drag and drop on a computer** — Must, Release: v0.2
+As Kim I want to drag the letter's files onto the page so that it's fast at my desk.
+
+- Given a laptop, When I drag up to 10 images or one PDF onto the drop area, Then they are added like picked files; other file types are refused with a plain message.
+
+**US-073: Choose files or a folder** — Should, Release: v0.2
+As Kim I want to pick several files or a whole folder so that I can load a client's scans at once.
+
+- Given a desktop browser, When I click "Choose a folder", Then images and PDFs in it are added in file-name order (max 10) and other files are skipped with a count.
+- Given iPhone or Android, Then "Choose a folder" is not shown.
+
+**US-074: Know which page the deadline is on** — Should, Release: v0.2
+As Kim I want to see which page the deadline came from so that I can show the client.
+
+- Given a multi-page letter, When the deadline is found, Then the result shows "From page N" with the quoted line.
+
+**US-075: Fake or broken files** — Must, Release: v0.2
+As any user I want a clear message for a broken or mislabeled file so that I know what to do.
+
+- Given a file whose content isn't really an image or PDF, When uploaded, Then it is refused before the model is called.
+
+## Epic I: West Coast states
+
+**US-080: The app knows my state** — Must, Release: v0.2
+As Daniel I want the app to recognize my California letter so that I get California's rules.
+
+- Given a letter from WA, OR, CA, NV or AZ, When read, Then the result says which state and program it's from (e.g. "Medi-Cal, California") and lets me change it.
+
+**US-081: Pick my state** — Must, Release: v0.2
+As Leilani I want to choose my state myself so that I can check exemptions before I get a letter.
+
+- Given the exemption questions, When I open them without a letter, Then I first choose WA, OR, CA, NV or AZ.
+
+**US-082: State-specific exemption questions** — Must, Release: v0.2
+As Leilani I want Washington's own questions so that the answer fits my state.
+
+- Given a state whose rules are published, When I answer its questions, Then I see that state's "may apply" results, ways to meet the rule, source link and checked date.
+
+**US-083: State hasn't published rules yet** — Must, Release: v0.2
+As Gloria I want to be told when my state hasn't published its list so that I don't rely on another state's rules.
+
+- Given a state marked "pending", When I open its questions, Then I see "Nevada hasn't published its list yet" with the state's phone number and official page, and no questions.
+
+**US-084: The right phone number and program name** — Must, Release: v0.2
+As Daniel I want the right program name and phone number on every screen so that I call the right office.
+
+- Given a state is known, Then every screen, error and the call bar use that state's program name and phone; otherwise the letter's phone; otherwise a neutral "call the number on your letter".
+
+**US-085: Other states** — Must, Release: v0.2
+As any user outside these five states I want to know the questions don't cover me so that I'm not misled.
+
+- Given a letter from another state, When read, Then I get the explanation and deadline, and the exemption check says it only covers WA, OR, CA, NV and AZ.
+
+## Epic J: Laptop and tablet layout
+
+**US-090: Laptop layout** — Must, Release: v0.2
+As Kim I want the result to use a laptop screen well so that I can show it to a client across the desk.
+
+- Given a window 1024px or wider, When a result shows, Then the summary and papers sit left and the due date and phone sit in a right column that stays in view while scrolling.
+
+**US-091: Tablet layout** — Should, Release: v0.2
+As Kim I want a tidy layout on a tablet so that it works on the clinic iPad.
+
+- Given 600-1023px, Then content is one centered column at a readable width, with exemption questions in two columns.
+
+**US-092: Zoom and large text** — Must, Release: v0.2
+As Gloria I want the page to work at 200% zoom so that I can read it.
+
+- Given browser zoom 200% at 1280px, Then nothing overlaps or is cut off and there is no sideways scrolling.
+
+**US-093: Keyboard only** — Must, Release: v0.2
+As Gloria I want to use the whole app with the keyboard so that I don't depend on the mouse.
+
+- Given keyboard only, Then every control is reachable in a logical order with a visible focus ring, and the drop area also works as a "Choose files" button.
+
+**US-094: Phone layout unchanged** — Must, Release: v0.2
+As Marisol I want the phone layout to stay as good as it is so that nothing gets worse for me.
+
+- Given a phone (under 600px), Then layout and behavior match v0.1, and all existing E2E tests pass unchanged.
