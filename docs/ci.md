@@ -26,7 +26,7 @@ The eval calls the paid model, so it never runs in GitHub Actions and no API key
 
 ## `security.yml` (nightly 02:30 PDT)
 
-`npm audit` + osv-scanner on `main`, because new CVEs appear without code changes.
+`npm audit` + osv-scanner on `main`, because new CVEs appear without code changes. osv-scanner fails on any severity. A dev-only advisory with no non-breaking fix can be listed in `osv-scanner.toml` with a reason and an `ignoreUntil` date of at most 30 days, so the job fails again when the exception expires.
 
 ## Hardening
 
