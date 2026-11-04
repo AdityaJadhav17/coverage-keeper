@@ -6,6 +6,7 @@ import { messages, pickLocale, type Locale } from "@/i18n/messages";
 import { rejectReason, toUploadJpeg } from "@/lib/image";
 import { phoneHref } from "@/lib/phone";
 import { LetterExtraction } from "@/lib/schema";
+import { stateRules, type Region } from "@/lib/states";
 import { BrandMark } from "./components/BrandMark";
 import { Capture } from "./components/Capture";
 import { Consent } from "./components/Consent";
@@ -46,6 +47,9 @@ export default function Home() {
   useEffect(() => {
     document.documentElement.lang = locale;
   }, [locale]);
+  // shortcut: chosen by the user only; start from the reader's `state` once #26 adds it.
+  const [region, setRegion] = useState<Region | null>(null);
+  const rules = region && region !== "other" ? stateRules(region) : null;
   const [photo, setPhoto] = useState<Blob | null>(null);
   const busy = useRef(false);
 
@@ -111,7 +115,9 @@ export default function Home() {
     view.name === "screened"
       ? view.data
       : null;
-  const phone = letterPhone(data);
+  // The chosen state's phone, else the letter's, else "the number on your letter" (US-084).
+  const phone = rules?.contact.phone || letterPhone(data);
+  const phoneText = phone || t.letterNumber;
   const retake = () => setView({ name: "capture" });
 
   return (
@@ -165,18 +171,25 @@ export default function Home() {
           ) : (
             <Result
               data={view.data}
-              phone={phone}
+              phone={phoneText}
+              region={region}
+              rules={rules}
+              onRegion={setRegion}
               onScreen={() => setView({ name: "screening", data: view.data })}
               onRetake={retake}
             />
           ))}
         {view.name === "screening" && (
           <Screening
+            region={region}
+            rules={rules}
+            onRegion={setRegion}
             onDone={(yes) => setView({ name: "screened", data, yes })}
           />
         )}
-        {view.name === "screened" && (
+        {view.name === "screened" && rules && (
           <Screened
+            rules={rules}
             yes={view.yes}
             deadline={data?.deadline ?? null}
             onBack={() =>
@@ -186,8 +199,16 @@ export default function Home() {
         )}
       </main>
       <footer className="callbar">
-        <span>{t.questions}</span>
-        <a href={phoneHref(phone)}>{phone}</a>
+        {phone ? (
+          <>
+            <span>{t.questions}</span>
+            <a href={phoneHref(phone) ?? undefined}>{phone}</a>
+          </>
+        ) : (
+          <span>
+            {t.questions} {t.letterNumber}
+          </span>
+        )}
       </footer>
     </LocaleContext.Provider>
   );

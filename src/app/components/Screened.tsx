@@ -1,28 +1,22 @@
-import rules from "../../../data/rules/or.json";
 import { useLocale } from "@/i18n/LocaleContext";
+import type { StateRules } from "@/lib/states";
 import { DoctorDraft } from "./DoctorDraft";
-import { formatDate } from "./shared";
+import { Source } from "./Source";
 
 export function Screened({
+  rules,
   yes,
   deadline,
   onBack,
 }: {
+  rules: StateRules;
   yes: string[];
   deadline: string | null;
   onBack: () => void;
 }) {
   const { t, locale } = useLocale();
   const es = locale === "es";
-  const matched = rules.exemptions.filter((r) => yes.includes(r.id));
-  const source = (
-    <p className="source">
-      <a href={rules.source_url} target="_blank" rel="noreferrer">
-        {t.sourceOha}
-      </a>
-      {t.checked(formatDate(rules.retrieved, locale))}
-    </p>
-  );
+  const matched = (rules.exemptions ?? []).filter((r) => yes.includes(r.id));
   return (
     <section aria-labelledby="screened-title">
       {matched.length > 0 ? (
@@ -31,8 +25,10 @@ export function Screened({
           <ul className="matches">
             {matched.map((rule) => (
               <li key={rule.id} data-testid="may-apply">
-                <p className="q">{es ? rule.question_es : rule.question}</p>
-                <p>{t.mayApply}</p>
+                <p className="q">
+                  {es && rule.question_es ? rule.question_es : rule.question}
+                </p>
+                <p>{t.mayApply(rules.program)}</p>
               </li>
             ))}
           </ul>
@@ -41,17 +37,20 @@ export function Screened({
         <>
           <h2 id="screened-title">{t.waysTitle}</h2>
           <p className="lead">
-            {es ? rules.applies_to_es : rules.applies_to} {t.waysLead}
+            {es && rules.applies_to_es ? rules.applies_to_es : rules.applies_to}{" "}
+            {t.waysLead}
           </p>
           <ul className="facts">
-            {rules.ways_to_meet.map((way) => (
-              <li key={way.id}>{es ? way.text_es : way.text}</li>
+            {(rules.ways_to_meet ?? []).map((way) => (
+              <li key={way.id}>{es && way.text_es ? way.text_es : way.text}</li>
             ))}
           </ul>
         </>
       )}
-      {yes.includes("health_condition") && <DoctorDraft deadline={deadline} />}
-      {source}
+      {yes.includes("health_condition") && (
+        <DoctorDraft deadline={deadline} rules={rules} />
+      )}
+      <Source rules={rules} />
       <button type="button" className="secondary" onClick={onBack}>
         {t.back}
       </button>

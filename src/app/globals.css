@@ -568,15 +568,33 @@ mark {
   margin-top: 1.5rem;
 }
 
-.draft {
-  margin-top: 1.5rem;
+.state-picker {
+  margin: 0 0 1.5rem;
 }
 
+.state-picker label,
 .draft label {
   display: block;
   font-weight: 700;
   color: var(--ink);
   margin-bottom: 0.5rem;
+}
+
+.state-picker select {
+  width: 100%;
+  max-width: 20rem;
+  min-height: 48px;
+  padding: 0 0.75rem;
+  border: 2px solid var(--muted); /* 3:1 for form field edges */
+  border-radius: 10px;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--text);
+  background: var(--paper);
+}
+
+.draft {
+  margin-top: 1.5rem;
 }
 
 .draft textarea {

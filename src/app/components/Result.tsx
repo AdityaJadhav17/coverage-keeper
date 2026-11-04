@@ -1,16 +1,24 @@
 import { useLocale } from "@/i18n/LocaleContext";
 import type { LetterExtraction } from "@/lib/schema";
+import type { Region, StateRules } from "@/lib/states";
 import { Deadline } from "./Deadline";
 import { safe } from "./shared";
+import { StatePicker } from "./StatePicker";
 
 export function Result({
   data,
   phone,
+  region,
+  rules,
+  onRegion,
   onScreen,
   onRetake,
 }: {
   data: LetterExtraction;
   phone: string;
+  region: Region | null;
+  rules: StateRules | null;
+  onRegion: (region: Region) => void;
   onScreen: () => void;
   onRetake: () => void;
 }) {
@@ -32,8 +40,9 @@ export function Result({
       <p className="kind">{t.noticeLabels[data.notice_type]}</p>
       <h2 id="result-title">{t.resultTitle}</h2>
       <p className="lead">{safe(data.summary, locale)}</p>
+      <StatePicker value={region} onChange={onRegion} />
 
-      <Deadline data={data} phone={phone} />
+      <Deadline data={data} phone={phone} rules={rules} />
 
       <h3>{t.askTitle}</h3>
       <p>

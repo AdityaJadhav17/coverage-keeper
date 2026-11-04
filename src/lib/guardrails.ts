@@ -19,10 +19,10 @@ const FORBIDDEN_PATTERNS_ES: RegExp[] = [
 ].map((p) => new RegExp(NOT_A_QUESTION_ES + p, "iu"));
 
 export const SAFE_FALLBACK =
-  "We can't decide if you qualify. Only the state can. Call OHP at 800-699-9075 to ask.";
+  "We can't decide if you qualify. Only the state can. Call the number on your letter to ask.";
 
 export const SAFE_FALLBACK_ES =
-  "No podemos decidir si usted califica. Solo el estado puede hacerlo. Llame a OHP al 800-699-9075 para preguntar.";
+  "No podemos decidir si usted califica. Solo el estado puede hacerlo. Llame al número que aparece en su carta para preguntar.";
 
 export function findForbiddenClaims(text: string): string[] {
   const normalized = text.replace(/\s+/g, " ").replace(/[’‘]/g, "'");

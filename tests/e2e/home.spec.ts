@@ -8,7 +8,9 @@ test("home page shows the product and who to call, with no serious a11y issues",
   await expect(
     page.getByRole("heading", { name: "Coverage Keeper" }),
   ).toBeVisible();
-  await expect(page.getByRole("link", { name: "800-699-9075" })).toBeVisible();
+  await expect(page.locator(".callbar")).toContainText(
+    "Questions? Call the number on your letter",
+  );
 
   // Screen fade-ins would otherwise be measured at half opacity.
   await page.evaluate(() =>

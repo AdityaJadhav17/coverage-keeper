@@ -1,5 +1,6 @@
 import type { DeadlineStatus } from "@/lib/deadline";
 import type { LetterExtraction } from "@/lib/schema";
+import type { StateCode } from "@/lib/states";
 
 export type Locale = "en" | "es";
 
@@ -85,20 +86,36 @@ const en = {
           : "Not sure of the date. Check the letter.",
   confirmDeadline: (phone: string) => `Call ${phone} to confirm your deadline.`,
   reapply: (phone: string) =>
-    `Call ${phone} today. Oregon lets you apply for OHP again at any time.`,
-  sourceOha: "Source: Oregon Health Authority",
+    `Call ${phone} today to ask how to get your coverage back.`,
+  source: (agency: string) => `Source: ${agency}`,
   checked: (date: string) => `, checked ${date}`,
+  stale: "Rules may have changed.",
+  letterNumber: "the number on your letter",
+
+  stateLabel: "State that sent this letter",
+  stateChoose: "Choose a state",
+  stateNames: {
+    WA: "Washington",
+    OR: "Oregon",
+    CA: "California",
+    NV: "Nevada",
+    AZ: "Arizona",
+  } as Record<StateCode, string>,
+  stateOther: "Another state",
+  otherNote:
+    "This check covers Washington, Oregon, California, Nevada and Arizona. For another state, call the number on your letter and ask about exemptions.",
+  pendingText: (state: string, program: string, phone: string) =>
+    `${state} hasn't published its list of exemptions yet. Call ${program} at ${phone} to ask whether one applies to you.`,
 
   screeningTitle: "Exemption questions",
-  screeningLead:
-    "Some OHP members don't have to meet the work rule. These questions follow the Oregon Health Authority's list. Skip any you'd rather not answer.",
-  screeningScope:
-    "These questions use Oregon Health Plan (OHP) rules. If your letter is from another state, call the number on your letter.",
+  screeningLead: (program: string, agency: string) =>
+    `Some ${program} members don't have to meet the work rule. These questions follow the list from the ${agency}. Skip any you'd rather not answer.`,
   yes: "Yes",
   no: "No",
   seeWhatMayApply: "See what may apply",
   askAboutTitle: "Exemptions to ask about",
-  mayApply: "This may apply to you. Ask OHP about it.",
+  mayApply: (program: string) =>
+    `This may apply to you. Ask ${program} about it.`,
   waysTitle: "Ways to meet the work rule",
   waysLead: "You can meet the rule with one of these:",
   back: "Back",
@@ -201,20 +218,35 @@ const es: Messages = {
   confirmDeadline: (phone) =>
     `Llame al ${phone} para confirmar su fecha límite.`,
   reapply: (phone) =>
-    `Llame al ${phone} hoy. Oregon le permite volver a solicitar OHP en cualquier momento.`,
-  sourceOha: "Fuente: Oregon Health Authority",
+    `Llame al ${phone} hoy para preguntar cómo recuperar su cobertura.`,
+  source: (agency) => `Fuente: ${agency}`,
   checked: (date) => `, revisado el ${date}`,
+  stale: "Las reglas pueden haber cambiado.",
+  letterNumber: "número que aparece en su carta",
+
+  stateLabel: "Estado que envió la carta",
+  stateChoose: "Elija un estado",
+  stateNames: {
+    WA: "Washington",
+    OR: "Oregón",
+    CA: "California",
+    NV: "Nevada",
+    AZ: "Arizona",
+  },
+  stateOther: "Otro estado",
+  otherNote:
+    "Esta revisión cubre Washington, Oregón, California, Nevada y Arizona. Si su carta es de otro estado, llame al número que aparece en su carta y pregunte por las exenciones.",
+  pendingText: (state, program, phone) =>
+    `${state} todavía no ha publicado su lista de exenciones. Llame a ${program} al ${phone} para preguntar si alguna le aplica.`,
 
   screeningTitle: "Preguntas sobre exenciones",
-  screeningLead:
-    "Algunos miembros de OHP no tienen que cumplir la regla de trabajo. Estas preguntas siguen la lista de la Oregon Health Authority. Puede saltarse las que prefiera no contestar.",
-  screeningScope:
-    "Estas preguntas usan las reglas del Oregon Health Plan (OHP). Si su carta es de otro estado, llame al número que aparece en su carta.",
+  screeningLead: (program, agency) =>
+    `Algunos miembros de ${program} no tienen que cumplir la regla de trabajo. Estas preguntas siguen la lista de ${agency}. Puede saltarse las que prefiera no contestar.`,
   yes: "Sí",
   no: "No",
   seeWhatMayApply: "Ver qué podría aplicarle",
   askAboutTitle: "Exenciones que puede consultar",
-  mayApply: "Esto podría aplicarle. Pregunte a OHP.",
+  mayApply: (program) => `Esto podría aplicarle. Pregunte a ${program}.`,
   waysTitle: "Formas de cumplir la regla de trabajo",
   waysLead: "Puede cumplir la regla con una de estas opciones:",
   back: "Atrás",
