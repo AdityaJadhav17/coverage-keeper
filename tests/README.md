@@ -6,18 +6,18 @@ Unit tests are not here. They live next to the code as `*.test.ts` (in `../src/l
 
 ## Contents
 
-| Path                                              | What it covers                                                                               |
-| ------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `integration/health.test.ts`                      | `GET /api/health`                                                                            |
-| `integration/read-route.test.ts`                  | `POST /api/read` request handling                                                            |
-| `integration/rules-data.test.ts`                  | `../data/rules/or.json`: oregon.gov source, retrieval date, unique ids, questions end in `?` |
-| `safety/guardrails.test.ts`                       | Adversarial eligibility phrases, doctor draft, rules text                                    |
-| `safety/read-route.test.ts`                       | The read route replaces a model output that claims eligibility                               |
-| `e2e/home.spec.ts`                                | Home page content and accessibility (axe)                                                    |
-| `e2e/flow.spec.ts`                                | Photo to result, passed or missing deadline, low confidence, non-OHP letter, screening       |
-| `e2e/doctor-draft.spec.ts`                        | Doctor draft flow                                                                            |
-| `fixtures/reader/synthetic-work-requirement.json` | Synthetic extraction returned when `LETTER_READER=fixture`                                   |
-| `fixtures/adversarial/eligible-summary.json`      | Model output that breaks the no-eligibility rule, used by the safety tests                   |
+| Path                                              | What it covers                                                                                                                                                                                                        |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `integration/health.test.ts`                      | `GET /api/health`                                                                                                                                                                                                     |
+| `integration/read-route.test.ts`                  | `POST /api/read` request handling                                                                                                                                                                                     |
+| `integration/rules-data.test.ts`                  | every file in `../data/rules/` via `src/lib/states.ts`: .gov source, retrieval date, phone, status matches content (published lists questions, pending none), unique ids, questions end in `?`, no eligibility claims |
+| `safety/guardrails.test.ts`                       | Adversarial eligibility phrases, doctor draft, rules text                                                                                                                                                             |
+| `safety/read-route.test.ts`                       | The read route replaces a model output that claims eligibility                                                                                                                                                        |
+| `e2e/home.spec.ts`                                | Home page content and accessibility (axe)                                                                                                                                                                             |
+| `e2e/flow.spec.ts`                                | Photo to result, passed or missing deadline, low confidence, non-OHP letter, screening                                                                                                                                |
+| `e2e/doctor-draft.spec.ts`                        | Doctor draft flow                                                                                                                                                                                                     |
+| `fixtures/reader/synthetic-work-requirement.json` | Synthetic extraction returned when `LETTER_READER=fixture`                                                                                                                                                            |
+| `fixtures/adversarial/eligible-summary.json`      | Model output that breaks the no-eligibility rule, used by the safety tests                                                                                                                                            |
 
 ## Commands
 

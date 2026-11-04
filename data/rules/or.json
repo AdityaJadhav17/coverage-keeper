@@ -1,10 +1,15 @@
 {
   "state": "OR",
+  "status": "published",
   "program": "Oregon Health Plan (OHP)",
+  "agency": "Oregon Health Authority",
   "source_url": "https://www.oregon.gov/oha/hsd/ohp/pages/federal-changes.aspx",
   "source_updated": "2026-09-18",
   "retrieved": "2026-10-28",
-  "contact": { "name": "OHP Customer Service", "phone": "800-699-9075" },
+  "contact": {
+    "name": "OHP Customer Service",
+    "phone": "800-699-9075"
+  },
   "applies_to": "Some adults ages 19-64 when they apply for or renew OHP, starting in 2027.",
   "ways_to_meet": [
     {
@@ -21,12 +26,18 @@
     }
   ],
   "exemptions": [
-    { "id": "aian", "question": "Are you American Indian or Alaska Native?" },
+    {
+      "id": "aian",
+      "question": "Are you American Indian or Alaska Native?"
+    },
     {
       "id": "pregnant",
       "question": "Are you pregnant or were you recently pregnant?"
     },
-    { "id": "child_under_14", "question": "Do you care for a child under 14?" },
+    {
+      "id": "child_under_14",
+      "question": "Do you care for a child under 14?"
+    },
     {
       "id": "caregiver",
       "question": "Do you care for someone with a disability or serious health condition for at least 80 hours a month?"
@@ -51,7 +62,10 @@
       "id": "sud_treatment",
       "question": "Have you been in drug or alcohol treatment in the past 5 years?"
     },
-    { "id": "medicare", "question": "Do you have Medicare?" },
+    {
+      "id": "medicare",
+      "question": "Do you have Medicare?"
+    },
     {
       "id": "recent_release",
       "question": "Were you recently released from jail or prison?"

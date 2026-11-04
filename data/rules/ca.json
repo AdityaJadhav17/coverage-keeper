@@ -1,0 +1,13 @@
+{
+  "state": "CA",
+  "status": "pending",
+  "program": "Medi-Cal",
+  "agency": "California Department of Health Care Services",
+  "source_url": "https://www.dhcs.ca.gov/workrules",
+  "retrieved": "2026-11-04",
+  "contact": {
+    "name": "Medi-Cal Helpline",
+    "phone": "800-541-5555"
+  },
+  "pending_note": "DHCS calls its guidance preliminary; the exemption list is not copied until it is confirmed on DHCS's own page."
+}
