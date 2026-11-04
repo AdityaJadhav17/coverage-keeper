@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FALLBACK_TEL, phoneHref } from "./phone";
+import { phoneHref } from "./phone";
 
 describe("phoneHref", () => {
   it.each([
@@ -12,9 +12,9 @@ describe("phoneHref", () => {
   });
 
   it.each(["call us!", "", "711", "12345678901234"])(
-    "falls back to OHP for %j",
+    "has no number in %j",
     (phone) => {
-      expect(phoneHref(phone)).toBe(FALLBACK_TEL);
+      expect(phoneHref(phone)).toBeNull();
     },
   );
 });

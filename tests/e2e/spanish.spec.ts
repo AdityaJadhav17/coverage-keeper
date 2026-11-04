@@ -52,6 +52,7 @@ test("Spanish result and exemption questions (US-061, US-063)", async ({
     fixture.deadline_quote,
   );
   await page.getByRole("button", { name: "Revisar exenciones" }).click();
+  await page.getByLabel("Estado que envió la carta").selectOption("OR");
   await expect(
     page.getByRole("group", { name: "¿Cuida a un niño menor de 14 años?" }),
   ).toBeVisible();

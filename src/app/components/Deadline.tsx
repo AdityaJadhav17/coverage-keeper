@@ -1,15 +1,17 @@
-import rules from "../../../data/rules/or.json";
 import { useLocale } from "@/i18n/LocaleContext";
 import { deadlineStatus } from "@/lib/deadline";
 import type { LetterExtraction } from "@/lib/schema";
+import type { StateRules } from "@/lib/states";
 import { formatDate, safe } from "./shared";
 
 export function Deadline({
   data,
   phone,
+  rules,
 }: {
   data: LetterExtraction;
   phone: string;
+  rules: StateRules | null;
 }) {
   const { t, locale } = useLocale();
   const { status, days } = deadlineStatus(data.deadline, new Date());
@@ -42,9 +44,11 @@ export function Deadline({
           {status === "passed" && (
             <p>
               {t.reapply(phone)}{" "}
-              <a href={rules.source_url} target="_blank" rel="noreferrer">
-                {t.sourceOha}
-              </a>
+              {rules && (
+                <a href={rules.source_url} target="_blank" rel="noreferrer">
+                  {t.source(rules.agency)}
+                </a>
+              )}
             </p>
           )}
         </>

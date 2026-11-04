@@ -25,6 +25,9 @@ export type StateRules = {
 
 export const STATE_CODES: StateCode[] = ["WA", "OR", "CA", "NV", "AZ"];
 
+// "other" is any state outside the list (US-085).
+export type Region = StateCode | "other";
+
 const RULES = { WA: wa, OR: or, CA: ca, NV: nv, AZ: az } as Record<
   StateCode,
   StateRules

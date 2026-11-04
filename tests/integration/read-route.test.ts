@@ -66,7 +66,7 @@ describe("POST /api/read", () => {
     }
     const res = await from("203.0.113.7");
     expect(res.status).toBe(429);
-    expect((await res.json()).error).toMatch(/800-699-9075/);
+    expect((await res.json()).error).toMatch(/number on your letter/);
     expect((await from("203.0.113.8")).status).toBe(200);
   });
 });
