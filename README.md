@@ -69,26 +69,31 @@ Details: [docs/safety-and-privacy.md](docs/safety-and-privacy.md), [ADR-0004 pri
 
 ## Evaluation
 
-**Method.** The eval set is 13 labeled images: 10 public sample notices from state `.gov` sites (3 Oregon, 7 Vermont; page 1 of each PDF) and 3 phone photos. We fixed the split before any run: 4 dev, 9 test. The test split ran with `claude-opus-5-5` and prompt v1 [5], then again after the prompt v2 fix [6]. Nobody tuned the prompt on test failures. Scoring rules are in [docs/eval.md](docs/eval.md).
+**Method.** The eval set is 15 labeled images: 12 public sample notices from state `.gov` sites (3 Oregon, 1 Washington, 1 California, 7 Vermont; page 1 of each PDF) and 3 phone photos. The split was fixed before any run: 4 dev, 11 test. The Washington and California letters were added to the test split for state detection and were never used to tune the prompt. The test split ran with `claude-opus-5-5` on prompt v1 [5], v2 [6] and v3 [8]. Prompt v3 adds the sending state. Because one run can swing by ±2 on required action, v3 is reported as the mean of 3 runs with the range. Nobody tuned the prompt on test failures. Scoring rules are in [docs/eval.md](docs/eval.md).
 
-**Results (test split, 9 letters: 6 PDF renders + 3 phone photos).** Prompt v1 and prompt v2 produced the same numbers and the same failures.
+**Results (test split, prompt v3, mean of 3 runs).** Every metric except required action was identical on all 3 runs.
 
-| Metric                                 | Result |
-| -------------------------------------- | ------ |
-| Printed deadline read correctly        | 4 of 4 |
-| No deadline correctly reported as none | 5 of 5 |
-| Notice type correct                    | 8 of 9 |
-| Required action correct                | 6 of 9 |
-| Document recall (mean)                 | 1.00   |
-| Document precision (mean)              | 0.83   |
-| Guardrail hits                         | 0      |
+| Metric                                 | 11 letters      | Same 9 letters as v2 | v2 (1 run) |
+| -------------------------------------- | --------------- | -------------------- | ---------- |
+| Printed deadline read correctly        | 5 of 5          | 4 of 4               | 4 of 4     |
+| No deadline correctly reported as none | 6 of 6          | 5 of 5               | 5 of 5     |
+| State identified                       | 11 of 11        | 9 of 9               | not scored |
+| Notice type correct                    | 10 of 11        | 8 of 9               | 8 of 9     |
+| Required action correct                | 8.0 of 11 (7–9) | 6.0 of 9 (5–7)       | 6 of 9     |
+| Document recall (mean)                 | 1.00            | 1.00                 | 1.00       |
+| Document precision (mean)              | 0.77            | 0.83                 | 0.83       |
+| Guardrail hits                         | 0               | 0                    | 0          |
 
-**Failures.** Notice type: `vt-re005ep-renewal-decision`. Required action: `or-med005-eligibility`, `vt-ee415-work-heads-up`, `vt-ee307-renewal-ending-photo`.
+**Failures.**
+
+- On every run: notice type for `vt-re005ep-renewal-decision`, and required action for `or-med005-eligibility` and `vt-ee415-work-heads-up`. These are the same failures as v1 and v2.
+- On some runs: required action for `or-open-card-move` and `vt-ee307-renewal-ending-photo`. On letters that ask for nothing, the reader sometimes writes "the letter does not ask you to do anything" instead of returning none.
 
 **Caveats.**
 
-- The set is small: 9 test letters.
-- It is mostly Vermont. Oregon publishes only 3 sample notices online.
+- The set is small: 11 test letters.
+- It is mostly Vermont. Oregon publishes only 3 sample notices online, and Washington and California have 1 each in the set.
+- Nevada and Arizona have no sample letters in the set.
 - Only page 1 of each notice is read.
 - The 3 phone photos show a screen, not printed paper.
 - 2 of the 3 photos (`vt-201p`, `vt-ee307`) show letters whose PDF versions are in the dev split.
@@ -195,11 +200,12 @@ Every pull request must pass hygiene and secret scan, dependency audit and licen
 4. Oregon Health Authority, Federal changes to OHP (updated 2026-09-18): https://www.oregon.gov/oha/hsd/ohp/pages/federal-changes.aspx
 5. Test split results, prompt v1, pull request #7: https://github.com/AdityaJadhav17/coverage-keeper/pull/7
 6. Test split results, prompt v2, pull request #13: https://github.com/AdityaJadhav17/coverage-keeper/pull/13#issuecomment-6483248906
-7. Sample notices used for evaluation: Oregon Health Authority and Vermont Department of Vermont Health Access. Each file's source URL is in [`eval/labels.json`](eval/labels.json).
+7. Sample notices used for evaluation: Oregon Health Authority, Washington State Health Care Authority, California Department of Health Care Services and Vermont Department of Vermont Health Access. Each file's source URL is in [`eval/labels.json`](eval/labels.json).
+8. Test split results, prompt v3, 3 runs, pull request #30: https://github.com/AdityaJadhav17/coverage-keeper/pull/30#issuecomment-6640037012
 
 ## Disclaimer
 
-Coverage Keeper is not legal advice and does not decide eligibility. It is not affiliated with the Oregon Health Authority, the Vermont Department of Vermont Health Access, or any government agency. The sample notices in `eval/` are public government documents, used here only for evaluation.
+Coverage Keeper is not legal advice and does not decide eligibility. It is not affiliated with the Oregon Health Authority, the Washington State Health Care Authority, the California Department of Health Care Services, the Vermont Department of Vermont Health Access, or any government agency. The sample notices in `eval/` are public government documents, used here only for evaluation.
 
 ## Contributing and security
 
