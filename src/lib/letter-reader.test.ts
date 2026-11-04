@@ -1,4 +1,4 @@
-import { APIError } from "@anthropic-ai/sdk";
+import Anthropic, { APIError } from "@anthropic-ai/sdk";
 import type { Message } from "@anthropic-ai/sdk/resources/messages";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import fixture from "../../tests/fixtures/reader/synthetic-work-requirement.json";
@@ -97,5 +97,17 @@ describe("readLetter", () => {
   it("returns the recorded fixture in fixture mode", async () => {
     vi.stubEnv("LETTER_READER", "fixture");
     expect((await readLetter(IMAGE)).deadline).toBe("2027-02-15");
+  });
+
+  it("passes the language to the live client", async () => {
+    vi.stubEnv("LETTER_READER", "");
+    vi.stubEnv("ANTHROPIC_API_KEY", "test-key");
+    const create = vi
+      .spyOn(Anthropic.Messages.prototype, "create")
+      .mockResolvedValue(reply(JSON.stringify(fixture)) as never);
+    await readLetter(IMAGE, { lang: "es" });
+    const params = create.mock.calls[0]![0] as { system: string };
+    expect(params.system).toContain("in Spanish");
+    create.mockRestore();
   });
 });
