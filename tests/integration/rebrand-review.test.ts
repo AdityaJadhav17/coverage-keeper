@@ -8,7 +8,10 @@ const css = read("globals.css");
 
 function rule(selector: string) {
   const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return css.match(new RegExp(`(?:^|\\n)${escaped} \\{([^}]*)\\}`))?.[1] ?? "";
+  // Only a selector that starts its own rule, not one inside an "a, b, c {" list.
+  return (
+    css.match(new RegExp(`(?:^|\\}\\s*\\n)${escaped} \\{([^}]*)\\}`))?.[1] ?? ""
+  );
 }
 
 const rem = (decl: string) => {
@@ -51,6 +54,26 @@ describe("fonts", () => {
   it("loads only the serif weight headings use (700)", () => {
     expect(read("layout.tsx")).toMatch(
       /Source_Serif_4\(\{\s*weight: \["700"\]/,
+    );
+  });
+});
+
+describe("rebrand polish (deferred review minors)", () => {
+  it("only the call bar is centered: the effort line is left-aligned", () => {
+    expect(rule(".effort")).not.toMatch(/text-align:\s*center/);
+  });
+
+  it("the due date uses the spec's 28-32px size", () => {
+    expect(rem(rule(".deadline .date"))).toBeLessThanOrEqual(2);
+  });
+
+  it("small headings get the same tight letter-spacing as the large ones", () => {
+    expect(rule("h3")).toMatch(/letter-spacing:\s*-0\.01em/);
+  });
+
+  it("the status pill stays visible inside a passed due-date card", () => {
+    expect(rule(".deadline.passed .badge")).toMatch(
+      /background:\s*var\(--surface-raised\)/,
     );
   });
 });
