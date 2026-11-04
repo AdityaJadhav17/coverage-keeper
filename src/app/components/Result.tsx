@@ -33,7 +33,7 @@ export function Result({
   return (
     <section aria-labelledby="result-title">
       <p className="kind">{NOTICE_LABELS[data.notice_type]}</p>
-      <h2 id="result-title">What your letter says</h2>
+      <h2 id="result-title">Here&apos;s what your letter says</h2>
       <p className="lead">{safe(data.summary)}</p>
 
       <Deadline data={data} phone={phone} />
