@@ -49,6 +49,7 @@ const PAIRS: [string, string, number][] = [
   ["ink", "surface", 4.5],
   ["ink", "primary-soft", 4.5],
   ["urgent", "urgent-bg", 4.5],
+  ["urgent", "surface-raised", 4.5],
   ["mark-text", "mark", 4.5],
   ["focus", "paper", 3],
   ["focus", "surface", 3],
