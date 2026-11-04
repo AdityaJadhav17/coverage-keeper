@@ -47,7 +47,7 @@ export default function Home() {
   useEffect(() => {
     document.documentElement.lang = locale;
   }, [locale]);
-  // shortcut: chosen by the user only; start from the reader's `state` once #26 adds it.
+  // Starts from the state the reader found on the letter; the user can change it (US-080).
   const [region, setRegion] = useState<Region | null>(null);
   const rules = region && region !== "other" ? stateRules(region) : null;
   const [photo, setPhoto] = useState<Blob | null>(null);
@@ -77,6 +77,7 @@ export default function Home() {
         await res.json().catch(() => null),
       );
       // Malformed reader output is treated as unsure (US-013).
+      if (parsed.success) setRegion(parsed.data.state);
       setView(
         parsed.success
           ? { name: "result", data: parsed.data }
@@ -115,8 +116,9 @@ export default function Home() {
     view.name === "screened"
       ? view.data
       : null;
-  // The chosen state's phone, else the letter's, else "the number on your letter" (US-084).
-  const phone = rules?.contact.phone || letterPhone(data);
+  // The letter's own number (often a local office), else the state's line, else
+  // "the number on your letter" (US-084), as the welcome screen promises.
+  const phone = letterPhone(data) || rules?.contact.phone || "";
   const phoneText = phone || t.letterNumber;
   const retake = () => setView({ name: "capture" });
 

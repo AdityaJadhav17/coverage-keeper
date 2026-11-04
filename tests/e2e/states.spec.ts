@@ -14,10 +14,10 @@ const PNG = {
   ),
 };
 
-// A letter with no phone of its own, so the call bar shows the state's (US-084).
+// A letter with no phone and no state we could read, so the user picks the state (US-081, US-084).
 async function toScreening(page: Page) {
   await page.route("**/api/read", (route) =>
-    route.fulfill({ json: { ...fixture, contact_phone: null } }),
+    route.fulfill({ json: { ...fixture, contact_phone: null, state: null } }),
   );
   await page.clock.setFixedTime(new Date("2027-02-10T10:00:00-08:00"));
   await page.goto("/");
@@ -79,19 +79,21 @@ test("California shows Medi-Cal's questions; switching to Washington swaps quest
   ).toHaveAttribute("href", /hca\.wa\.gov/);
 });
 
-test("Arizona has no published list yet, so it shows who to call instead of questions (US-083)", async ({
+test("Arizona shows its own questions, sourced from AHCCCS", async ({
   page,
 }) => {
   const state = await toScreening(page);
   await state.selectOption("AZ");
-  await expect(page.getByTestId("pending")).toContainText(
-    "Arizona hasn't published its list of exemptions yet. Call AHCCCS (Arizona Medicaid) at 800-331-5090",
-  );
-  await expect(page.getByRole("group")).toHaveCount(0);
   await expect(
-    page.getByRole("button", { name: "See what may apply" }),
-  ).toHaveCount(0);
-  await expect(page.getByRole("link", { name: "800-331-5090" })).toBeVisible();
+    page.getByText(/Some AHCCCS \(Arizona Medicaid\) members/),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("group", {
+      name: "Do you care for a child age 13 or younger?",
+    }),
+  ).toBeVisible();
+  await expect(page.getByTestId("pending")).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "855-220-0903" })).toBeVisible();
   await expectNoSeriousA11yIssues(page);
 });
 
@@ -136,6 +138,25 @@ test("the state chosen on the result screen carries into the exemption check", a
   await expect(page.getByLabel("State that sent this letter")).toHaveValue(
     "CA",
   );
+  await expect(
+    page.getByRole("group", { name: "Are you 18 or younger?" }),
+  ).toBeVisible();
+});
+
+test("the state read from the letter is already chosen (US-080)", async ({
+  page,
+}) => {
+  await page.route("**/api/read", (route) =>
+    route.fulfill({ json: { ...fixture, state: "CA", contact_phone: null } }),
+  );
+  await page.goto("/");
+  await page.getByRole("button", { name: "Start with my letter" }).click();
+  await page.getByLabel("Scan my letter").setInputFiles(PNG);
+  await expect(page.getByLabel("State that sent this letter")).toHaveValue(
+    "CA",
+  );
+  await expect(page.getByRole("link", { name: "800-541-5555" })).toBeVisible();
+  await page.getByRole("button", { name: "Check exemptions" }).click();
   await expect(
     page.getByRole("group", { name: "Are you 18 or younger?" }),
   ).toBeVisible();
