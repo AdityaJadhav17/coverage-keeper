@@ -1,6 +1,6 @@
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
-import { Atkinson_Hyperlegible } from "next/font/google";
+import { Atkinson_Hyperlegible, Source_Serif_4 } from "next/font/google";
 import type { ReactNode } from "react";
 import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "@/lib/site";
 import "./globals.css";
@@ -9,6 +9,13 @@ import "./globals.css";
 const font = Atkinson_Hyperlegible({
   weight: ["400", "700"],
   subsets: ["latin"],
+});
+
+// Headings only: a warm serif that reads approachable (docs/design/2026-11-03-rebrand.md).
+const serif = Source_Serif_4({
+  weight: ["600", "700"],
+  subsets: ["latin"],
+  variable: "--font-serif",
 });
 
 export const metadata: Metadata = {
@@ -44,7 +51,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={serif.variable}>
       <body className={font.className}>
         {children}
         <Analytics />
