@@ -28,7 +28,7 @@ async function mockReader(page: Page, body: object = fixture) {
 async function start(page: Page) {
   await page.clock.setFixedTime(new Date("2027-02-10T10:00:00-08:00"));
   await page.goto("/");
-  await page.getByRole("button", { name: "I understand" }).click();
+  await page.getByRole("button", { name: "Start with my letter" }).click();
 }
 
 const scan = (page: Page, file = PNG) =>
@@ -59,7 +59,7 @@ test("photo to explanation shows summary, deadline, checklist and phone", async 
   await scan(page);
 
   await expect(
-    page.getByRole("heading", { name: "What your letter says" }),
+    page.getByRole("heading", { name: "Here's what your letter says" }),
   ).toBeVisible();
   const deadline = page.getByTestId("deadline");
   await expect(deadline).toContainText("Feb 15, 2027");
@@ -77,7 +77,7 @@ test("passed deadline tells the user to call now", async ({ page }) => {
   await start(page);
   await scan(page);
   await expect(page.getByTestId("deadline")).toContainText(
-    "This date has passed. Call now.",
+    "Date has passed. Call now.",
   );
 });
 
@@ -90,7 +90,7 @@ test("missing deadline and letter phone fall back safely", async ({ page }) => {
   await start(page);
   await scan(page);
   await expect(page.getByTestId("deadline")).toContainText(
-    "Not sure. Check the letter or call.",
+    "Not sure of the date. Check the letter.",
   );
   await expect(page.getByRole("link", { name: "503-555-0100" })).toBeVisible();
 });
@@ -202,7 +202,7 @@ test("offline: photo is not sent and retry works", async ({
   await context.setOffline(false);
   await page.getByRole("button", { name: "Try again" }).click();
   await expect(
-    page.getByRole("heading", { name: "What your letter says" }),
+    page.getByRole("heading", { name: "Here's what your letter says" }),
   ).toBeVisible();
 });
 

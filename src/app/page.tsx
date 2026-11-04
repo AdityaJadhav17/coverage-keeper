@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { rejectReason, toUploadJpeg } from "@/lib/image";
 import { phoneHref } from "@/lib/phone";
 import { LetterExtraction } from "@/lib/schema";
+import { BrandMark } from "./components/BrandMark";
 import { Capture } from "./components/Capture";
 import { Consent } from "./components/Consent";
 import { Problem } from "./components/Problem";
@@ -96,7 +97,10 @@ export default function Home() {
   return (
     <>
       <main>
-        <h1 className="brand">Coverage Keeper</h1>
+        <h1 className="brand">
+          <BrandMark />
+          Coverage Keeper
+        </h1>
         {view.name === "consent" && (
           <Consent onAccept={() => setView({ name: "capture" })} />
         )}

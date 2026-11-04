@@ -21,3 +21,8 @@ it("keeps the meta description within the length search results show", async () 
   const { SITE_DESCRIPTION } = await import("./site");
   expect(SITE_DESCRIPTION.length).toBeLessThanOrEqual(160);
 });
+
+it("doesn't brand the site as one state's program", async () => {
+  const { SITE_TITLE, SITE_DESCRIPTION } = await import("./site");
+  expect(`${SITE_TITLE} ${SITE_DESCRIPTION}`).not.toMatch(/\bOHP\b|Oregon/);
+});

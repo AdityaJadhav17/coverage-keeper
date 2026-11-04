@@ -16,11 +16,9 @@ export function Result({
   if (data.notice_type === "not_medicaid") {
     return (
       <section aria-labelledby="result-title">
-        <h2 id="result-title">
-          This doesn&apos;t look like a Medicaid or OHP letter
-        </h2>
+        <h2 id="result-title">This doesn&apos;t look like a Medicaid letter</h2>
         <p className="lead">
-          If it came from OHP or the Oregon Health Authority, call {phone} and
+          If it came from your state&apos;s Medicaid program, call {phone} and
           they can tell you what it means.
         </p>
         <button type="button" className="primary" onClick={onRetake}>
@@ -33,7 +31,7 @@ export function Result({
   return (
     <section aria-labelledby="result-title">
       <p className="kind">{NOTICE_LABELS[data.notice_type]}</p>
-      <h2 id="result-title">What your letter says</h2>
+      <h2 id="result-title">Here&apos;s what your letter says</h2>
       <p className="lead">{safe(data.summary)}</p>
 
       <Deadline data={data} phone={phone} />

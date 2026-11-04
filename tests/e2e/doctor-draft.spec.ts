@@ -32,7 +32,7 @@ test("health condition yes drafts an editable, copyable doctor note", async ({
   await page.route("**/api/read", (route) => route.fulfill({ json: fixture }));
   await page.clock.setFixedTime(new Date("2027-02-10T10:00:00-08:00"));
   await page.goto("/");
-  await page.getByRole("button", { name: "I understand" }).click();
+  await page.getByRole("button", { name: "Start with my letter" }).click();
   await page.getByLabel("Scan my letter").setInputFiles(PNG);
   await page.getByRole("button", { name: "Check exemptions" }).click();
   await page
@@ -76,7 +76,7 @@ test("health condition yes drafts an editable, copyable doctor note", async ({
 test("no health condition yes hides the doctor note", async ({ page }) => {
   await page.route("**/api/read", (route) => route.fulfill({ json: fixture }));
   await page.goto("/");
-  await page.getByRole("button", { name: "I understand" }).click();
+  await page.getByRole("button", { name: "Start with my letter" }).click();
   await page.getByLabel("Scan my letter").setInputFiles(PNG);
   await page.getByRole("button", { name: "Check exemptions" }).click();
   await page
@@ -98,7 +98,7 @@ test("copy failure tells the user to copy by hand", async ({ page }) => {
   });
   await page.route("**/api/read", (route) => route.fulfill({ json: fixture }));
   await page.goto("/");
-  await page.getByRole("button", { name: "I understand" }).click();
+  await page.getByRole("button", { name: "Start with my letter" }).click();
   await page.getByLabel("Scan my letter").setInputFiles(PNG);
   await page.getByRole("button", { name: "Check exemptions" }).click();
   await page

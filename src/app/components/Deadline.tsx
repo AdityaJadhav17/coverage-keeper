@@ -1,7 +1,7 @@
 import rules from "../../../data/rules/or.json";
-import { deadlineStatus } from "@/lib/deadline";
+import { deadlineBadge, deadlineStatus } from "@/lib/deadline";
 import type { LetterExtraction } from "@/lib/schema";
-import { formatDate, NOT_SURE, safe } from "./shared";
+import { formatDate, safe } from "./shared";
 
 export function Deadline({
   data,
@@ -16,24 +16,25 @@ export function Deadline({
       <mark>{safe(data.deadline_quote)}</mark>
     </blockquote>
   );
+  const badge = (
+    <p className={`badge ${status}`}>
+      <span className="dot" aria-hidden="true" />
+      {deadlineBadge(status, days)}
+    </p>
+  );
   return (
     <div className={`deadline ${status}`} data-testid="deadline">
       <h3>Due date</h3>
       {status === "unknown" ? (
         <>
-          <p className="big">{NOT_SURE}</p>
+          {badge}
           {quote}
           <p>Call {phone} to confirm your deadline.</p>
         </>
       ) : (
         <>
           <p className="date">{formatDate(data.deadline!)}</p>
-          <p className="big">
-            {status === "upcoming" &&
-              `${days} ${days === 1 ? "day" : "days"} left`}
-            {status === "today" && "Due today"}
-            {status === "passed" && "This date has passed. Call now."}
-          </p>
+          {badge}
           {quote}
           {status === "passed" && (
             <p>

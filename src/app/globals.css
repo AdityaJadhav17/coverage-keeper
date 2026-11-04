@@ -1,37 +1,44 @@
 :root {
   color-scheme: light dark;
-  --ink: #14325c; /* letterhead navy: the one accent */
+  /* Evergreen and marigold (docs/design/2026-11-03-rebrand.md). */
+  --ink: #1f5c4a; /* evergreen: the one accent */
   --on-ink: #ffffff;
-  --text: #1a1f29;
-  --muted: #4a5568;
-  --paper: #ffffff;
-  --surface: #f4f6f9;
-  --rule: #c9d2de;
-  --mark: #ffe066; /* highlighter on quoted letter text */
-  --mark-text: #1a1f29;
-  --mark-soft: #fff8d6;
-  --urgent: #a51d12;
-  --urgent-bg: #fdecea;
-  --focus: #0b5fd6;
+  --text: #1f2a24;
+  --muted: #5b6359;
+  --paper: #fbf7f0; /* warm paper */
+  --surface: #f1eadc; /* tinted panel */
+  --surface-raised: #ffffff;
+  --primary-soft: #e4efe7;
+  --rule: #d9cfbd;
+  --mark: #ffd166; /* marigold highlighter on quoted letter text */
+  --mark-text: #1f2a24;
+  --mark-soft: #fff4d6;
+  --urgent: #b4441f;
+  --urgent-bg: #fbe7df;
+  --focus: #1f5c4a;
   --bar: rgb(255 255 255 / 0.94);
+  --font-heading: var(--font-serif), Georgia, "Times New Roman", serif;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --space: clamp(1rem, 4vw, 1.5rem);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --ink: #a9c7f5;
-    --on-ink: #0d1520;
-    --text: #e8edf3;
-    --muted: #a9b4c2;
-    --paper: #0d1520;
-    --surface: #16212f;
-    --rule: #33404f;
-    --mark-soft: #2b2714;
-    --urgent: #ff9b8f;
-    --urgent-bg: #3a1714;
-    --focus: #7fb0ff;
-    --bar: rgb(13 21 32 / 0.94);
+    --ink: #8fd0b4;
+    --on-ink: #10251d;
+    --text: #f3eee4;
+    --muted: #bfb7a8;
+    --paper: #1b1a17; /* warm charcoal */
+    --surface: #2e2b25;
+    --surface-raised: #25231f;
+    --primary-soft: #1f3a31;
+    --rule: #4a463e;
+    --mark-text: #10251d;
+    --mark-soft: #3a3220;
+    --urgent: #f4a07f;
+    --urgent-bg: #3a2118;
+    --focus: #8fd0b4;
+    --bar: rgb(37 35 31 / 0.94);
   }
 }
 
@@ -88,21 +95,24 @@ h3 {
 .brand {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 1rem;
+  gap: 0.625rem;
+  font-size: 1.0625rem;
+  color: var(--text);
   margin: 0 0 2rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 3px solid var(--ink);
+  padding-bottom: 0.875rem;
+  border-bottom: 1px solid var(--rule);
 }
 
-/* A folded-letter mark; decorative. */
-.brand::before {
-  content: "";
-  width: 1.25rem;
-  height: 1.25rem;
-  background: currentColor;
-  -webkit-mask: var(--icon-mail) center / contain no-repeat;
-  mask: var(--icon-mail) center / contain no-repeat;
+.brand-mark {
+  flex: none;
+  border-radius: 8px;
+}
+
+h2,
+h3,
+.deadline .date {
+  font-family: var(--font-heading);
+  font-weight: 700;
 }
 
 h2 {
@@ -177,7 +187,7 @@ textarea {
   min-height: 56px;
   padding: 0.75rem 1rem;
   border: 2px solid var(--ink);
-  border-radius: 12px;
+  border-radius: 999px;
   font: inherit;
   font-weight: 700;
   font-size: 1.15rem;
@@ -284,12 +294,12 @@ textarea {
   }
 }
 
-/* Deadline: the visual hero. Urgency is carried by text and icon, color only reinforces it. */
+/* Deadline: the visual hero. Urgency is carried by the badge's words; color only reinforces it. */
 .deadline {
   margin: 1.75rem 0;
   padding: 1.25rem 1.25rem 0.75rem;
-  border: 2px solid var(--ink);
-  border-radius: 16px;
+  border: 1px solid var(--rule);
+  border-radius: 18px;
   background: var(--surface);
 }
 
@@ -309,50 +319,37 @@ textarea {
   font-variant-numeric: tabular-nums;
 }
 
-.deadline .big {
-  display: flex;
-  align-items: flex-start;
+.badge {
+  display: inline-flex;
+  align-items: center;
   gap: 0.5rem;
   margin: 0.5rem 0 1rem;
-  font-size: 1.5rem;
-  font-weight: 700;
-  line-height: 1.25;
+  padding: 0.375rem 0.875rem;
+  border: 1px solid transparent; /* outlines the pill in forced-colors mode */
+  border-radius: 999px;
+  background: var(--primary-soft);
   color: var(--ink);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.3;
 }
 
-.deadline .big::before {
-  content: "";
+.badge .dot {
+  width: 0.5rem;
+  height: 0.5rem;
   flex: none;
-  width: 1.5rem;
-  height: 1.5rem;
-  margin-top: 0.05em;
+  border-radius: 50%;
   background: currentColor;
-  -webkit-mask: var(--icon-calendar) center / contain no-repeat;
-  mask: var(--icon-calendar) center / contain no-repeat;
 }
 
-.deadline.today .big::before {
-  -webkit-mask-image: var(--icon-clock);
-  mask-image: var(--icon-clock);
+.badge.passed {
+  background: var(--urgent-bg);
+  color: var(--urgent);
 }
 
 .deadline.passed {
   border-color: var(--urgent);
   background: var(--urgent-bg);
-}
-
-.deadline.passed .big {
-  color: var(--urgent);
-}
-
-.deadline.passed .big::before {
-  -webkit-mask-image: var(--icon-alert);
-  mask-image: var(--icon-alert);
-}
-
-.deadline.unknown .big::before {
-  -webkit-mask-image: var(--icon-help);
-  mask-image: var(--icon-help);
 }
 
 blockquote {
@@ -535,13 +532,8 @@ mark {
 
 /* Icons (stroke outlines, used as masks so they take currentColor). */
 :root {
-  --icon-calendar: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2'/%3E%3Cpath d='M16 2v4M8 2v4M3 10h18'/%3E%3C/svg%3E");
-  --icon-clock: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 6v6l4 2'/%3E%3C/svg%3E");
-  --icon-alert: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'/%3E%3Cpath d='M12 9v4M12 17h.01'/%3E%3C/svg%3E");
-  --icon-help: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01'/%3E%3C/svg%3E");
   --icon-phone: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z'/%3E%3C/svg%3E");
   --icon-camera: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z'/%3E%3Ccircle cx='12' cy='13' r='3'/%3E%3C/svg%3E");
-  --icon-mail: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='4' width='20' height='16' rx='2'/%3E%3Cpath d='m22 7-10 6L2 7'/%3E%3C/svg%3E");
 }
 
 /* Doctor note draft (US-040, US-041). */
@@ -580,4 +572,73 @@ mark {
   margin-top: 0.5rem;
   font-weight: 700;
   color: var(--ink);
+}
+
+/* Welcome screen (docs/design/2026-11-03-rebrand.md). */
+.welcome h2 {
+  font-size: clamp(1.875rem, 7vw, 2.25rem);
+}
+
+.path {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1.25rem 0 1.5rem;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.path li {
+  counter-increment: step;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.path li::before {
+  content: counter(step);
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  color: var(--ink);
+  font-size: 0.8125rem;
+}
+
+.effort {
+  margin: 0.75rem 0 0;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.assure {
+  margin: 1rem 0 0;
+  font-size: 1.0625rem;
+  color: var(--text);
+}
+
+.promise {
+  margin: 1.25rem 0 0;
+  padding: 1rem 1.125rem;
+  border-radius: 18px;
+  background: var(--primary-soft);
+  color: var(--text);
+}
+
+.promise strong {
+  color: var(--ink);
+}
+
+.smallprint {
+  margin: 1.5rem 0 0;
+  font-size: 1.0625rem;
+  color: var(--muted);
 }
