@@ -68,3 +68,23 @@ test("consent facts come before the consent button", async ({ page }) => {
   expect(order.ai).toBeLessThan(order.button);
   expect(order.save).toBeLessThan(order.button);
 });
+
+test("welcome facts are a scannable list with room around the button", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.evaluate(() =>
+    Promise.all(document.getAnimations().map((a) => a.finished)),
+  );
+  const facts = page.getByRole("list", { name: "Before you start" });
+  await expect(facts.getByRole("listitem")).toHaveCount(4);
+  const list = (await facts.boundingBox())!;
+  const button = (await page
+    .getByRole("button", { name: "Start with my letter" })
+    .boundingBox())!;
+  const promise = (await page
+    .getByText("Rather talk to a person?")
+    .boundingBox())!;
+  expect(button.y - (list.y + list.height)).toBeGreaterThanOrEqual(20);
+  expect(promise.y - (button.y + button.height)).toBeGreaterThanOrEqual(40);
+});

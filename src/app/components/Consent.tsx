@@ -13,15 +13,15 @@ export function Consent({ onAccept }: { onAccept: () => void }) {
         <li>What it means</li>
         <li>What to send</li>
       </ol>
-      <p className="assure">
-        We don&apos;t save your photo. You decide what to send; we never contact
-        the state for you.
-      </p>
-      <p className="smallprint">
-        Free and independent. Not run by any state agency. This isn&apos;t legal
-        advice; only your state decides your coverage. An AI service reads your
-        photo for us.
-      </p>
+      <h3 id="before-title" className="kicker">
+        Before you start
+      </h3>
+      <ul className="facts-list" aria-labelledby="before-title">
+        <li>We don&apos;t save your photo. An AI service reads it for us.</li>
+        <li>You decide what to send. We never contact the state for you.</li>
+        <li>Free and independent. Not run by any state agency.</li>
+        <li>Not legal advice. Only your state decides your coverage.</li>
+      </ul>
       <button type="button" className="primary" onClick={onAccept}>
         Start with my letter
       </button>
