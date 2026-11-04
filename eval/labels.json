@@ -180,5 +180,18 @@
     "source_url": "https://hca.wa.gov/assets/free-or-low-cost/Apple-Health-renewal-action-required-for-individuals-turning-65.pdf",
     "retrieved": "2026-11-04",
     "usage_note": "Public government sample notice, used for evaluation (page 1 of PDF; Washington HCA EE009 renewal, placeholder name Jane Doe)"
+  },
+  {
+    "id": "ca-mc020-1095b",
+    "file": "ca-mc020-1095b.png",
+    "split": "test",
+    "state": "CA",
+    "notice_type": "other_medicaid",
+    "deadline": null,
+    "required_action": "report changes",
+    "documents": [],
+    "source_url": "https://www.dhcs.ca.gov/formsandpubs/forms/Pages/MCEDFormsMCinfo.aspx",
+    "retrieved": "2026-11-04",
+    "usage_note": "Public government sample notice, used for evaluation (MC Information Notice 020, file MC-020-Eng-TY-2020.pdf, listed under MC Information Notices; one page; no personal data, no deadline)"
   }
 ]
