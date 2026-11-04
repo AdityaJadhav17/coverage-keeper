@@ -1,0 +1,105 @@
+{
+  "state": "WA",
+  "status": "published",
+  "program": "Apple Health (Medicaid)",
+  "agency": "Washington State Health Care Authority",
+  "source_url": "https://www.hca.wa.gov/free-or-low-cost-health-care/i-need-medical-dental-or-vision-care/apple-health-medicaid-work-requirements",
+  "retrieved": "2026-11-04",
+  "contact": {
+    "name": "Apple Health customer service",
+    "phone": "800-562-3022"
+  },
+  "applies_to": "People on Apple Health for Adults, starting January 1, 2027, when they apply or renew.",
+  "ways_to_meet": [
+    {
+      "id": "income",
+      "text": "At least $580 monthly household income."
+    },
+    {
+      "id": "work",
+      "text": "Working at least 80 hours a month."
+    },
+    {
+      "id": "school",
+      "text": "Enrolled in an education program at least half-time."
+    },
+    {
+      "id": "work_program",
+      "text": "A work program for at least 80 hours a month."
+    },
+    {
+      "id": "community_service",
+      "text": "Community service for at least 80 hours a month."
+    },
+    {
+      "id": "combination",
+      "text": "Work, school, a work program and volunteering that add up to at least 80 hours a month."
+    }
+  ],
+  "exemptions": [
+    {
+      "id": "under_19",
+      "question": "Are you under 19?"
+    },
+    {
+      "id": "medicare",
+      "question": "Are you enrolled in Medicare Part A or B?"
+    },
+    {
+      "id": "other_program",
+      "question": "Do you get Apple Health through a program other than Apple Health for Adults?"
+    },
+    {
+      "id": "medical_travel",
+      "question": "Did you travel outside your community for care for a serious or complex condition, for you or your dependent?"
+    },
+    {
+      "id": "inpatient",
+      "question": "Did you spend part or all of a month in a hospital, nursing home or similar inpatient care?"
+    },
+    {
+      "id": "disaster_area",
+      "question": "Do you live in an area where the President has declared a disaster?"
+    },
+    {
+      "id": "high_unemployment",
+      "question": "Do you live in a county where unemployment is 1.5 times the national rate?"
+    },
+    {
+      "id": "foster_alumni",
+      "question": "Do you get Apple Health as a foster care alumni (ages 18-26)?"
+    },
+    {
+      "id": "aian",
+      "question": "Are you American Indian or Alaska Native?"
+    },
+    {
+      "id": "pregnant",
+      "question": "Are you pregnant or postpartum?"
+    },
+    {
+      "id": "caregiver",
+      "question": "Are you a parent, guardian, caretaker relative or family caregiver of a child under 14 or a person with a disability?"
+    },
+    {
+      "id": "veteran_total",
+      "question": "Are you a veteran with a total disability rating?"
+    },
+    {
+      "id": "health_condition",
+      "question": "Do you have a serious health condition that makes it hard to work (medically frail)?"
+    },
+    {
+      "id": "snap_tanf",
+      "question": "Do you get TANF or SNAP?"
+    },
+    {
+      "id": "treatment",
+      "question": "Are you in a drug or alcohol treatment program?"
+    },
+    {
+      "id": "recent_release",
+      "question": "Are you in jail or prison, or were you released in the last 3 months?"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "state": "AZ",
+  "status": "pending",
+  "program": "AHCCCS (Arizona Medicaid)",
+  "agency": "Arizona Health Care Cost Containment System",
+  "source_url": "https://azahcccs.gov/shared/AHCCCScontacts.html",
+  "retrieved": "2026-11-04",
+  "contact": {
+    "name": "AHCCCS eligibility and enrollment",
+    "phone": "800-331-5090"
+  },
+  "pending_note": "No final 2027 exemption list is published on azahcccs.gov. The 2019 AHCCCS Works pages are not current."
+}
