@@ -20,6 +20,8 @@ export const LetterExtraction = z.object({
   required_action: z.string().max(400).nullable(),
   documents: z.array(z.string().max(200)).max(20),
   contact_phone: z.string().max(40).nullable(),
+  // The state that sent the letter; picks that state's rules (#18).
+  state: z.enum(["WA", "OR", "CA", "NV", "AZ", "other"]).nullable(),
   confidence: z.enum(["high", "medium", "low"]),
 });
 

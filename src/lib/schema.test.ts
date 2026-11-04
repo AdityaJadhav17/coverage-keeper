@@ -11,8 +11,19 @@ it.each([
   ["non-ISO deadline", { deadline: "02/15/2027" }],
   ["bad confidence", { confidence: "certain" }],
   ["documents not a list", { documents: "Pay stubs" }],
+  ["a state outside the list", { state: "TX" }],
+  ["a missing state", { state: undefined }],
 ])("rejects %s", (_, patch) => {
   expect(LetterExtraction.safeParse({ ...fixture, ...patch }).success).toBe(
     false,
   );
 });
+
+it.each(["WA", "OR", "CA", "NV", "AZ", "other", null])(
+  "accepts state %j",
+  (state) => {
+    expect(LetterExtraction.safeParse({ ...fixture, state }).success).toBe(
+      true,
+    );
+  },
+);

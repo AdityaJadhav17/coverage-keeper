@@ -7,5 +7,6 @@
   "required_action": "Send proof of 80 hours of work or activities for January 2027",
   "documents": ["Pay stubs for January 2027", "Timesheet or activity log"],
   "contact_phone": "800-699-9075",
+  "state": "OR",
   "confidence": "high"
 }
