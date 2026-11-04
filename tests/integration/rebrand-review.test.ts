@@ -20,7 +20,7 @@ const rem = (decl: string) => {
 };
 
 describe("welcome screen text size (spec: body never below 17px)", () => {
-  it.each([".assure", ".smallprint"])("%s is at least 1.0625rem", (sel) => {
+  it.each([".facts-list li"])("%s is at least 1.0625rem", (sel) => {
     expect(rem(rule(sel))).toBeGreaterThanOrEqual(1.0625);
   });
 
