@@ -6,10 +6,12 @@ describe.each(STATE_CODES)("%s rules data", (code) => {
   const rules = stateRules(code);
 
   it("cites an official .gov source, a retrieval date and a phone number", () => {
+    const gov = /^https:\/\/([a-z0-9-]+\.)*[a-z0-9-]+\.gov\//;
     expect(rules.state).toBe(code);
-    expect(rules.source_url).toMatch(
-      /^https:\/\/([a-z0-9-]+\.)*[a-z0-9-]+\.gov\//,
-    );
+    // An agency's own non-.gov site counts only when its .gov page links to it.
+    expect(
+      gov.test(rules.source_url) ? rules.source_url : rules.source_linked_from,
+    ).toMatch(gov);
     expect(rules.retrieved).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(rules.contact.phone).toMatch(/\d{3}-\d{3}-\d{4}/);
     expect(rules.program.length).toBeGreaterThan(0);

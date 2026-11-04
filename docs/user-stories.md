@@ -228,12 +228,13 @@ As Leilani I want Washington's own questions so that the answer fits my state.
 **US-083: State hasn't published rules yet** — Must, Release: v0.2
 As Gloria I want to be told when my state hasn't published its list so that I don't rely on another state's rules.
 
-- Given a state marked "pending", When I open its questions, Then I see "Nevada hasn't published its list yet" with the state's phone number and official page, and no questions.
+- Given a state marked "pending", When I open its questions, Then I see "Arizona hasn't published its list yet" with the state's phone number and official page, and no questions.
 
 **US-084: The right phone number and program name** — Must, Release: v0.2
 As Daniel I want the right program name and phone number on every screen so that I call the right office.
 
-- Given a state is known, Then every screen, error and the call bar use that state's program name and phone; otherwise the letter's phone; otherwise a neutral "call the number on your letter".
+- Given a state is known, Then every screen and error use that state's program name.
+- The call bar shows the phone printed on the letter (often a local office); otherwise the state's phone; otherwise a neutral "call the number on your letter".
 
 **US-085: Other states** — Must, Release: v0.2
 As any user outside these five states I want to know the questions don't cover me so that I'm not misled.

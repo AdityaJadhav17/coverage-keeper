@@ -23,12 +23,12 @@ export type LetterReader = (image: LetterImage) => Promise<LetterExtraction>;
 export const UNSURE_RESULT: LetterExtraction = {
   notice_type: "other_medicaid",
   summary:
-    "We could not read this letter clearly. Try a sharper photo, or call OHP at 800-699-9075 to ask what it says.",
+    "We could not read this letter clearly. Try a sharper photo, or call the number on your letter to ask what it says.",
   deadline: null,
   deadline_quote: null,
   required_action: null,
   documents: [],
-  contact_phone: "800-699-9075",
+  contact_phone: null,
   state: null,
   confidence: "low",
 };

@@ -1,13 +1,104 @@
 {
   "state": "AZ",
-  "status": "pending",
+  "status": "published",
   "program": "AHCCCS (Arizona Medicaid)",
   "agency": "Arizona Health Care Cost Containment System",
-  "source_url": "https://azahcccs.gov/shared/AHCCCScontacts.html",
+  "source_url": "https://keepmyahcccs.com/#faq7",
+  "source_linked_from": "https://www.azahcccs.gov/AHCCCS/Initiatives/HR1/",
   "retrieved": "2026-11-04",
   "contact": {
-    "name": "AHCCCS eligibility and enrollment",
-    "phone": "800-331-5090"
+    "name": "KeepMyAHCCCS help line",
+    "phone": "855-220-0903"
   },
-  "pending_note": "No final 2027 exemption list is published on azahcccs.gov. The 2019 AHCCCS Works pages are not current."
+  "applies_to": "Adults ages 19 to 64 in the AHCCCS adult group who don't have Medicare, starting January 1, 2027. AHCCCS will tell you if the rules apply to you.",
+  "applies_to_es": "Adultos de 19 a 64 años del grupo de adultos de AHCCCS que no tienen Medicare, a partir del 1 de enero de 2027. AHCCCS le avisará si las reglas le aplican.",
+  "ways_to_meet": [
+    {
+      "id": "income",
+      "text": "Income of at least $580 a month.",
+      "text_es": "Ingresos de al menos $580 al mes."
+    },
+    {
+      "id": "hours",
+      "text": "At least 80 hours a month of work, school, job training, or community service or volunteering.",
+      "text_es": "Al menos 80 horas al mes de trabajo, escuela, capacitación laboral, o servicio comunitario o voluntariado."
+    },
+    {
+      "id": "mix",
+      "text": "Some income plus some activity hours together.",
+      "text_es": "Una combinación de algunos ingresos y algunas horas de actividades."
+    }
+  ],
+  "exemptions": [
+    {
+      "id": "aian",
+      "question": "Are you American Indian or Alaska Native?",
+      "question_es": "¿Es usted indígena americano o nativo de Alaska?"
+    },
+    {
+      "id": "veteran_100",
+      "question": "Are you a veteran with a 100% total disability rating?",
+      "question_es": "¿Es usted veterano con una calificación de discapacidad total del 100 %?"
+    },
+    {
+      "id": "child_under_14",
+      "question": "Do you care for a child age 13 or younger?",
+      "question_es": "¿Cuida a un niño de 13 años o menos?"
+    },
+    {
+      "id": "caregiver",
+      "question": "Do you care for a person with a disability?",
+      "question_es": "¿Cuida a una persona con una discapacidad?"
+    },
+    {
+      "id": "former_foster",
+      "question": "Are you under 26, and were you in foster care at age 18?",
+      "question_es": "¿Tiene menos de 26 años y estaba en cuidado de crianza (foster care) a los 18 años?"
+    },
+    {
+      "id": "disability",
+      "question": "Do you have blindness, or a physical, intellectual or developmental disability that makes at least one everyday activity hard to do?",
+      "question_es": "¿Tiene ceguera, o una discapacidad física, intelectual o del desarrollo que le dificulta al menos una actividad diaria?"
+    },
+    {
+      "id": "health_condition",
+      "question": "Do you have a serious or complex health condition, or a mental health condition, that makes daily life or meeting the work rules hard?",
+      "question_es": "¿Tiene una condición de salud grave o compleja, o una condición de salud mental, que le dificulta la vida diaria o cumplir con las reglas de trabajo?"
+    },
+    {
+      "id": "sud",
+      "question": "Do you have a substance use disorder that makes it hard to meet the work rules, or are you getting treatment for drug or alcohol use?",
+      "question_es": "¿Tiene un trastorno por consumo de sustancias que le dificulta cumplir con las reglas de trabajo, o recibe tratamiento por consumo de drogas o alcohol?"
+    },
+    {
+      "id": "pregnant",
+      "question": "Are you pregnant, or were you pregnant in the last 12 months?",
+      "question_es": "¿Está embarazada, o estuvo embarazada en los últimos 12 meses?"
+    },
+    {
+      "id": "snap_tanf",
+      "question": "Do you already meet the work rules for SNAP (Nutrition Assistance) or TANF (Cash Assistance)?",
+      "question_es": "¿Ya cumple con las reglas de trabajo de SNAP (asistencia nutricional) o TANF (asistencia en efectivo)?"
+    },
+    {
+      "id": "recent_release",
+      "question": "Are you in jail or prison, or were you released in the last 3 months?",
+      "question_es": "¿Está en la cárcel o en prisión, o salió en los últimos 3 meses?"
+    },
+    {
+      "id": "inpatient",
+      "question": "Are you getting care in a hospital or nursing home?",
+      "question_es": "¿Recibe atención en un hospital o en un hogar de ancianos?"
+    },
+    {
+      "id": "medical_travel",
+      "question": "Do you have to travel away from home for medical care for yourself or a dependent?",
+      "question_es": "¿Tiene que viajar fuera de casa para recibir atención médica para usted o para alguien a su cargo?"
+    },
+    {
+      "id": "area",
+      "question": "Do you live in an Arizona county with a presidential disaster declaration or high unemployment?",
+      "question_es": "¿Vive en un condado de Arizona con una declaración de desastre presidencial o con mucho desempleo?"
+    }
+  ]
 }

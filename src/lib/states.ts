@@ -6,7 +6,8 @@ import wa from "../../data/rules/wa.json";
 
 export type StateCode = "WA" | "OR" | "CA" | "NV" | "AZ";
 
-// One file per state in data/rules/; every fact comes from the agency's own .gov page.
+// One file per state in data/rules/; every fact comes from the agency's own .gov page,
+// or a site of the agency's that its .gov page links to (source_linked_from).
 export type StateRules = {
   state: StateCode;
   status: "published" | "pending";
@@ -14,6 +15,8 @@ export type StateRules = {
   agency: string;
   contact: { name: string; phone: string };
   source_url: string;
+  // Set when source_url is the agency's own non-.gov site: the .gov page that links to it.
+  source_linked_from?: string;
   source_updated?: string;
   retrieved: string;
   pending_note?: string;
