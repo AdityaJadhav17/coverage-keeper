@@ -1,13 +1,99 @@
 {
   "state": "NV",
-  "status": "pending",
+  "status": "published",
   "program": "Nevada Medicaid",
   "agency": "Nevada Health Authority",
-  "source_url": "https://nevadamedicaid.nv.gov/WorkRequirements",
+  "source_url": "https://www.nevadamedicaid.nv.gov/WorkRequirements/DoesThisApplytoMe/",
+  "source_updated": "2026-10-14",
   "retrieved": "2026-11-04",
   "contact": {
     "name": "Nevada Medicaid work requirements hotline",
     "phone": "702-631-3310"
   },
-  "pending_note": "The work requirements page (updated 2026-09-23) links exemptions to a separate page that has not been reviewed yet."
+  "applies_to": "Certain adults ages 19 to 64 in the Medicaid expansion group, at their next renewal in 2027.",
+  "applies_to_es": "Algunos adultos de 19 a 64 años del grupo de expansión de Medicaid, en su próxima renovación en 2027.",
+  "ways_to_meet": [
+    {
+      "id": "hours",
+      "text": "At least 80 hours in a month of work, job training, volunteering, or a mix of these.",
+      "text_es": "Al menos 80 horas en un mes de trabajo, capacitación laboral, voluntariado o una combinación de estas."
+    },
+    {
+      "id": "income",
+      "text": "At least $580 in countable income in a month, including from your own business.",
+      "text_es": "Al menos $580 de ingresos contables en un mes, incluso de su propio negocio."
+    },
+    {
+      "id": "school",
+      "text": "Enrolled in school at least part-time.",
+      "text_es": "Estar inscrito en la escuela por lo menos medio tiempo."
+    },
+    {
+      "id": "seasonal",
+      "text": "Seasonal work that averages $580 a month over a 6-month season.",
+      "text_es": "Trabajo de temporada que da un promedio de $580 al mes durante una temporada de 6 meses."
+    }
+  ],
+  "exemptions": [
+    {
+      "id": "under_19",
+      "question": "Are you under 19?",
+      "question_es": "¿Tiene menos de 19 años?"
+    },
+    {
+      "id": "medicare",
+      "question": "Do you have Medicare, or can you get it?",
+      "question_es": "¿Tiene Medicare o puede obtenerlo?"
+    },
+    {
+      "id": "aian",
+      "question": "Are you American Indian or Alaska Native?",
+      "question_es": "¿Es usted indígena americano o nativo de Alaska?"
+    },
+    {
+      "id": "child_under_14",
+      "question": "Are you a parent, guardian or family caregiver of a child under 14?",
+      "question_es": "¿Es padre, madre, tutor o cuidador familiar de un niño menor de 14 años?"
+    },
+    {
+      "id": "caregiver",
+      "question": "Do you care for someone with a disability who needs help with daily activities like bathing or dressing?",
+      "question_es": "¿Cuida a alguien con una discapacidad que necesita ayuda con actividades diarias, como bañarse o vestirse?"
+    },
+    {
+      "id": "veteran_100",
+      "question": "Are you a veteran with a total disability?",
+      "question_es": "¿Es usted veterano con una discapacidad total?"
+    },
+    {
+      "id": "health_condition",
+      "question": "Do you have a serious physical or mental health condition, substance use disorder, or disability that keeps you from working, volunteering or going to school?",
+      "question_es": "¿Tiene una condición grave de salud física o mental, un trastorno por consumo de sustancias o una discapacidad que no le permite trabajar, hacer voluntariado o ir a la escuela?"
+    },
+    {
+      "id": "sud_treatment",
+      "question": "Are you getting treatment for a drug or alcohol use disorder?",
+      "question_es": "¿Recibe tratamiento por un trastorno por consumo de drogas o alcohol?"
+    },
+    {
+      "id": "snap_tanf",
+      "question": "Do you already meet the work rules for SNAP (food assistance) or TANF (NEON cash assistance)?",
+      "question_es": "¿Ya cumple con las reglas de trabajo de SNAP (asistencia de alimentos) o TANF (asistencia en efectivo NEON)?"
+    },
+    {
+      "id": "recent_release",
+      "question": "Are you in jail or prison, or were you in the last 3 months?",
+      "question_es": "¿Está en la cárcel o en prisión, o estuvo en los últimos 3 meses?"
+    },
+    {
+      "id": "inpatient",
+      "question": "Are you staying in a hospital, nursing facility or psychiatric hospital?",
+      "question_es": "¿Está internado en un hospital, un centro de enfermería o un hospital psiquiátrico?"
+    },
+    {
+      "id": "medical_travel",
+      "question": "Do you have to travel outside your community for medical care for yourself or someone in your care?",
+      "question_es": "¿Tiene que viajar fuera de su comunidad para recibir atención médica para usted o para alguien a su cargo?"
+    }
+  ]
 }
