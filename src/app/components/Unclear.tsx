@@ -1,15 +1,18 @@
+import { useLocale } from "@/i18n/LocaleContext";
+
 export function Unclear({ onRetake }: { onRetake: () => void }) {
+  const { t } = useLocale();
   return (
     <section aria-labelledby="unclear-title">
-      <h2 id="unclear-title">We couldn&apos;t read this clearly</h2>
-      <p className="lead">A new photo usually fixes it:</p>
+      <h2 id="unclear-title">{t.unclearTitle}</h2>
+      <p className="lead">{t.unclearLead}</p>
       <ul className="facts">
-        <li>Turn on a light or move closer to a window.</li>
-        <li>Lay the letter on a flat surface.</li>
-        <li>Hold the phone straight above the page so it fills the frame.</li>
+        {t.unclearTips.map((tip) => (
+          <li key={tip}>{tip}</li>
+        ))}
       </ul>
       <button type="button" className="primary" onClick={onRetake}>
-        Take a new photo
+        {t.newPhoto}
       </button>
     </section>
   );

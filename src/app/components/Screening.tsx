@@ -1,8 +1,10 @@
 import { useState } from "react";
 import rules from "../../../data/rules/or.json";
+import { useLocale } from "@/i18n/LocaleContext";
 import { mayApply } from "@/lib/screening";
 
 export function Screening({ onDone }: { onDone: (yes: string[]) => void }) {
+  const { t, locale } = useLocale();
   const [answers, setAnswers] = useState<Record<string, boolean>>({});
   return (
     <form
@@ -13,19 +15,12 @@ export function Screening({ onDone }: { onDone: (yes: string[]) => void }) {
         onDone(mayApply(answers, rules).map((r) => r.id));
       }}
     >
-      <h2 id="screening-title">Exemption questions</h2>
-      <p className="lead">
-        Some OHP members don&apos;t have to meet the work rule. These questions
-        follow the Oregon Health Authority&apos;s list. Skip any you&apos;d
-        rather not answer.
-      </p>
-      <p>
-        These questions use Oregon Health Plan (OHP) rules. If your letter is
-        from another state, call the number on your letter.
-      </p>
+      <h2 id="screening-title">{t.screeningTitle}</h2>
+      <p className="lead">{t.screeningLead}</p>
+      <p>{t.screeningScope}</p>
       {rules.exemptions.map((rule) => (
         <fieldset key={rule.id} className="question">
-          <legend>{rule.question}</legend>
+          <legend>{locale === "es" ? rule.question_es : rule.question}</legend>
           {[true, false].map((value) => (
             <label key={String(value)}>
               <input
@@ -34,13 +29,13 @@ export function Screening({ onDone }: { onDone: (yes: string[]) => void }) {
                 checked={answers[rule.id] === value}
                 onChange={() => setAnswers({ ...answers, [rule.id]: value })}
               />
-              <span>{value ? "Yes" : "No"}</span>
+              <span>{value ? t.yes : t.no}</span>
             </label>
           ))}
         </fieldset>
       ))}
       <button type="submit" className="primary">
-        See what may apply
+        {t.seeWhatMayApply}
       </button>
     </form>
   );

@@ -21,13 +21,13 @@ describe("rejectReason", () => {
     ["", 1000],
     ["text/plain", 10],
   ])("rejects non-image %j", (type, size) => {
-    expect(rejectReason({ type, size })).toMatch(/isn't a photo/);
+    expect(rejectReason({ type, size })).toBe("notImage");
   });
 
   it("rejects images over 15 MB", () => {
-    expect(
-      rejectReason({ type: "image/jpeg", size: MAX_PICK_BYTES + 1 }),
-    ).toMatch(/too large/);
+    expect(rejectReason({ type: "image/jpeg", size: MAX_PICK_BYTES + 1 })).toBe(
+      "tooLarge",
+    );
   });
 });
 

@@ -1,4 +1,5 @@
 import rules from "../../../data/rules/or.json";
+import { useLocale } from "@/i18n/LocaleContext";
 import { DoctorDraft } from "./DoctorDraft";
 import { formatDate } from "./shared";
 
@@ -11,38 +12,40 @@ export function Screened({
   deadline: string | null;
   onBack: () => void;
 }) {
+  const { t, locale } = useLocale();
+  const es = locale === "es";
   const matched = rules.exemptions.filter((r) => yes.includes(r.id));
   const source = (
     <p className="source">
       <a href={rules.source_url} target="_blank" rel="noreferrer">
-        Source: Oregon Health Authority
+        {t.sourceOha}
       </a>
-      , checked {formatDate(rules.retrieved)}
+      {t.checked(formatDate(rules.retrieved, locale))}
     </p>
   );
   return (
     <section aria-labelledby="screened-title">
       {matched.length > 0 ? (
         <>
-          <h2 id="screened-title">Exemptions to ask about</h2>
+          <h2 id="screened-title">{t.askAboutTitle}</h2>
           <ul className="matches">
             {matched.map((rule) => (
               <li key={rule.id} data-testid="may-apply">
-                <p className="q">{rule.question}</p>
-                <p>This may apply to you. Ask OHP about it.</p>
+                <p className="q">{es ? rule.question_es : rule.question}</p>
+                <p>{t.mayApply}</p>
               </li>
             ))}
           </ul>
         </>
       ) : (
         <>
-          <h2 id="screened-title">Ways to meet the work rule</h2>
+          <h2 id="screened-title">{t.waysTitle}</h2>
           <p className="lead">
-            {rules.applies_to} You can meet the rule with one of these:
+            {es ? rules.applies_to_es : rules.applies_to} {t.waysLead}
           </p>
           <ul className="facts">
             {rules.ways_to_meet.map((way) => (
-              <li key={way.id}>{way.text}</li>
+              <li key={way.id}>{es ? way.text_es : way.text}</li>
             ))}
           </ul>
         </>
@@ -50,7 +53,7 @@ export function Screened({
       {yes.includes("health_condition") && <DoctorDraft deadline={deadline} />}
       {source}
       <button type="button" className="secondary" onClick={onBack}>
-        Back
+        {t.back}
       </button>
     </section>
   );
