@@ -79,20 +79,33 @@ test("California shows Medi-Cal's questions; switching to Washington swaps quest
   ).toHaveAttribute("href", /hca\.wa\.gov/);
 });
 
-test("Nevada has no published list yet, so it shows who to call instead of questions (US-083)", async ({
+test("Arizona has no published list yet, so it shows who to call instead of questions (US-083)", async ({
   page,
 }) => {
   const state = await toScreening(page);
-  await state.selectOption("NV");
+  await state.selectOption("AZ");
   await expect(page.getByTestId("pending")).toContainText(
-    "Nevada hasn't published its list of exemptions yet. Call Nevada Medicaid at 702-631-3310",
+    "Arizona hasn't published its list of exemptions yet. Call AHCCCS (Arizona Medicaid) at 800-331-5090",
   );
   await expect(page.getByRole("group")).toHaveCount(0);
   await expect(
     page.getByRole("button", { name: "See what may apply" }),
   ).toHaveCount(0);
-  await expect(page.getByRole("link", { name: "702-631-3310" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "800-331-5090" })).toBeVisible();
   await expectNoSeriousA11yIssues(page);
+});
+
+test("Nevada shows its own published questions", async ({ page }) => {
+  const state = await toScreening(page);
+  await state.selectOption("NV");
+  await expect(page.getByText(/Some Nevada Medicaid members/)).toBeVisible();
+  await expect(
+    page.getByRole("group", {
+      name: "Are you a veteran with a total disability?",
+    }),
+  ).toBeVisible();
+  await expect(page.getByTestId("pending")).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "702-631-3310" })).toBeVisible();
 });
 
 test("another state gets the coverage note and no Oregon number (US-085)", async ({
