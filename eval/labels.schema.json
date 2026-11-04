@@ -9,6 +9,7 @@
       "id",
       "file",
       "split",
+      "state",
       "notice_type",
       "deadline",
       "required_action",
@@ -18,22 +19,48 @@
       "usage_note"
     ],
     "properties": {
-      "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      },
       "file": {
         "type": "string",
         "description": "Path relative to eval/letters/"
       },
-      "split": { "enum": ["dev", "test"] },
-      "notice_type": { "type": "string" },
-      "deadline": { "type": ["string", "null"], "format": "date" },
-      "required_action": { "type": ["string", "null"] },
-      "documents": { "type": "array", "items": { "type": "string" } },
+      "split": {
+        "enum": ["dev", "test"]
+      },
+      "state": {
+        "enum": ["WA", "OR", "CA", "NV", "AZ", "other"],
+        "description": "The state that sent the letter; any state outside the list is \"other\""
+      },
+      "notice_type": {
+        "type": "string"
+      },
+      "deadline": {
+        "type": ["string", "null"],
+        "format": "date"
+      },
+      "required_action": {
+        "type": ["string", "null"]
+      },
+      "documents": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
       "source_url": {
         "type": "string",
         "pattern": "^https://([a-z0-9-]+\\.)*[a-z0-9-]+\\.gov/"
       },
-      "retrieved": { "type": "string", "format": "date" },
-      "usage_note": { "type": "string" }
+      "retrieved": {
+        "type": "string",
+        "format": "date"
+      },
+      "usage_note": {
+        "type": "string"
+      }
     }
   }
 }

@@ -16,7 +16,7 @@ Scores the letter reader against labeled public sample notices and writes a resu
 
 ## Labels and splits
 
-Each label has `id`, `file` (relative to `letters/`), `split` (`dev` or `test`), `notice_type`, `deadline` (ISO date or null), `required_action`, `documents`, `source_url`, `retrieved` and `usage_note`. Use `dev` while changing the prompt and `test` for the final check.
+Each label has `id`, `file` (relative to `letters/`), `split` (`dev` or `test`), `state` (`WA`, `OR`, `CA`, `NV`, `AZ` or `other`), `notice_type`, `deadline` (ISO date or null), `required_action`, `documents`, `source_url`, `retrieved` and `usage_note`. Use `dev` while changing the prompt and `test` for the final check.
 
 ## Run
 
