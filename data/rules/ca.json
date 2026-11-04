@@ -1,13 +1,81 @@
 {
   "state": "CA",
-  "status": "pending",
+  "status": "published",
   "program": "Medi-Cal",
   "agency": "California Department of Health Care Services",
-  "source_url": "https://www.dhcs.ca.gov/workrules",
+  "source_url": "https://www.dhcs.ca.gov/medi-cal/updates/medi-cal-changes/",
   "retrieved": "2026-11-04",
   "contact": {
     "name": "Medi-Cal Helpline",
     "phone": "800-541-5555"
   },
-  "pending_note": "DHCS calls its guidance preliminary; the exemption list is not copied until it is confirmed on DHCS's own page."
+  "applies_to": "Adults ages 19 to 64 who get Medi-Cal because of their income, starting January 1, 2027. Medi-Cal will send you a letter if this applies to you, and your county Medi-Cal office will tell you if you need to follow the work rules.",
+  "ways_to_meet": [
+    {
+      "id": "income",
+      "text": "Work at a job and earn at least $580 a month."
+    },
+    {
+      "id": "seasonal",
+      "text": "Be a seasonal worker and earn an average of $580 a month over the last six months."
+    },
+    {
+      "id": "training",
+      "text": "Be in a job training program for at least 80 hours a month."
+    },
+    {
+      "id": "volunteer",
+      "text": "Volunteer or do community service for at least 80 hours a month."
+    },
+    {
+      "id": "school",
+      "text": "Go to school at least half-time (usually two or three classes, or about six to eight credits each semester)."
+    },
+    {
+      "id": "combination",
+      "text": "Do a mix of these so the total is at least 80 hours a month or at least $580 a month."
+    }
+  ],
+  "exemptions": [
+    {
+      "id": "under_19",
+      "question": "Are you 18 or younger?"
+    },
+    {
+      "id": "age_65",
+      "question": "Are you 65 or older?"
+    },
+    {
+      "id": "pregnant",
+      "question": "Are you pregnant, or were you pregnant in the last year?"
+    },
+    {
+      "id": "child_under_14",
+      "question": "Are you a parent or caregiver of a child age 13 or younger?"
+    },
+    {
+      "id": "disability",
+      "question": "Do you have a disability?"
+    },
+    {
+      "id": "health_condition",
+      "question": "Do you have a serious physical or mental health condition, or a substance use problem?"
+    },
+    {
+      "id": "recent_release",
+      "question": "Were you released from jail or prison in the last 90 days?"
+    },
+    {
+      "id": "medicare",
+      "question": "Are you on Medicare Part A or Part B?"
+    },
+    {
+      "id": "aian",
+      "question": "Are you American Indian or Alaska Native?"
+    },
+    {
+      "id": "former_foster",
+      "question": "Are you under 26, and were you in foster care on your 18th birthday?"
+    }
+  ]
 }
