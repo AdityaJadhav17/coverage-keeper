@@ -92,15 +92,37 @@ h3 {
   text-wrap: balance;
 }
 
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 2rem;
+  padding-bottom: 0.875rem;
+  border-bottom: 1px solid var(--rule);
+}
+
 .brand {
   display: flex;
   align-items: center;
   gap: 0.625rem;
+  margin: 0;
   font-size: 1.0625rem;
   color: var(--text);
-  margin: 0 0 2rem;
-  padding-bottom: 0.875rem;
-  border-bottom: 1px solid var(--rule);
+}
+
+/* Language switch: small, but still a 44px touch target. */
+.lang {
+  min-height: 44px;
+  padding: 0 1rem;
+  border: 1.5px solid var(--muted);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .brand-mark {
@@ -546,15 +568,33 @@ mark {
   margin-top: 1.5rem;
 }
 
-.draft {
-  margin-top: 1.5rem;
+.state-picker {
+  margin: 0 0 1.5rem;
 }
 
+.state-picker label,
 .draft label {
   display: block;
   font-weight: 700;
   color: var(--ink);
   margin-bottom: 0.5rem;
+}
+
+.state-picker select {
+  width: 100%;
+  max-width: 20rem;
+  min-height: 48px;
+  padding: 0 0.75rem;
+  border: 2px solid var(--muted); /* 3:1 for form field edges */
+  border-radius: 10px;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--text);
+  background: var(--paper);
+}
+
+.draft {
+  margin-top: 1.5rem;
 }
 
 .draft textarea {
@@ -623,14 +663,8 @@ mark {
   color: var(--ink);
 }
 
-.assure {
-  margin: 1rem 0 0;
-  font-size: 1.0625rem;
-  color: var(--text);
-}
-
 .promise {
-  margin: 1.25rem 0 0;
+  margin: 2.5rem 0 0;
   padding: 1rem 1.125rem;
   border-radius: 18px;
   background: var(--primary-soft);
@@ -641,10 +675,44 @@ mark {
   color: var(--ink);
 }
 
-.smallprint {
-  margin: 1.5rem 0 0;
-  font-size: 1.0625rem;
+/* "Before you start": the consent facts, one per line so they can be scanned. */
+.welcome .kicker {
+  margin: 0 0 0.625rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--muted);
+}
+
+.facts-list {
+  display: grid;
+  gap: 0.625rem;
+  margin: 0 0 1.75rem;
+  padding: 1rem 1.25rem;
+  list-style: none;
+  border-radius: 18px;
+  background: var(--surface);
+}
+
+.facts-list li {
+  display: grid;
+  grid-template-columns: 0.5rem 1fr;
+  gap: 0.75rem;
+  align-items: baseline;
+  font-size: 1.0625rem;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.facts-list li::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--ink);
+  transform: translateY(-0.1em);
 }
 
 /* Tablet and laptop (#15). Phones (< 600px) keep the single column above. */

@@ -1,72 +1,104 @@
 {
   "state": "OR",
+  "status": "published",
   "program": "Oregon Health Plan (OHP)",
+  "agency": "Oregon Health Authority",
   "source_url": "https://www.oregon.gov/oha/hsd/ohp/pages/federal-changes.aspx",
   "source_updated": "2026-09-18",
   "retrieved": "2026-10-28",
-  "contact": { "name": "OHP Customer Service", "phone": "800-699-9075" },
+  "contact": {
+    "name": "OHP Customer Service",
+    "phone": "800-699-9075"
+  },
   "applies_to": "Some adults ages 19-64 when they apply for or renew OHP, starting in 2027.",
+  "applies_to_es": "Algunos adultos de 19 a 64 años cuando solicitan o renuevan OHP, a partir de 2027.",
   "ways_to_meet": [
     {
       "id": "income",
-      "text": "Household income above $580 a month before taxes and deductions."
+      "text": "Household income above $580 a month before taxes and deductions.",
+      "text_es": "Ingresos del hogar de más de $580 al mes, antes de impuestos y deducciones."
     },
     {
       "id": "school",
-      "text": "Enrolled in school at least half-time, including high school or GED programs."
+      "text": "Enrolled in school at least half-time, including high school or GED programs.",
+      "text_es": "Estar inscrito en estudios al menos medio tiempo, incluidos la escuela secundaria o programas de GED."
     },
     {
       "id": "hours",
-      "text": "At least 80 hours a month of work, volunteering, caregiving, school, or a training or work program."
+      "text": "At least 80 hours a month of work, volunteering, caregiving, school, or a training or work program.",
+      "text_es": "Al menos 80 horas al mes de trabajo, voluntariado, cuidado de otra persona, estudios o un programa de capacitación o de trabajo."
     }
   ],
   "exemptions": [
-    { "id": "aian", "question": "Are you American Indian or Alaska Native?" },
+    {
+      "id": "aian",
+      "question": "Are you American Indian or Alaska Native?",
+      "question_es": "¿Es usted indígena americano o nativo de Alaska?"
+    },
     {
       "id": "pregnant",
-      "question": "Are you pregnant or were you recently pregnant?"
+      "question": "Are you pregnant or were you recently pregnant?",
+      "question_es": "¿Está embarazada o estuvo embarazada recientemente?"
     },
-    { "id": "child_under_14", "question": "Do you care for a child under 14?" },
+    {
+      "id": "child_under_14",
+      "question": "Do you care for a child under 14?",
+      "question_es": "¿Cuida a un niño menor de 14 años?"
+    },
     {
       "id": "caregiver",
-      "question": "Do you care for someone with a disability or serious health condition for at least 80 hours a month?"
+      "question": "Do you care for someone with a disability or serious health condition for at least 80 hours a month?",
+      "question_es": "¿Cuida a una persona con una discapacidad o una condición de salud grave al menos 80 horas al mes?"
     },
     {
       "id": "health_condition",
-      "question": "Do you have a serious or disabling health condition?"
+      "question": "Do you have a serious or disabling health condition?",
+      "question_es": "¿Tiene una condición de salud grave o que lo incapacita?"
     },
     {
       "id": "veteran_100",
-      "question": "Are you a veteran with a 100% VA disability rating?"
+      "question": "Are you a veteran with a 100% VA disability rating?",
+      "question_es": "¿Es usted veterano con una calificación de discapacidad del 100 % de la VA?"
     },
     {
       "id": "inpatient",
-      "question": "Are you in inpatient or residential care?"
+      "question": "Are you in inpatient or residential care?",
+      "question_es": "¿Está internado o recibe atención residencial?"
     },
     {
       "id": "medical_travel",
-      "question": "Were you away from home 7 or more days this month for medical care?"
+      "question": "Were you away from home 7 or more days this month for medical care?",
+      "question_es": "¿Estuvo fuera de casa 7 días o más este mes para recibir atención médica?"
     },
     {
       "id": "sud_treatment",
-      "question": "Have you been in drug or alcohol treatment in the past 5 years?"
+      "question": "Have you been in drug or alcohol treatment in the past 5 years?",
+      "question_es": "¿Ha recibido tratamiento por consumo de drogas o alcohol en los últimos 5 años?"
     },
-    { "id": "medicare", "question": "Do you have Medicare?" },
+    {
+      "id": "medicare",
+      "question": "Do you have Medicare?",
+      "question_es": "¿Tiene Medicare?"
+    },
     {
       "id": "recent_release",
-      "question": "Were you recently released from jail or prison?"
+      "question": "Were you recently released from jail or prison?",
+      "question_es": "¿Salió recientemente de la cárcel o de prisión?"
     },
     {
       "id": "snap_tanf",
-      "question": "Are you meeting SNAP or TANF work rules?"
+      "question": "Are you meeting SNAP or TANF work rules?",
+      "question_es": "¿Cumple con los requisitos de trabajo de SNAP o TANF?"
     },
     {
       "id": "former_foster",
-      "question": "Are you a former foster youth age 19-26?"
+      "question": "Are you a former foster youth age 19-26?",
+      "question_es": "¿Estuvo en cuidado de crianza (foster care) y tiene entre 19 y 26 años?"
     },
     {
       "id": "area",
-      "question": "Do you live in a high-unemployment county or a federally declared disaster area?"
+      "question": "Do you live in a high-unemployment county or a federally declared disaster area?",
+      "question_es": "¿Vive en un condado con mucho desempleo o en una zona declarada de desastre por el gobierno federal?"
     }
   ]
 }

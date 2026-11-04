@@ -142,8 +142,9 @@ test("exemption screening shows rules that may apply", async ({ page }) => {
   await start(page);
   await scan(page);
   await page.getByRole("button", { name: "Check exemptions" }).click();
+  await page.getByLabel("State that sent this letter").selectOption("OR");
   await expect(
-    page.getByText(/use Oregon Health Plan \(OHP\) rules/),
+    page.getByText(/Some Oregon Health Plan \(OHP\) members/),
   ).toBeVisible();
 
   await page
@@ -161,7 +162,9 @@ test("exemption screening shows rules that may apply", async ({ page }) => {
   const items = page.getByTestId("may-apply");
   await expect(items).toHaveCount(1);
   await expect(items).toContainText("Do you have Medicare?");
-  await expect(items).toContainText("This may apply to you. Ask OHP about it.");
+  await expect(items).toContainText(
+    "This may apply to you. Ask Oregon Health Plan (OHP) about it.",
+  );
   await expect(
     page.getByRole("link", { name: "Source: Oregon Health Authority" }),
   ).toHaveAttribute("href", /oregon\.gov/);
@@ -175,6 +178,7 @@ test("no yes answers shows the ways to meet the rule", async ({ page }) => {
   await start(page);
   await scan(page);
   await page.getByRole("button", { name: "Check exemptions" }).click();
+  await page.getByLabel("State that sent this letter").selectOption("OR");
   await page.getByRole("button", { name: "See what may apply" }).click();
   await expect(
     page.getByRole("heading", { name: "Ways to meet the work rule" }),
@@ -195,7 +199,9 @@ test("offline: photo is not sent and retry works", async ({
       name: "No connection. Your photo wasn't sent.",
     }),
   ).toBeVisible();
-  await expect(page.getByRole("link", { name: "800-699-9075" })).toBeVisible();
+  await expect(page.locator(".callbar")).toContainText(
+    "the number on your letter",
+  );
   expect(calls()).toBe(0);
   await expectNoSeriousA11yIssues(page);
 
@@ -216,6 +222,7 @@ test.describe("dark mode", () => {
     await expect(page.getByTestId("deadline")).toContainText("has passed");
     await expectNoSeriousA11yIssues(page);
     await page.getByRole("button", { name: "Check exemptions" }).click();
+    await page.getByLabel("State that sent this letter").selectOption("OR");
     await page
       .getByRole("group", { name: "Do you have Medicare?" })
       .getByLabel("Yes")

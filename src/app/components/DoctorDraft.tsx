@@ -1,8 +1,18 @@
 import { useState } from "react";
+import { useLocale } from "@/i18n/LocaleContext";
 import { buildDoctorDraft } from "@/lib/doctor-draft";
+import type { StateRules } from "@/lib/states";
 
 // Built and kept in the browser only; nothing is sent or stored (US-040, US-041).
-export function DoctorDraft({ deadline }: { deadline: string | null }) {
+// The note itself stays in English, the doctor's language (US-065).
+export function DoctorDraft({
+  deadline,
+  rules,
+}: {
+  deadline: string | null;
+  rules: StateRules;
+}) {
+  const { t } = useLocale();
   const [draft, setDraft] = useState<string | null>(null);
   const [copyStatus, setCopyStatus] = useState("");
   if (draft === null) {
@@ -11,21 +21,21 @@ export function DoctorDraft({ deadline }: { deadline: string | null }) {
         type="button"
         className="primary draft-open"
         onClick={() =>
-          setDraft(buildDoctorDraft({ deadline, today: new Date() }))
+          setDraft(buildDoctorDraft({ deadline, today: new Date(), rules }))
         }
       >
-        Draft a note to my doctor
+        {t.draftOpen}
       </button>
     );
   }
   const canShare = typeof navigator.share === "function";
   return (
     <div className="draft">
-      <label htmlFor="doctor-draft">
-        Note to your doctor. Edit it before you send it.
-      </label>
+      {t.draftInEnglish && <p>{t.draftInEnglish}</p>}
+      <label htmlFor="doctor-draft">{t.draftLabel}</label>
       <textarea
         id="doctor-draft"
+        lang="en"
         rows={14}
         value={draft}
         onChange={(e) => {
@@ -42,15 +52,12 @@ export function DoctorDraft({ deadline }: { deadline: string | null }) {
             Promise.resolve()
               .then(() => navigator.clipboard.writeText(draft))
               .then(
-                () => setCopyStatus("Copied"),
-                () =>
-                  setCopyStatus(
-                    "Couldn't copy. Press and hold the text to copy it.",
-                  ),
+                () => setCopyStatus(t.copied),
+                () => setCopyStatus(t.copyFailed),
               )
           }
         >
-          Copy
+          {t.copy}
         </button>
         {canShare && (
           <button
@@ -58,7 +65,7 @@ export function DoctorDraft({ deadline }: { deadline: string | null }) {
             className="secondary"
             onClick={() => navigator.share({ text: draft }).catch(() => {})}
           >
-            Share
+            {t.share}
           </button>
         )}
       </div>

@@ -83,6 +83,7 @@ test("tablet: exemption questions sit in two columns (US-091)", async ({
   test.skip(info.project.name !== "tablet");
   await openResult(page);
   await page.getByRole("button", { name: "Check exemptions" }).click();
+  await page.getByLabel("State that sent this letter").selectOption("OR");
   await expect(page.locator("fieldset.question").first()).toBeVisible();
   // Measure after the screen's fade-in, not mid-animation.
   await page.evaluate(() =>

@@ -1,9 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { LocaleContext } from "@/i18n/LocaleContext";
+import { messages, pickLocale, type Locale } from "@/i18n/messages";
 import { rejectReason, toUploadJpeg } from "@/lib/image";
 import { phoneHref } from "@/lib/phone";
 import { LetterExtraction } from "@/lib/schema";
+import { stateRules, type Region } from "@/lib/states";
 import { BrandMark } from "./components/BrandMark";
 import { Capture } from "./components/Capture";
 import { Consent } from "./components/Consent";
@@ -25,8 +28,28 @@ type View =
   | { name: "screening"; data: LetterExtraction | null }
   | { name: "screened"; data: LetterExtraction | null; yes: string[] };
 
+function subscribeLanguage(onChange: () => void) {
+  window.addEventListener("languagechange", onChange);
+  return () => window.removeEventListener("languagechange", onChange);
+}
+
 export default function Home() {
   const [view, setView] = useState<View>({ name: "consent" });
+  // The phone's language (English on the server render), unless the user picks one.
+  const detected = useSyncExternalStore(
+    subscribeLanguage,
+    () => pickLocale(navigator.language),
+    () => "en" as Locale,
+  );
+  const [chosen, setLocale] = useState<Locale | null>(null);
+  const locale = chosen ?? detected;
+  const t = messages[locale];
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
+  // shortcut: chosen by the user only; start from the reader's `state` once #26 adds it.
+  const [region, setRegion] = useState<Region | null>(null);
+  const rules = region && region !== "other" ? stateRules(region) : null;
   const [photo, setPhoto] = useState<Blob | null>(null);
   const busy = useRef(false);
 
@@ -46,10 +69,7 @@ export default function Home() {
       if (!res.ok) {
         setView({
           name: "error",
-          message:
-            res.status === 413
-              ? "That photo is too big to send. Take a new one from a little farther back."
-              : "The reading service didn't answer. Your photo is still here, so you can try again.",
+          message: res.status === 413 ? t.errorTooBig : t.errorService,
         });
         return;
       }
@@ -72,7 +92,11 @@ export default function Home() {
   async function onPick(file: File | undefined) {
     if (!file || busy.current) return;
     const reason = rejectReason(file);
-    if (reason) return setView({ name: "capture", error: reason });
+    if (reason)
+      return setView({
+        name: "capture",
+        error: reason === "notImage" ? t.rejectNotImage : t.rejectTooLarge,
+      });
     try {
       const jpeg = await toUploadJpeg(file);
       setPhoto(jpeg);
@@ -80,7 +104,7 @@ export default function Home() {
     } catch {
       setView({
         name: "capture",
-        error: "This phone couldn't open that photo. Take a new one.",
+        error: t.cantOpen,
       });
     }
   }
@@ -91,16 +115,28 @@ export default function Home() {
     view.name === "screened"
       ? view.data
       : null;
-  const phone = letterPhone(data);
+  // The chosen state's phone, else the letter's, else "the number on your letter" (US-084).
+  const phone = rules?.contact.phone || letterPhone(data);
+  const phoneText = phone || t.letterNumber;
   const retake = () => setView({ name: "capture" });
 
   return (
-    <>
+    <LocaleContext.Provider value={{ locale, setLocale }}>
       <main>
-        <h1 className="brand">
-          <BrandMark />
-          Coverage Keeper
-        </h1>
+        <div className="topbar">
+          <h1 className="brand">
+            <BrandMark />
+            Coverage Keeper
+          </h1>
+          <button
+            type="button"
+            className="lang"
+            lang={t.switchLang}
+            onClick={() => setLocale(t.switchLang)}
+          >
+            {t.switchTo}
+          </button>
+        </div>
         {view.name === "consent" && (
           <Consent onAccept={() => setView({ name: "capture" })} />
         )}
@@ -109,22 +145,22 @@ export default function Home() {
         )}
         {view.name === "reading" && (
           <p role="status" className="reading">
-            Reading your letter. This can take up to 30 seconds.
+            {t.reading}
           </p>
         )}
         {view.name === "offline" && (
           <Problem
-            title="No connection. Your photo wasn't sent."
-            text="Check your signal or Wi-Fi, then try again."
-            action="Try again"
+            title={t.offlineTitle}
+            text={t.offlineText}
+            action={t.tryAgain}
             onAction={() => (photo ? send(photo) : retake())}
           />
         )}
         {view.name === "error" && (
           <Problem
-            title="We couldn't finish reading your letter"
+            title={t.errorTitle}
             text={view.message}
-            action="Try again"
+            action={t.tryAgain}
             onAction={() => (photo ? send(photo) : retake())}
           />
         )}
@@ -135,18 +171,25 @@ export default function Home() {
           ) : (
             <Result
               data={view.data}
-              phone={phone}
+              phone={phoneText}
+              region={region}
+              rules={rules}
+              onRegion={setRegion}
               onScreen={() => setView({ name: "screening", data: view.data })}
               onRetake={retake}
             />
           ))}
         {view.name === "screening" && (
           <Screening
+            region={region}
+            rules={rules}
+            onRegion={setRegion}
             onDone={(yes) => setView({ name: "screened", data, yes })}
           />
         )}
-        {view.name === "screened" && (
+        {view.name === "screened" && rules && (
           <Screened
+            rules={rules}
             yes={view.yes}
             deadline={data?.deadline ?? null}
             onBack={() =>
@@ -156,9 +199,17 @@ export default function Home() {
         )}
       </main>
       <footer className="callbar">
-        <span>Questions? Call</span>
-        <a href={phoneHref(phone)}>{phone}</a>
+        {phone ? (
+          <>
+            <span>{t.questions}</span>
+            <a href={phoneHref(phone) ?? undefined}>{phone}</a>
+          </>
+        ) : (
+          <span>
+            {t.questions} {t.letterNumber}
+          </span>
+        )}
       </footer>
-    </>
+    </LocaleContext.Provider>
   );
 }
