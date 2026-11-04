@@ -45,3 +45,21 @@ it("keeps the health-condition question id the doctor note relies on", () => {
       expect(rules.exemptions!.map((e) => e.id)).toContain("health_condition");
   }
 });
+
+describe.each(STATE_CODES.filter((c) => stateRules(c).status === "published"))(
+  "%s Spanish wording (US-063)",
+  (code) => {
+    const rules = stateRules(code);
+
+    it("has a Spanish question for every exemption", () => {
+      for (const e of rules.exemptions!) {
+        expect(e.question_es, e.id).toMatch(/^¿.+\?$/);
+      }
+    });
+
+    it("has Spanish text for every way to meet the rule, and for who it applies to", () => {
+      for (const w of rules.ways_to_meet!) expect(w.text_es, w.id).toBeTruthy();
+      expect(rules.applies_to_es).toBeTruthy();
+    });
+  },
+);

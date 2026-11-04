@@ -2,15 +2,13 @@ export const MAX_PICK_BYTES = 15 * 1024 * 1024;
 export const MAX_UPLOAD_BYTES = 2 * 1024 * 1024;
 export const MAX_EDGE = 2000;
 
-// Plain-language reason a picked file can't be used, or null if it's fine (US-005).
+// Why a picked file can't be used, or null if it's fine (US-005). The UI words it.
 export function rejectReason(file: {
   type: string;
   size: number;
-}): string | null {
-  if (!file.type.startsWith("image/"))
-    return "That file isn't a photo. Please pick a photo of your letter.";
-  if (file.size > MAX_PICK_BYTES)
-    return "That photo is too large. Please take a new photo of your letter.";
+}): "notImage" | "tooLarge" | null {
+  if (!file.type.startsWith("image/")) return "notImage";
+  if (file.size > MAX_PICK_BYTES) return "tooLarge";
   return null;
 }
 

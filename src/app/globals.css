@@ -92,15 +92,37 @@ h3 {
   text-wrap: balance;
 }
 
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 2rem;
+  padding-bottom: 0.875rem;
+  border-bottom: 1px solid var(--rule);
+}
+
 .brand {
   display: flex;
   align-items: center;
   gap: 0.625rem;
+  margin: 0;
   font-size: 1.0625rem;
   color: var(--text);
-  margin: 0 0 2rem;
-  padding-bottom: 0.875rem;
-  border-bottom: 1px solid var(--rule);
+}
+
+/* Language switch: small, but still a 44px touch target. */
+.lang {
+  min-height: 44px;
+  padding: 0 1rem;
+  border: 1.5px solid var(--muted);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .brand-mark {

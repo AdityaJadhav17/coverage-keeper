@@ -34,15 +34,3 @@ export function deadlineStatus(
     days,
   };
 }
-
-// The one place status wording lives, so every screen says the same thing.
-export function deadlineBadge(
-  status: DeadlineStatus,
-  days: number | null,
-): string {
-  if (status === "upcoming")
-    return `${days} ${days === 1 ? "day" : "days"} left`;
-  if (status === "today") return "Due today";
-  if (status === "passed") return "Date has passed. Call now.";
-  return "Not sure of the date. Check the letter.";
-}

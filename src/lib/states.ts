@@ -18,6 +18,7 @@ export type StateRules = {
   retrieved: string;
   pending_note?: string;
   applies_to?: string;
+  applies_to_es?: string;
   ways_to_meet?: { id: string; text: string; text_es?: string }[];
   exemptions?: { id: string; question: string; question_es?: string }[];
 };

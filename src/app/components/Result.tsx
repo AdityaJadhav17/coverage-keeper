@@ -1,6 +1,7 @@
+import { useLocale } from "@/i18n/LocaleContext";
 import type { LetterExtraction } from "@/lib/schema";
 import { Deadline } from "./Deadline";
-import { NOT_SURE, NOTICE_LABELS, safe } from "./shared";
+import { safe } from "./shared";
 
 export function Result({
   data,
@@ -13,16 +14,14 @@ export function Result({
   onScreen: () => void;
   onRetake: () => void;
 }) {
+  const { t, locale } = useLocale();
   if (data.notice_type === "not_medicaid") {
     return (
       <section aria-labelledby="result-title">
-        <h2 id="result-title">This doesn&apos;t look like a Medicaid letter</h2>
-        <p className="lead">
-          If it came from your state&apos;s Medicaid program, call {phone} and
-          they can tell you what it means.
-        </p>
+        <h2 id="result-title">{t.notMedicaidTitle}</h2>
+        <p className="lead">{t.notMedicaidText(phone)}</p>
         <button type="button" className="primary" onClick={onRetake}>
-          Scan another letter
+          {t.scanAnother}
         </button>
       </section>
     );
@@ -30,29 +29,31 @@ export function Result({
   const isWork = data.notice_type.startsWith("work_requirement");
   return (
     <section aria-labelledby="result-title" className="result">
-      <p className="kind">{NOTICE_LABELS[data.notice_type]}</p>
-      <h2 id="result-title">Here&apos;s what your letter says</h2>
-      <p className="lead">{safe(data.summary)}</p>
+      <p className="kind">{t.noticeLabels[data.notice_type]}</p>
+      <h2 id="result-title">{t.resultTitle}</h2>
+      <p className="lead">{safe(data.summary, locale)}</p>
 
       <Deadline data={data} phone={phone} />
 
-      <h3>What the letter asks you to do</h3>
-      <p>{data.required_action ? safe(data.required_action) : NOT_SURE}</p>
+      <h3>{t.askTitle}</h3>
+      <p>
+        {data.required_action ? safe(data.required_action, locale) : t.notSure}
+      </p>
 
-      <h3>Papers to send</h3>
+      <h3>{t.papersTitle}</h3>
       {data.documents.length > 0 ? (
         <ul className="checklist">
           {data.documents.map((doc, i) => (
             <li key={i}>
               <label>
                 <input type="checkbox" />
-                <span>{safe(doc)}</span>
+                <span>{safe(doc, locale)}</span>
               </label>
             </li>
           ))}
         </ul>
       ) : (
-        <p>{NOT_SURE}</p>
+        <p>{t.notSure}</p>
       )}
 
       <div className="actions">
@@ -61,10 +62,10 @@ export function Result({
           className={isWork ? "primary" : "secondary"}
           onClick={onScreen}
         >
-          Check exemptions
+          {t.checkExemptions}
         </button>
         <button type="button" className="secondary" onClick={onRetake}>
-          Scan another letter
+          {t.scanAnother}
         </button>
       </div>
     </section>
