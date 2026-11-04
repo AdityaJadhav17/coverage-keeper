@@ -51,6 +51,8 @@ export default function Home() {
   const [region, setRegion] = useState<Region | null>(null);
   const rules = region && region !== "other" ? stateRules(region) : null;
   const [photo, setPhoto] = useState<Blob | null>(null);
+  // The language the current result was written in.
+  const [readIn, setReadIn] = useState<Locale>("en");
   const busy = useRef(false);
 
   async function send(jpeg: Blob) {
@@ -65,6 +67,7 @@ export default function Home() {
     try {
       const body = new FormData();
       body.append("image", jpeg, "letter.jpg");
+      body.append("lang", locale);
       const res = await fetch("/api/read", { method: "POST", body });
       if (!res.ok) {
         setView({
@@ -77,7 +80,10 @@ export default function Home() {
         await res.json().catch(() => null),
       );
       // Malformed reader output is treated as unsure (US-013).
-      if (parsed.success) setRegion(parsed.data.state);
+      if (parsed.success) {
+        setRegion(parsed.data.state);
+        setReadIn(locale);
+      }
       setView(
         parsed.success
           ? { name: "result", data: parsed.data }
@@ -177,6 +183,9 @@ export default function Home() {
               region={region}
               rules={rules}
               onRegion={setRegion}
+              onReread={
+                photo && readIn !== locale ? () => send(photo) : undefined
+              }
               onScreen={() => setView({ name: "screening", data: view.data })}
               onRetake={retake}
             />

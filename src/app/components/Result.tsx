@@ -11,6 +11,7 @@ export function Result({
   region,
   rules,
   onRegion,
+  onReread,
   onScreen,
   onRetake,
 }: {
@@ -19,6 +20,8 @@ export function Result({
   region: Region | null;
   rules: StateRules | null;
   onRegion: (region: Region) => void;
+  // Set when the result is in the other language than the screen (US-061).
+  onReread?: () => void;
   onScreen: () => void;
   onRetake: () => void;
 }) {
@@ -38,6 +41,11 @@ export function Result({
   return (
     <section aria-labelledby="result-title" className="result">
       <p className="kind">{t.noticeLabels[data.notice_type]}</p>
+      {onReread && (
+        <button type="button" className="secondary" onClick={onReread}>
+          {t.readAgain}
+        </button>
+      )}
       <h2 id="result-title">{t.resultTitle}</h2>
       <p className="lead">{safe(data.summary, locale)}</p>
       <StatePicker value={region} onChange={onRegion} />

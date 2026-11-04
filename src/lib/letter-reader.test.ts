@@ -60,6 +60,19 @@ describe("readLetter", () => {
     expect(create).toHaveBeenCalledTimes(2);
   });
 
+  it.each([
+    [undefined, false],
+    [{ lang: "en" } as const, false],
+    [{ lang: "es" } as const, true],
+  ])("with options %j sends the Spanish line: %s", async (opts, spanish) => {
+    let system = "";
+    await createLetterReader(async (params) => {
+      system = params.system as string;
+      return reply(JSON.stringify(fixture));
+    })(IMAGE, opts);
+    expect(system.includes("in Spanish")).toBe(spanish);
+  });
+
   it("gives up after one retry", async () => {
     const create = vi.fn().mockRejectedValue(apiError(503));
     await expect(createLetterReader(create, 0)(IMAGE)).rejects.toThrow();

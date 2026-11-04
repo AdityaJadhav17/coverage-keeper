@@ -1,18 +1,22 @@
 import { expect, it } from "vitest";
 import { findForbiddenClaims } from "@/lib/guardrails";
-import { LETTER_READER_SYSTEM_PROMPT, PROMPT_VERSION } from "./letter-reader";
+import { letterReaderSystemPrompt, PROMPT_VERSION } from "./letter-reader";
 
-it("matches the golden prompt (bump PROMPT_VERSION when this snapshot changes)", () => {
-  expect({ PROMPT_VERSION, LETTER_READER_SYSTEM_PROMPT }).toMatchSnapshot();
+const en = letterReaderSystemPrompt("en");
+const es = letterReaderSystemPrompt("es");
+
+it("matches the golden prompts (bump PROMPT_VERSION when this snapshot changes)", () => {
+  expect({ PROMPT_VERSION, en, es }).toMatchSnapshot();
 });
 
 it("contains no eligibility claims itself", () => {
-  expect(findForbiddenClaims(LETTER_READER_SYSTEM_PROMPT)).toEqual([]);
+  expect(findForbiddenClaims(en)).toEqual([]);
+  expect(findForbiddenClaims(es)).toEqual([]);
 });
 
 it("asks for the sending state and isn't written for Oregon only", () => {
-  expect(PROMPT_VERSION).toBe("3");
-  expect(LETTER_READER_SYSTEM_PROMPT).toContain("state:");
+  expect(PROMPT_VERSION).toBe("4");
+  expect(en).toContain("state:");
   for (const program of [
     "Apple Health",
     "OHP",
@@ -20,7 +24,18 @@ it("asks for the sending state and isn't written for Oregon only", () => {
     "Nevada Medicaid",
     "AHCCCS",
   ])
-    expect(LETTER_READER_SYSTEM_PROMPT).toContain(program);
-  const [firstLine] = LETTER_READER_SYSTEM_PROMPT.split(/\r?\n/);
+    expect(en).toContain(program);
+  const [firstLine] = en.split(/\r?\n/);
   expect(firstLine).not.toContain("Oregon");
+});
+
+it("Spanish adds one line and changes nothing else (US-061)", () => {
+  expect(letterReaderSystemPrompt()).toBe(en);
+  expect(es.startsWith(en)).toBe(true);
+  const added = es.slice(en.length);
+  expect(added.trim().split("\n")).toHaveLength(1);
+  expect(added).toContain(
+    "Write summary, required_action and documents in Spanish",
+  );
+  expect(added).toContain("Keep deadline_quote exactly as printed");
 });
