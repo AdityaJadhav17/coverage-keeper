@@ -55,7 +55,8 @@ export default function Home() {
   const [readIn, setReadIn] = useState<Locale>("en");
   const busy = useRef(false);
 
-  async function send(jpeg: Blob) {
+  // reread: the same photo again in the other language; keeps the state the user chose.
+  async function send(jpeg: Blob, reread = false) {
     if (busy.current) return;
     busy.current = true;
     if (!navigator.onLine) {
@@ -81,7 +82,7 @@ export default function Home() {
       );
       // Malformed reader output is treated as unsure (US-013).
       if (parsed.success) {
-        setRegion(parsed.data.state);
+        if (!reread) setRegion(parsed.data.state);
         setReadIn(locale);
       }
       setView(
@@ -184,7 +185,7 @@ export default function Home() {
               rules={rules}
               onRegion={setRegion}
               onReread={
-                photo && readIn !== locale ? () => send(photo) : undefined
+                photo && readIn !== locale ? () => send(photo, true) : undefined
               }
               onScreen={() => setView({ name: "screening", data: view.data })}
               onRetake={retake}

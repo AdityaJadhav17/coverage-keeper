@@ -41,13 +41,13 @@ export function Result({
   return (
     <section aria-labelledby="result-title" className="result">
       <p className="kind">{t.noticeLabels[data.notice_type]}</p>
+      <h2 id="result-title">{t.resultTitle}</h2>
+      <p className="lead">{safe(data.summary, locale)}</p>
       {onReread && (
-        <button type="button" className="secondary" onClick={onReread}>
+        <button type="button" className="secondary reread" onClick={onReread}>
           {t.readAgain}
         </button>
       )}
-      <h2 id="result-title">{t.resultTitle}</h2>
-      <p className="lead">{safe(data.summary, locale)}</p>
       <StatePicker value={region} onChange={onRegion} />
 
       <Deadline data={data} phone={phone} rules={rules} />

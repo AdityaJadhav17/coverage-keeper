@@ -34,9 +34,14 @@ const MEDIA_TYPES: Record<string, LetterImage["mediaType"]> = {
 
 const splitArg = process.argv.indexOf("--split");
 const split = splitArg > -1 ? process.argv[splitArg + 1] : undefined;
-const lang = process.argv.includes("--lang")
-  ? (process.argv[process.argv.indexOf("--lang") + 1] as "en" | "es")
+const langArg = process.argv.includes("--lang")
+  ? process.argv[process.argv.indexOf("--lang") + 1]
   : "en";
+if (langArg !== "en" && langArg !== "es") {
+  console.error(`--lang must be "en" or "es", got "${langArg}"`);
+  process.exit(1);
+}
+const lang: "en" | "es" = langArg;
 // Labels are English, so Spanish runs can't score the free-text fields.
 const textScored = lang === "en";
 

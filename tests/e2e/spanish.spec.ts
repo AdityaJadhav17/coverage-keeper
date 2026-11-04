@@ -89,11 +89,16 @@ test("a Spanish phone asks for the letter in Spanish (US-061)", async ({
 
   // Switching language offers one tap to read the same photo again.
   await page.getByRole("button", { name: "English" }).click();
+  // A state the user picked survives the re-read.
+  await page.getByLabel("State that sent this letter").selectOption("WA");
   await page.getByRole("button", { name: "Read again in English" }).click();
   await expect(
     page.getByRole("heading", { name: "Here's what your letter says" }),
   ).toBeVisible();
   expect(langs).toEqual(["es", "en"]);
+  await expect(page.getByLabel("State that sent this letter")).toHaveValue(
+    "WA",
+  );
   await expect(
     page.getByRole("button", { name: "Read again in English" }),
   ).toHaveCount(0);
