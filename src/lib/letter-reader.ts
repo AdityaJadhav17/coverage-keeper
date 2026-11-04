@@ -29,6 +29,7 @@ export const UNSURE_RESULT: LetterExtraction = {
   required_action: null,
   documents: [],
   contact_phone: "800-699-9075",
+  state: null,
   confidence: "low",
 };
 
