@@ -50,15 +50,21 @@ export async function POST(req: Request) {
     return error(413, "That photo is too large. Please use one under 4 MB.");
   }
 
+  // Anything but "es" reads in English.
+  const lang = form.get("lang") === "es" ? "es" : "en";
+
   try {
-    const result = await readLetter({
-      mediaType: image.type as LetterImage["mediaType"],
-      base64: Buffer.from(await image.arrayBuffer()).toString("base64"),
-    });
+    const result = await readLetter(
+      {
+        mediaType: image.type as LetterImage["mediaType"],
+        base64: Buffer.from(await image.arrayBuffer()).toString("base64"),
+      },
+      { lang },
+    );
     // Every user-facing string, including text copied from the letter (ADR-0005).
     let blocked = false;
     const guard = (text: string) => {
-      const out = enforceGuardrail(text);
+      const out = enforceGuardrail(text, lang);
       blocked ||= out.blocked;
       return out.text;
     };
@@ -69,7 +75,7 @@ export async function POST(req: Request) {
       deadline_quote: result.deadline_quote && guard(result.deadline_quote),
       documents: result.documents.map(guard),
     };
-    log({ status: 200, ms: Date.now() - started, blocked });
+    log({ status: 200, ms: Date.now() - started, blocked, lang });
     return Response.json(safe);
   } catch (err) {
     log({

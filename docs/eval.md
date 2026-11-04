@@ -36,9 +36,13 @@ CI rejects any file in `eval/` that is not listed in `labels.json` with a `.gov`
 ## Running it
 
 ```bash
-npm run eval                 # all splits, real model, needs ANTHROPIC_API_KEY
-npm run eval -- --split test # stage number
+npm run eval                            # all splits, real model, reads ANTHROPIC_API_KEY from .env.local
+npm run eval -- --split test            # stage number
+npm run eval -- --split test --lang es  # Spanish output
 ```
+
+- `--lang es` asks for Spanish output. Labels are English, so a Spanish run scores deadline, state, notice type and guardrail only; required action and documents are reported as not scored.
+- One run can swing by ±2 on required action. Report the mean and range of 3 runs.
 
 - Model and prompt are pinned: the script records `MODEL_ID` from `src/lib/letter-reader.ts` and `PROMPT_VERSION` from `src/prompts/letter-reader.ts` in every result.
 - Output: `eval/results/<timestamp>.json` and `eval/results/latest.md` (score table + per-letter pass/fail). `eval/results/` is git-ignored; CI uploads it as an artifact.

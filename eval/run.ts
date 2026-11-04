@@ -34,6 +34,16 @@ const MEDIA_TYPES: Record<string, LetterImage["mediaType"]> = {
 
 const splitArg = process.argv.indexOf("--split");
 const split = splitArg > -1 ? process.argv[splitArg + 1] : undefined;
+const langArg = process.argv.includes("--lang")
+  ? process.argv[process.argv.indexOf("--lang") + 1]
+  : "en";
+if (langArg !== "en" && langArg !== "es") {
+  console.error(`--lang must be "en" or "es", got "${langArg}"`);
+  process.exit(1);
+}
+const lang: "en" | "es" = langArg;
+// Labels are English, so Spanish runs can't score the free-text fields.
+const textScored = lang === "en";
 
 const labels: Label[] = JSON.parse(await readFile("eval/labels.json", "utf8"));
 const selected = labels.filter((l) => !split || l.split === split);
@@ -56,7 +66,7 @@ for (const label of selected) {
     await readFile(path.join("eval/letters", label.file))
   ).toString("base64");
   try {
-    const out = await readLetter({ mediaType, base64 });
+    const out = await readLetter({ mediaType, base64 }, { lang });
     const docs = documentScores(label.documents, out.documents);
     rows.push({
       id: label.id,
@@ -100,6 +110,7 @@ const summary = {
   model: MODEL_ID,
   prompt_version: PROMPT_VERSION,
   split: split ?? "all",
+  lang,
   letters: rows.length,
   errors: rows.length - ok.length,
   deadline_correct: count("deadline"),
@@ -114,7 +125,7 @@ const summary = {
 };
 
 const md = [
-  `# Eval results (${summary.split})`,
+  `# Eval results (${summary.split}, ${lang})`,
   "",
   `Model \`${summary.model}\`, prompt v${summary.prompt_version}, run ${summary.run_at}`,
   "",
@@ -124,9 +135,13 @@ const md = [
   `| No deadline correctly reported as none | ${dl.none.correct} of ${dl.none.total} |`,
   `| State identified | ${summary.state_correct} of ${rows.length} |`,
   `| Notice type correct | ${summary.notice_type_correct} of ${rows.length} |`,
-  `| Required action correct | ${summary.required_action_correct} of ${rows.length} |`,
-  `| Document recall (mean) | ${summary.doc_recall_mean.toFixed(2)} |`,
-  `| Document precision (mean) | ${summary.doc_precision_mean.toFixed(2)} |`,
+  ...(textScored
+    ? [
+        `| Required action correct | ${summary.required_action_correct} of ${rows.length} |`,
+        `| Document recall (mean) | ${summary.doc_recall_mean.toFixed(2)} |`,
+        `| Document precision (mean) | ${summary.doc_precision_mean.toFixed(2)} |`,
+      ]
+    : ["| Required action, documents | not scored (English labels) |"]),
   `| Guardrail hits | ${summary.guardrail_hits} |`,
   `| Errors | ${summary.errors} |`,
   "",

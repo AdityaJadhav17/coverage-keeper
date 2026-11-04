@@ -6,7 +6,7 @@ import type {
   Message,
   MessageCreateParamsNonStreaming,
 } from "@anthropic-ai/sdk/resources/messages";
-import { LETTER_READER_SYSTEM_PROMPT } from "@/prompts/letter-reader";
+import { letterReaderSystemPrompt } from "@/prompts/letter-reader";
 import { LetterExtraction } from "./schema";
 
 // Pinned so eval runs are comparable (ADR-0003). Change only with a new eval run.
@@ -17,7 +17,12 @@ export type LetterImage = {
   base64: string;
 };
 
-export type LetterReader = (image: LetterImage) => Promise<LetterExtraction>;
+export type ReadOptions = { lang: "en" | "es" };
+
+export type LetterReader = (
+  image: LetterImage,
+  opts?: ReadOptions,
+) => Promise<LetterExtraction>;
 
 // Shown when the model output can't be trusted (US-013): never presented as fact.
 export const UNSURE_RESULT: LetterExtraction = {
@@ -49,12 +54,12 @@ export function createLetterReader(
   create: CreateFn,
   retryDelayMs = 1000,
 ): LetterReader {
-  return async (image) => {
+  return async (image, opts = { lang: "en" }) => {
     const params: MessageCreateParamsNonStreaming = {
       model: MODEL_ID,
       // Thinking tokens count toward this on claude-opus-5-5; too low truncates the JSON.
       max_tokens: 16000,
-      system: LETTER_READER_SYSTEM_PROMPT,
+      system: letterReaderSystemPrompt(opts.lang),
       output_config: {
         effort: "medium",
         format: zodOutputFormat(LetterExtraction),
@@ -100,7 +105,7 @@ export function createLetterReader(
 
 let live: LetterReader | undefined;
 
-export const readLetter: LetterReader = async (image) => {
+export const readLetter: LetterReader = async (image, opts) => {
   if (process.env.LETTER_READER === "fixture") {
     return LetterExtraction.parse(
       JSON.parse(readFileSync(FIXTURE_PATH, "utf8")),
@@ -112,5 +117,5 @@ export const readLetter: LetterReader = async (image) => {
     const client = new Anthropic({ maxRetries: 0, timeout: 30_000 });
     live = createLetterReader((params) => client.messages.create(params));
   }
-  return live(image);
+  return live(image, opts);
 };
