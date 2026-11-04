@@ -10,72 +10,89 @@
     "phone": "800-541-5555"
   },
   "applies_to": "Adults ages 19 to 64 who get Medi-Cal because of their income, starting January 1, 2027. Medi-Cal will send you a letter if this applies to you, and your county Medi-Cal office will tell you if you need to follow the work rules.",
+  "applies_to_es": "Adultos de 19 a 64 años que reciben Medi-Cal por sus ingresos, a partir del 1 de enero de 2027. Medi-Cal le enviará una carta si esto le aplica, y la oficina de Medi-Cal de su condado le dirá si tiene que cumplir las reglas de trabajo.",
   "ways_to_meet": [
     {
       "id": "income",
-      "text": "Work at a job and earn at least $580 a month."
+      "text": "Work at a job and earn at least $580 a month.",
+      "text_es": "Trabajar y ganar al menos $580 al mes."
     },
     {
       "id": "seasonal",
-      "text": "Be a seasonal worker and earn an average of $580 a month over the last six months."
+      "text": "Be a seasonal worker and earn an average of $580 a month over the last six months.",
+      "text_es": "Ser trabajador de temporada y ganar un promedio de $580 al mes en los últimos seis meses."
     },
     {
       "id": "training",
-      "text": "Be in a job training program for at least 80 hours a month."
+      "text": "Be in a job training program for at least 80 hours a month.",
+      "text_es": "Estar en un programa de capacitación laboral al menos 80 horas al mes."
     },
     {
       "id": "volunteer",
-      "text": "Volunteer or do community service for at least 80 hours a month."
+      "text": "Volunteer or do community service for at least 80 hours a month.",
+      "text_es": "Hacer voluntariado o servicio comunitario al menos 80 horas al mes."
     },
     {
       "id": "school",
-      "text": "Go to school at least half-time (usually two or three classes, or about six to eight credits each semester)."
+      "text": "Go to school at least half-time (usually two or three classes, or about six to eight credits each semester).",
+      "text_es": "Estudiar al menos medio tiempo (por lo general dos o tres clases, o unos seis a ocho créditos por semestre)."
     },
     {
       "id": "combination",
-      "text": "Do a mix of these so the total is at least 80 hours a month or at least $580 a month."
+      "text": "Do a mix of these so the total is at least 80 hours a month or at least $580 a month.",
+      "text_es": "Combinar estas actividades para sumar al menos 80 horas al mes o al menos $580 al mes."
     }
   ],
   "exemptions": [
     {
       "id": "under_19",
-      "question": "Are you 18 or younger?"
+      "question": "Are you 18 or younger?",
+      "question_es": "¿Tiene 18 años o menos?"
     },
     {
       "id": "age_65",
-      "question": "Are you 65 or older?"
+      "question": "Are you 65 or older?",
+      "question_es": "¿Tiene 65 años o más?"
     },
     {
       "id": "pregnant",
-      "question": "Are you pregnant, or were you pregnant in the last year?"
+      "question": "Are you pregnant, or were you pregnant in the last year?",
+      "question_es": "¿Está embarazada, o estuvo embarazada en el último año?"
     },
     {
       "id": "child_under_14",
-      "question": "Are you a parent or caregiver of a child age 13 or younger?"
+      "question": "Are you a parent or caregiver of a child age 13 or younger?",
+      "question_es": "¿Es usted padre, madre o cuidador de un niño de 13 años o menos?"
     },
     {
       "id": "disability",
-      "question": "Do you have a disability?"
+      "question": "Do you have a disability?",
+      "question_es": "¿Tiene una discapacidad?"
     },
     {
       "id": "health_condition",
-      "question": "Do you have a serious physical or mental health condition, or a substance use problem?"
+      "question": "Do you have a serious physical or mental health condition, or a substance use problem?",
+      "question_es": "¿Tiene una condición de salud física o mental grave, o un problema de consumo de sustancias?"
     },
     {
       "id": "recent_release",
-      "question": "Were you released from jail or prison in the last 90 days?"
+      "question": "Were you released from jail or prison in the last 90 days?",
+      "question_es": "¿Salió de la cárcel o de prisión en los últimos 90 días?"
     },
     {
       "id": "medicare",
-      "question": "Are you on Medicare Part A or Part B?"
+      "question": "Are you on Medicare Part A or Part B?",
+      "question_es": "¿Tiene Medicare Parte A o Parte B?"
     },
     {
       "id": "aian",
-      "question": "Are you American Indian or Alaska Native?"
+      "question": "Are you American Indian or Alaska Native?",
+      "question_es": "¿Es usted indígena americano o nativo de Alaska?"
     },
     {
       "id": "former_foster",
-      "question": "Are you under 26, and were you in foster care on your 18th birthday?"
+      "question": "Are you under 26, and were you in foster care on your 18th birthday?",
+      "question_es": "¿Tiene menos de 26 años y estaba en cuidado de crianza el día que cumplió 18?"
     }
   ]
 }
