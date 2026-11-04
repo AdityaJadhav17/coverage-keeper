@@ -1,5 +1,5 @@
-import rules from "../../data/rules/or.json";
 import { deadlineStatus } from "./deadline";
+import type { StateRules } from "./states";
 
 export const CONDITION_PLACEHOLDER =
   "[describe your condition in your own words]";
@@ -17,9 +17,11 @@ const date = (d: Date, timeZone: string) =>
 export function buildDoctorDraft({
   deadline,
   today,
+  rules,
 }: {
   deadline: string | null;
   today: Date;
+  rules: Pick<StateRules, "program" | "source_url">;
 }): string {
   const { status } = deadlineStatus(deadline, today);
   const by =
@@ -33,14 +35,14 @@ export function buildDoctorDraft({
     "",
     "Hello Dr. [doctor's name],",
     "",
-    "The Oregon Health Plan (OHP) has new work and activity rules. Some adults need to show 80 hours a month of work or other activities.",
+    `${rules.program} has new work and activity rules. Some adults need to show 80 hours a month of work or other activities.`,
     "",
     "Could you write a statement about whether I have a health condition that limits my ability to work or do activities for 80 hours a month?",
     "",
     `About my health: ${CONDITION_PLACEHOLDER}`,
     ...(by ? ["", by] : []),
     "",
-    `OHP rules: ${rules.source_url}`,
+    `Rules: ${rules.source_url}`,
     "",
     "Thank you,",
     "[your name]",

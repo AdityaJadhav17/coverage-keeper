@@ -1,0 +1,128 @@
+{
+  "state": "WA",
+  "status": "published",
+  "program": "Apple Health (Medicaid)",
+  "agency": "Washington State Health Care Authority",
+  "source_url": "https://www.hca.wa.gov/free-or-low-cost-health-care/i-need-medical-dental-or-vision-care/apple-health-medicaid-work-requirements",
+  "retrieved": "2026-11-04",
+  "contact": {
+    "name": "Apple Health customer service",
+    "phone": "800-562-3022"
+  },
+  "applies_to": "People on Apple Health for Adults, starting January 1, 2027, when they apply or renew.",
+  "applies_to_es": "Personas con Apple Health for Adults, a partir del 1 de enero de 2027, cuando solicitan o renuevan.",
+  "ways_to_meet": [
+    {
+      "id": "income",
+      "text": "At least $580 monthly household income.",
+      "text_es": "Ingresos del hogar de al menos $580 al mes."
+    },
+    {
+      "id": "work",
+      "text": "Working at least 80 hours a month.",
+      "text_es": "Trabajar al menos 80 horas al mes."
+    },
+    {
+      "id": "school",
+      "text": "Enrolled in an education program at least half-time.",
+      "text_es": "Estar inscrito en un programa de estudios al menos medio tiempo."
+    },
+    {
+      "id": "work_program",
+      "text": "A work program for at least 80 hours a month.",
+      "text_es": "Participar en un programa de trabajo al menos 80 horas al mes."
+    },
+    {
+      "id": "community_service",
+      "text": "Community service for at least 80 hours a month.",
+      "text_es": "Hacer servicio comunitario al menos 80 horas al mes."
+    },
+    {
+      "id": "combination",
+      "text": "Work, school, a work program and volunteering that add up to at least 80 hours a month.",
+      "text_es": "Trabajo, estudios, un programa de trabajo y voluntariado que sumen al menos 80 horas al mes."
+    }
+  ],
+  "exemptions": [
+    {
+      "id": "under_19",
+      "question": "Are you under 19?",
+      "question_es": "¿Tiene menos de 19 años?"
+    },
+    {
+      "id": "medicare",
+      "question": "Are you enrolled in Medicare Part A or B?",
+      "question_es": "¿Está inscrito en Medicare Parte A o B?"
+    },
+    {
+      "id": "other_program",
+      "question": "Do you get Apple Health through a program other than Apple Health for Adults?",
+      "question_es": "¿Recibe Apple Health por un programa que no es Apple Health for Adults?"
+    },
+    {
+      "id": "medical_travel",
+      "question": "Did you travel outside your community for care for a serious or complex condition, for you or your dependent?",
+      "question_es": "¿Viajó fuera de su comunidad para recibir atención por una condición grave o compleja, para usted o un dependiente?"
+    },
+    {
+      "id": "inpatient",
+      "question": "Did you spend part or all of a month in a hospital, nursing home or similar inpatient care?",
+      "question_es": "¿Pasó parte o todo un mes en un hospital, un hogar de ancianos o una atención similar con internación?"
+    },
+    {
+      "id": "disaster_area",
+      "question": "Do you live in an area where the President has declared a disaster?",
+      "question_es": "¿Vive en una zona donde el Presidente declaró un desastre?"
+    },
+    {
+      "id": "high_unemployment",
+      "question": "Do you live in a county where unemployment is 1.5 times the national rate?",
+      "question_es": "¿Vive en un condado donde el desempleo es 1.5 veces la tasa nacional?"
+    },
+    {
+      "id": "foster_alumni",
+      "question": "Do you get Apple Health as a foster care alumni (ages 18-26)?",
+      "question_es": "¿Recibe Apple Health como exjoven de cuidado de crianza (de 18 a 26 años)?"
+    },
+    {
+      "id": "aian",
+      "question": "Are you American Indian or Alaska Native?",
+      "question_es": "¿Es usted indígena americano o nativo de Alaska?"
+    },
+    {
+      "id": "pregnant",
+      "question": "Are you pregnant or postpartum?",
+      "question_es": "¿Está embarazada o en el periodo posparto?"
+    },
+    {
+      "id": "caregiver",
+      "question": "Are you a parent, guardian, caretaker relative or family caregiver of a child under 14 or a person with a disability?",
+      "question_es": "¿Es usted padre o madre, tutor, familiar a cargo o cuidador familiar de un niño menor de 14 años o de una persona con discapacidad?"
+    },
+    {
+      "id": "veteran_total",
+      "question": "Are you a veteran with a total disability rating?",
+      "question_es": "¿Es usted veterano con una calificación de discapacidad total?"
+    },
+    {
+      "id": "health_condition",
+      "question": "Do you have a serious health condition that makes it hard to work (medically frail)?",
+      "question_es": "¿Tiene una condición de salud grave que le dificulta trabajar (médicamente frágil)?"
+    },
+    {
+      "id": "snap_tanf",
+      "question": "Do you get TANF or SNAP?",
+      "question_es": "¿Recibe TANF o SNAP?"
+    },
+    {
+      "id": "treatment",
+      "question": "Are you in a drug or alcohol treatment program?",
+      "question_es": "¿Está en un programa de tratamiento por consumo de drogas o alcohol?"
+    },
+    {
+      "id": "recent_release",
+      "question": "Are you in jail or prison, or were you released in the last 3 months?",
+      "question_es": "¿Está en la cárcel o en prisión, o salió en los últimos 3 meses?"
+    }
+  ]
+}

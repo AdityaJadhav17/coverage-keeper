@@ -35,6 +35,7 @@ test("health condition yes drafts an editable, copyable doctor note", async ({
   await page.getByRole("button", { name: "Start with my letter" }).click();
   await page.getByLabel("Scan my letter").setInputFiles(PNG);
   await page.getByRole("button", { name: "Check exemptions" }).click();
+  await page.getByLabel("State that sent this letter").selectOption("OR");
   await page
     .getByRole("group", {
       name: "Do you have a serious or disabling health condition?",
@@ -79,6 +80,7 @@ test("no health condition yes hides the doctor note", async ({ page }) => {
   await page.getByRole("button", { name: "Start with my letter" }).click();
   await page.getByLabel("Scan my letter").setInputFiles(PNG);
   await page.getByRole("button", { name: "Check exemptions" }).click();
+  await page.getByLabel("State that sent this letter").selectOption("OR");
   await page
     .getByRole("group", { name: "Do you have Medicare?" })
     .getByLabel("Yes")
@@ -101,6 +103,7 @@ test("copy failure tells the user to copy by hand", async ({ page }) => {
   await page.getByRole("button", { name: "Start with my letter" }).click();
   await page.getByLabel("Scan my letter").setInputFiles(PNG);
   await page.getByRole("button", { name: "Check exemptions" }).click();
+  await page.getByLabel("State that sent this letter").selectOption("OR");
   await page
     .getByRole("group", {
       name: "Do you have a serious or disabling health condition?",

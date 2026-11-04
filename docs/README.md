@@ -11,6 +11,7 @@ Product, safety, testing and decision documents for Coverage Keeper.
 | [safety-and-privacy.md](safety-and-privacy.md) | No eligibility claims, photo handling, logs  |
 | [testing.md](testing.md)                       | Test layers, commands and conventions        |
 | [ci.md](ci.md)                                 | Continuous integration checks                |
+| [launch-readiness.md](launch-readiness.md)     | Checklist for the public NGO launch          |
 | [adr/README.md](adr/README.md)                 | Index of architecture decision records       |
 
 ## Images

@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     log({ status: 429 });
     return error(
       429,
-      "Too many tries. Please wait a minute, or call OHP at 800-699-9075.",
+      "Too many tries. Please wait a minute, or call the number on your letter.",
     );
   }
   // Reject before buffering the body (audit L1). Browsers always send Content-Length.
@@ -79,7 +79,7 @@ export async function POST(req: Request) {
     });
     return error(
       502,
-      "We couldn't read your letter right now. Please try again, or call OHP at 800-699-9075.",
+      "We couldn't read your letter right now. Please try again, or call the number on your letter.",
     );
   }
 }
