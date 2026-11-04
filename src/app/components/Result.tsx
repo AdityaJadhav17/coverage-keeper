@@ -29,7 +29,7 @@ export function Result({
   }
   const isWork = data.notice_type.startsWith("work_requirement");
   return (
-    <section aria-labelledby="result-title">
+    <section aria-labelledby="result-title" className="result">
       <p className="kind">{NOTICE_LABELS[data.notice_type]}</p>
       <h2 id="result-title">Here&apos;s what your letter says</h2>
       <p className="lead">{safe(data.summary)}</p>

@@ -642,3 +642,51 @@ mark {
   font-size: 1.0625rem;
   color: var(--muted);
 }
+
+/* Tablet and laptop (#15). Phones (< 600px) keep the single column above. */
+@media (min-width: 600px) {
+  main {
+    max-width: 45rem;
+  }
+
+  .screening {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 1rem;
+    align-items: start;
+  }
+
+  .screening > :not(.question) {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Laptop: the due date moves to a right column that stays in view while scrolling. */
+@media (min-width: 1024px) {
+  main:has(.result) {
+    max-width: 70rem;
+  }
+
+  .result {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 22.5rem;
+    column-gap: 2.5rem;
+    align-items: start;
+  }
+
+  .result > * {
+    grid-column: 1;
+  }
+
+  .result > .kind {
+    justify-self: start;
+  }
+
+  .result > .deadline {
+    grid-column: 2;
+    grid-row: 1 / span 20;
+    position: sticky;
+    top: 1.5rem;
+    margin-top: 0;
+  }
+}

@@ -16,6 +16,15 @@ export default defineConfig({
     { name: "android", use: { ...devices["Pixel 7"] } },
     // Demo phones are iPhones, so Safari (WebKit) must pass too.
     { name: "iphone", use: { ...devices["iPhone 15"] } },
+    // Clinic laptops and the library desktop (#15, personas P6 and P9).
+    {
+      name: "laptop",
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1280, height: 800 },
+      },
+    },
+    { name: "tablet", use: { ...devices["iPad Mini"] } },
   ],
   webServer: {
     // Runs against the production build, so `npm run build` must run first.

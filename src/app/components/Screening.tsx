@@ -7,6 +7,7 @@ export function Screening({ onDone }: { onDone: (yes: string[]) => void }) {
   return (
     <form
       aria-labelledby="screening-title"
+      className="screening"
       onSubmit={(e) => {
         e.preventDefault();
         onDone(mayApply(answers, rules).map((r) => r.id));
