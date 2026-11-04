@@ -1,6 +1,7 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import { daysUntil, deadlineStatus } from "./deadline";
+import { findForbiddenClaims } from "./guardrails";
+import { daysUntil, deadlineBadge, deadlineStatus } from "./deadline";
 
 describe("daysUntil", () => {
   it("counts days left from an injected clock", () => {
@@ -80,4 +81,23 @@ describe("deadlineStatus", () => {
       });
     },
   );
+});
+
+describe("deadlineBadge", () => {
+  it.each([
+    ["upcoming", 5, "5 days left"],
+    ["upcoming", 1, "1 day left"],
+    ["today", 0, "Due today"],
+    ["passed", -3, "Date has passed. Call now."],
+    ["unknown", null, "Not sure of the date. Check the letter."],
+  ] as const)("%s with %s days reads %j", (status, days, text) => {
+    expect(deadlineBadge(status, days)).toBe(text);
+  });
+
+  it("never makes an eligibility claim", () => {
+    const all = (["upcoming", "today", "passed", "unknown"] as const).map((s) =>
+      deadlineBadge(s, 2),
+    );
+    expect(findForbiddenClaims(all.join(" "))).toEqual([]);
+  });
 });

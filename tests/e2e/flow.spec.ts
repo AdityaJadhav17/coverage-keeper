@@ -77,7 +77,7 @@ test("passed deadline tells the user to call now", async ({ page }) => {
   await start(page);
   await scan(page);
   await expect(page.getByTestId("deadline")).toContainText(
-    "This date has passed. Call now.",
+    "Date has passed. Call now.",
   );
 });
 
@@ -90,7 +90,7 @@ test("missing deadline and letter phone fall back safely", async ({ page }) => {
   await start(page);
   await scan(page);
   await expect(page.getByTestId("deadline")).toContainText(
-    "Not sure. Check the letter or call.",
+    "Not sure of the date. Check the letter.",
   );
   await expect(page.getByRole("link", { name: "503-555-0100" })).toBeVisible();
 });
