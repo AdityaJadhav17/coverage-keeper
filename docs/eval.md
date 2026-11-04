@@ -8,6 +8,7 @@ This backs the stage claim ("deadline correct on N of M real letters"). Report w
 - Source: **only public sample notices published by a state agency** (`.gov` domains), for example Oregon Health Authority notice guides and sample notices, or the Vermont DVHA notice page. Never a real person's letter, even with permission.
 - Each label entry (schema in `eval/labels.schema.json`):
   - `id`, `file`, `split` (`dev` or `test`)
+  - `state` (`WA`, `OR`, `CA`, `NV`, `AZ`, or `other` for any other state)
   - `notice_type`, `deadline` (ISO date or `null`), `required_action`, `documents` (list)
   - `source_url`, `retrieved` (date), `usage_note` (e.g. "Public government sample notice, used for evaluation")
 - Size: 10-15 letters. At least 3 must be phone photos of a printed sample (taken by the team) so the score reflects real use.
@@ -26,6 +27,7 @@ CI rejects any file in `eval/` that is not listed in `labels.json` with a `.gov`
 | Field             | Metric                                                                                                                                                                      |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `deadline`        | Exact match on ISO date. `null` label matches only `null` output.                                                                                                           |
+| `state`           | Exact match on enum. `other` matches only `other`; a `null` output (can't tell) never matches.                                                                              |
 | `notice_type`     | Exact match on enum.                                                                                                                                                        |
 | `required_action` | Match if normalized label tokens (lowercase, stopwords removed) are a subset of the output's tokens. Reported separately from deadline so the stricter metric isn't hidden. |
 | `documents`       | Set precision and recall after normalization. Headline: recall.                                                                                                             |

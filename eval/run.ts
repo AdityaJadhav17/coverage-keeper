@@ -18,6 +18,7 @@ type Label = {
   id: string;
   file: string;
   split: "dev" | "test";
+  state: "WA" | "OR" | "CA" | "NV" | "AZ" | "other";
   notice_type: string;
   deadline: string | null;
   required_action: string | null;
@@ -60,6 +61,8 @@ for (const label of selected) {
     rows.push({
       id: label.id,
       split: label.split,
+      // Exact: "other" matches only "other", and null ("can't tell") never matches.
+      state: label.state === out.state,
       notice_type: label.notice_type === out.notice_type,
       deadline: deadlineMatches(label.deadline, out.deadline),
       required_action: textMatches(label.required_action, out.required_action),
@@ -70,6 +73,8 @@ for (const label of selected) {
       ).length,
       expected_deadline: label.deadline,
       actual_deadline: out.deadline,
+      expected_state: label.state,
+      actual_state: out.state,
       error: null as string | null,
     });
   } catch (err) {
@@ -81,7 +86,7 @@ const ok = rows.filter((r) => !r.error) as Extract<
   (typeof rows)[number],
   { deadline: boolean }
 >[];
-const count = (key: "notice_type" | "deadline" | "required_action") =>
+const count = (key: "state" | "notice_type" | "deadline" | "required_action") =>
   ok.filter((r) => r[key]).length;
 const mean = (key: "doc_recall" | "doc_precision") =>
   ok.length ? ok.reduce((s, r) => s + r[key], 0) / ok.length : 0;
@@ -100,6 +105,7 @@ const summary = {
   deadline_correct: count("deadline"),
   deadline_printed: dl.printed,
   deadline_none: dl.none,
+  state_correct: count("state"),
   notice_type_correct: count("notice_type"),
   required_action_correct: count("required_action"),
   doc_recall_mean: mean("doc_recall"),
@@ -116,6 +122,7 @@ const md = [
   "| --- | --- |",
   `| Printed deadline read correctly | ${dl.printed.correct} of ${dl.printed.total} |`,
   `| No deadline correctly reported as none | ${dl.none.correct} of ${dl.none.total} |`,
+  `| State identified | ${summary.state_correct} of ${rows.length} |`,
   `| Notice type correct | ${summary.notice_type_correct} of ${rows.length} |`,
   `| Required action correct | ${summary.required_action_correct} of ${rows.length} |`,
   `| Document recall (mean) | ${summary.doc_recall_mean.toFixed(2)} |`,
@@ -128,7 +135,7 @@ const md = [
   ...rows.map((r) =>
     r.error
       ? `- ${r.id}: ERROR ${r.error}`
-      : `- ${r.id}: deadline ${r.deadline ? "ok" : `FAIL (expected ${r.expected_deadline}, got ${r.actual_deadline})`}`,
+      : `- ${r.id}: deadline ${r.deadline ? "ok" : `FAIL (expected ${r.expected_deadline}, got ${r.actual_deadline})`}; state ${r.state ? "ok" : `FAIL (expected ${r.expected_state}, got ${r.actual_state})`}`,
   ),
 ].join("\n");
 
