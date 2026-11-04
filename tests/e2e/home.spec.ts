@@ -47,3 +47,24 @@ test("welcome screen leads with the outcome and states what we are", async ({
     "What to send",
   );
 });
+
+test("consent facts come before the consent button", async ({ page }) => {
+  await page.goto("/");
+  const order = await page.evaluate(() => {
+    const all = [...document.querySelectorAll("section *")];
+    const ai = all.findIndex((el) =>
+      el.textContent?.startsWith("Free and independent."),
+    );
+    const save = all.findIndex((el) =>
+      el.textContent?.startsWith("We don't save your photo."),
+    );
+    const button = all.findIndex(
+      (el) => el.textContent === "Start with my letter",
+    );
+    return { ai, save, button };
+  });
+  expect(order.ai).toBeGreaterThan(-1);
+  expect(order.save).toBeGreaterThan(-1);
+  expect(order.ai).toBeLessThan(order.button);
+  expect(order.save).toBeLessThan(order.button);
+});

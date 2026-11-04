@@ -13,7 +13,7 @@ const font = Atkinson_Hyperlegible({
 
 // Headings only: a warm serif that reads approachable (docs/design/2026-11-03-rebrand.md).
 const serif = Source_Serif_4({
-  weight: ["600", "700"],
+  weight: ["700"],
   subsets: ["latin"],
   variable: "--font-serif",
 });

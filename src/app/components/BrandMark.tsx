@@ -9,7 +9,14 @@ export function BrandMark() {
       aria-hidden="true"
       focusable="false"
     >
-      <rect width="32" height="32" rx="8" fill="#1F5C4A" />
+      <rect
+        width="32"
+        height="32"
+        rx="8"
+        fill="#1F5C4A"
+        stroke="var(--ink)"
+        strokeWidth="1.5"
+      />
       <path
         d="M9 11h14v12H9z"
         fill="none"

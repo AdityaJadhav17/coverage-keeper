@@ -14,8 +14,8 @@ export const NOTICE_LABELS: Record<LetterExtraction["notice_type"], string> = {
   request_for_information: "Request for information",
   coverage_ending: "Coverage ending",
   approval_or_change: "Approval or change",
-  other_medicaid: "OHP / Medicaid letter",
-  not_medicaid: "Not an OHP letter",
+  other_medicaid: "Medicaid letter",
+  not_medicaid: "Not a Medicaid letter",
 };
 
 export function formatDate(iso: string) {
