@@ -1,4 +1,6 @@
 export const MAX_PAGES = 10;
+// A PDF is billed per page; real letters run longer than 10 (one eval letter is 14).
+export const MAX_PDF_PAGES = 20;
 // One read's files together; Vercel's function body limit is about 4.5 MB.
 export const MAX_LETTER_BYTES = 4 * 1024 * 1024;
 

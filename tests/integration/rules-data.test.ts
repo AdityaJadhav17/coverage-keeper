@@ -12,6 +12,11 @@ describe.each(STATE_CODES)("%s rules data", (code) => {
     expect(
       gov.test(rules.source_url) ? rules.source_url : rules.source_linked_from,
     ).toMatch(gov);
+    // Shown as a link, so never plain http or another scheme (security audit I6).
+    expect(new URL(rules.source_url).protocol).toBe("https:");
+    // source_linked_from only vouches for a non-.gov source_url.
+    if (gov.test(rules.source_url))
+      expect(rules.source_linked_from).toBeUndefined();
     expect(rules.retrieved).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(rules.contact.phone).toMatch(/\d{3}-\d{3}-\d{4}/);
     expect(rules.program.length).toBeGreaterThan(0);

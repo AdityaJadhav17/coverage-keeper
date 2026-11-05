@@ -2,11 +2,6 @@
 # and an expiry so the nightly audit fails again and the finding gets re-checked.
 
 [[IgnoredVulns]]
-id = "GHSA-g3hv-75wg-m249"
-ignoreUntil = 2026-12-03
-reason = "minimatch ReDoS (moderate). Dev-only: ESLint plugins (minimatch 3.x) and license-checker. Not in the production bundle; patterns come from our own config, not user input. Fix needs minimatch 11, which breaks the ESLint 9 plugins. Re-check when eslint-config-next moves off minimatch 3."
-
-[[IgnoredVulns]]
 id = "GHSA-3g3m-2fjr-6pw4"
 ignoreUntil = 2026-12-03
 reason = "glob AbortSignal bypass (moderate). Dev-only: license-checker-rseidelsohn's npm internals (glob 13). Not in the production bundle and never given untrusted input. Re-check when license-checker updates @npmcli to glob 14."

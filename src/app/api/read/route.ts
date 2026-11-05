@@ -1,5 +1,10 @@
-import { MAX_LETTER_BYTES, MAX_PAGES } from "@/lib/collect-files";
+import {
+  MAX_LETTER_BYTES,
+  MAX_PAGES,
+  MAX_PDF_PAGES,
+} from "@/lib/collect-files";
 import { sniffType } from "@/lib/file-type";
+import { pdfPageCount } from "@/lib/pdf-pages";
 import { enforceGuardrail } from "@/lib/guardrails";
 import {
   MODEL_ID,
@@ -23,6 +28,24 @@ const log = (fields: Record<string, unknown>) =>
     JSON.stringify({ route: "/api/read", model: MODEL_ID, ...fields }),
   );
 
+// The body, or null once it passes max bytes (the rest is never read).
+async function readUpTo(req: Request, max: number) {
+  if (!req.body) return new Uint8Array();
+  const reader = req.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) return Buffer.concat(chunks);
+    size += value.length;
+    if (size > max) {
+      await reader.cancel();
+      return null;
+    }
+    chunks.push(value);
+  }
+}
+
 export async function POST(req: Request) {
   const started = Date.now();
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
@@ -37,9 +60,16 @@ export async function POST(req: Request) {
   if (Number(req.headers.get("content-length")) > MAX_BODY) {
     return error(413, "That photo is too large. Please use one under 4 MB.");
   }
+  // A chunked request has no Content-Length, so count bytes as they arrive (audit L3).
+  const body = await readUpTo(req, MAX_BODY);
+  if (!body) {
+    return error(413, "That photo is too large. Please use one under 4 MB.");
+  }
   let form: FormData;
   try {
-    form = await req.formData();
+    form = await new Response(body, {
+      headers: { "content-type": req.headers.get("content-type") ?? "" },
+    }).formData();
   } catch {
     return error(400, "Please send a photo of your letter.");
   }
@@ -69,6 +99,7 @@ export async function POST(req: Request) {
     files.map(async (f) => {
       const data = new Uint8Array(await f.arrayBuffer());
       return {
+        data,
         type: sniffType(data),
         base64: Buffer.from(data).toString("base64"),
       };
@@ -79,6 +110,15 @@ export async function POST(req: Request) {
     const [file] = read;
     if (file?.type !== "application/pdf") {
       return error(400, "That file is not a PDF.");
+    }
+    // Before the model call: each page is billed (security audit M1).
+    const pages = pdfPageCount(file.data);
+    if (pages === null) return error(400, "That file is not a PDF.");
+    if (pages > MAX_PDF_PAGES) {
+      return error(
+        413,
+        "This PDF has too many pages. Take photos of up to 10 pages instead.",
+      );
     }
     input = { kind: "pdf", base64: file.base64 };
   } else {
