@@ -7,24 +7,18 @@ import { StatePicker } from "./StatePicker";
 
 export function Result({
   data,
-  multiPage,
   phone,
   region,
   rules,
   onRegion,
-  onReread,
   onScreen,
   onRetake,
 }: {
   data: LetterExtraction;
-  // More than one page, or a PDF: the deadline's page is worth showing (US-074).
-  multiPage: boolean;
   phone: string;
   region: Region | null;
   rules: StateRules | null;
   onRegion: (region: Region) => void;
-  // Set when the result is in the other language than the screen (US-061).
-  onReread?: () => void;
   onScreen: () => void;
   onRetake: () => void;
 }) {
@@ -46,14 +40,9 @@ export function Result({
       <p className="kind">{t.noticeLabels[data.notice_type]}</p>
       <h2 id="result-title">{t.resultTitle}</h2>
       <p className="lead">{safe(data.summary, locale)}</p>
-      {onReread && (
-        <button type="button" className="secondary reread" onClick={onReread}>
-          {t.readAgain}
-        </button>
-      )}
       <StatePicker value={region} onChange={onRegion} />
 
-      <Deadline data={data} multiPage={multiPage} phone={phone} rules={rules} />
+      <Deadline data={data} phone={phone} rules={rules} />
 
       <h3>{t.askTitle}</h3>
       <p>

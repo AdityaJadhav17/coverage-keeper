@@ -200,18 +200,20 @@ test("shows which page the deadline is on (US-074)", async ({ page }) => {
   await expectNoSeriousA11yIssues(page);
 });
 
-test("a one-page letter doesn't say which page", async ({ page }) => {
+test("a deadline on page 1 doesn't name the page, even in a PDF", async ({
+  page,
+}) => {
   await mockReader(page, { ...fixture, deadline_page: 1 });
   await start(page);
-  await page.getByLabel("Scan my letter").setInputFiles(file("page-1.png"));
-  await page.getByRole("button", { name: "Read my letter (1 page)" }).click();
+  await page
+    .getByLabel("Choose photos or a PDF")
+    .setInputFiles(file("letter.pdf"));
+  await page.getByRole("button", { name: /Read my letter/ }).click();
   await expect(page.getByTestId("deadline")).toBeVisible();
   await expect(page.getByText("From page")).toHaveCount(0);
 });
 
-test("read again after a language switch re-sends every page", async ({
-  page,
-}) => {
+test("a language switch re-reads every page", async ({ page }) => {
   const sent = await mockReader(page);
   await start(page);
   await page
@@ -220,7 +222,6 @@ test("read again after a language switch re-sends every page", async ({
   await page.getByRole("button", { name: "Read my letter (2 pages)" }).click();
   await expect(page.getByTestId("deadline")).toBeVisible();
   await page.getByRole("button", { name: "Español" }).click();
-  await page.getByRole("button", { name: "Leer de nuevo en español" }).click();
   await expect(
     page.getByRole("heading", { name: "Esto es lo que dice su carta" }),
   ).toBeVisible();
