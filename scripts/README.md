@@ -4,9 +4,10 @@ Repository checks that run outside the app and the test runner.
 
 ## Contents
 
-| File                | Purpose                                                                  |
-| ------------------- | ------------------------------------------------------------------------ |
-| `check-hygiene.mjs` | Fails when local tool config files are tracked or eval data looks unsafe |
+| File                | Purpose                                                                             |
+| ------------------- | ----------------------------------------------------------------------------------- |
+| `check-hygiene.mjs` | Fails when local tool config files are tracked or eval data looks unsafe            |
+| `hygiene-rules.mjs` | The forbidden-path list `check-hygiene.mjs` uses, kept apart so tests can import it |
 
 ## What check-hygiene.mjs checks
 
@@ -29,6 +30,6 @@ The script reads tracked files, so run it from the repository root inside the gi
 
 ## Adding a check
 
-Add a pattern to `FORBIDDEN` (path rules) or `PII` (content rules) in `check-hygiene.mjs`, or push a message onto `errors` for a new rule. Keep the script free of dependencies: it imports only Node built-ins.
+Add a pattern to `FORBIDDEN` (path rules, matched case-insensitively) in `hygiene-rules.mjs`, or to `PII` (content rules) in `check-hygiene.mjs`, or push a message onto `errors` for a new rule. Keep the script free of dependencies: it imports only Node built-ins.
 
 See [../eval/README.md](../eval/README.md) for the eval data rules and [../docs/ci.md](../docs/ci.md) for where checks run.
