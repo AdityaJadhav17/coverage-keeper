@@ -51,7 +51,11 @@ async function pageNames(page: Page, images: Part[]) {
         b64s.map(async (b64) => {
           const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
           const bmp = await createImageBitmap(new Blob([bytes]));
-          const canvas = new OffscreenCanvas(bmp.width, bmp.height);
+          // A DOM canvas: Playwright's Windows WebKit has no OffscreenCanvas.
+          const canvas = Object.assign(document.createElement("canvas"), {
+            width: bmp.width,
+            height: bmp.height,
+          });
           const ctx = canvas.getContext("2d")!;
           ctx.drawImage(bmp, 0, 0);
           const d = ctx.getImageData(bmp.width >> 1, bmp.height >> 1, 1, 1);
