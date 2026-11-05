@@ -13,6 +13,9 @@ it.each([
   ["documents not a list", { documents: "Pay stubs" }],
   ["a state outside the list", { state: "TX" }],
   ["a missing state", { state: undefined }],
+  ["deadline page 0", { deadline_page: 0 }],
+  ["a fractional deadline page", { deadline_page: 1.5 }],
+  ["a missing deadline page", { deadline_page: undefined }],
 ])("rejects %s", (_, patch) => {
   expect(LetterExtraction.safeParse({ ...fixture, ...patch }).success).toBe(
     false,
@@ -27,3 +30,9 @@ it.each(["WA", "OR", "CA", "NV", "AZ", "other", null])(
     );
   },
 );
+
+it.each([1, 3, null])("accepts deadline page %j", (deadline_page) => {
+  expect(
+    LetterExtraction.safeParse({ ...fixture, deadline_page }).success,
+  ).toBe(true);
+});

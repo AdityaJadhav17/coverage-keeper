@@ -15,7 +15,7 @@ it("contains no eligibility claims itself", () => {
 });
 
 it("asks for the sending state and isn't written for Oregon only", () => {
-  expect(PROMPT_VERSION).toBe("4");
+  expect(PROMPT_VERSION).toBe("5");
   expect(en).toContain("state:");
   for (const program of [
     "Apple Health",
@@ -38,4 +38,9 @@ it("Spanish adds one line and changes nothing else (US-061)", () => {
     "Write summary, required_action and documents in Spanish",
   );
   expect(added).toContain("Keep deadline_quote exactly as printed");
+});
+
+it("reads whole letters and asks where the deadline is (US-070, US-074)", () => {
+  expect(en).toContain("photos or PDFs of");
+  expect(en).toContain("deadline_page:");
 });

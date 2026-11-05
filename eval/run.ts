@@ -66,7 +66,10 @@ for (const label of selected) {
     await readFile(path.join("eval/letters", label.file))
   ).toString("base64");
   try {
-    const out = await readLetter({ mediaType, base64 }, { lang });
+    const out = await readLetter(
+      { kind: "images", images: [{ mediaType, base64 }] },
+      { lang },
+    );
     const docs = documentScores(label.documents, out.documents);
     rows.push({
       id: label.id,

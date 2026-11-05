@@ -56,8 +56,13 @@ export async function POST(req: Request) {
   try {
     const result = await readLetter(
       {
-        mediaType: image.type as LetterImage["mediaType"],
-        base64: Buffer.from(await image.arrayBuffer()).toString("base64"),
+        kind: "images",
+        images: [
+          {
+            mediaType: image.type as LetterImage["mediaType"],
+            base64: Buffer.from(await image.arrayBuffer()).toString("base64"),
+          },
+        ],
       },
       { lang },
     );
