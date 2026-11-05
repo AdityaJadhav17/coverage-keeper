@@ -11,7 +11,6 @@ export function Result({
   region,
   rules,
   onRegion,
-  onReread,
   onScreen,
   onRetake,
 }: {
@@ -20,8 +19,6 @@ export function Result({
   region: Region | null;
   rules: StateRules | null;
   onRegion: (region: Region) => void;
-  // Set when the result is in the other language than the screen (US-061).
-  onReread?: () => void;
   onScreen: () => void;
   onRetake: () => void;
 }) {
@@ -43,11 +40,6 @@ export function Result({
       <p className="kind">{t.noticeLabels[data.notice_type]}</p>
       <h2 id="result-title">{t.resultTitle}</h2>
       <p className="lead">{safe(data.summary, locale)}</p>
-      {onReread && (
-        <button type="button" className="secondary reread" onClick={onReread}>
-          {t.readAgain}
-        </button>
-      )}
       <StatePicker value={region} onChange={onRegion} />
 
       <Deadline data={data} phone={phone} rules={rules} />

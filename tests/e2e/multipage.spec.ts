@@ -213,9 +213,7 @@ test("a deadline on page 1 doesn't name the page, even in a PDF", async ({
   await expect(page.getByText("From page")).toHaveCount(0);
 });
 
-test("read again after a language switch re-sends every page", async ({
-  page,
-}) => {
+test("a language switch re-reads every page", async ({ page }) => {
   const sent = await mockReader(page);
   await start(page);
   await page
@@ -224,7 +222,6 @@ test("read again after a language switch re-sends every page", async ({
   await page.getByRole("button", { name: "Read my letter (2 pages)" }).click();
   await expect(page.getByTestId("deadline")).toBeVisible();
   await page.getByRole("button", { name: "Español" }).click();
-  await page.getByRole("button", { name: "Leer de nuevo en español" }).click();
   await expect(
     page.getByRole("heading", { name: "Esto es lo que dice su carta" }),
   ).toBeVisible();

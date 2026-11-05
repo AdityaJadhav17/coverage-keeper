@@ -29,7 +29,7 @@ type View =
   | { name: "screening"; data: LetterExtraction | null }
   | { name: "screened"; data: LetterExtraction | null; yes: string[] };
 
-// What was sent, kept for "Try again" and "Read again" (every page, US-070).
+// What was sent, kept for "Try again" and a language switch (every page, US-070).
 type Upload = { kind: "images"; pages: Blob[] } | { kind: "pdf"; file: File };
 
 function subscribeLanguage(onChange: () => void) {
@@ -56,12 +56,12 @@ export default function Home() {
   const rules = region && region !== "other" ? stateRules(region) : null;
   const [tray, setTray] = useState<Tray>(null);
   const [upload, setUpload] = useState<Upload | null>(null);
-  // The language the current result was written in.
-  const [readIn, setReadIn] = useState<Locale>("en");
+  // This letter's result in each language already read, so switching back is instant.
+  const readings = useRef<Partial<Record<Locale, LetterExtraction>>>({});
   const busy = useRef(false);
 
   // reread: the same pages again in the other language; keeps the state the user chose.
-  async function send(letter: Upload, reread = false) {
+  async function send(letter: Upload, lang: Locale = locale, reread = false) {
     if (busy.current) return;
     busy.current = true;
     if (!navigator.onLine) {
@@ -78,7 +78,7 @@ export default function Home() {
         letter.pages.forEach((page, i) =>
           body.append("image", page, `page-${i + 1}.jpg`),
         );
-      body.append("lang", locale);
+      body.append("lang", lang);
       const res = await fetch("/api/read", { method: "POST", body });
       if (!res.ok) {
         setView({
@@ -99,8 +99,11 @@ export default function Home() {
       );
       // Malformed reader output is treated as unsure (US-013).
       if (parsed.success) {
-        if (!reread) setRegion(parsed.data.state);
-        setReadIn(locale);
+        if (!reread) {
+          setRegion(parsed.data.state);
+          readings.current = {};
+        }
+        readings.current[lang] = parsed.data;
       }
       setView(
         parsed.success
@@ -174,6 +177,17 @@ export default function Home() {
   // "the number on your letter" (US-084), as the welcome screen promises.
   const phone = letterPhone(data) || rules?.contact.phone || "";
   const phoneText = phone || t.letterNumber;
+  // Switching language also translates the letter: from memory if this language
+  // was already read, otherwise one new read of the same pages (US-061).
+  function switchLanguage() {
+    const next = t.switchLang;
+    setLocale(next);
+    if (!data || !upload) return;
+    const cached = readings.current[next];
+    if (cached) setView({ ...view, data: cached } as View);
+    else send(upload, next, true);
+  }
+
   // A new letter starts with an empty tray.
   const retake = () => {
     setTray(null);
@@ -192,7 +206,7 @@ export default function Home() {
             type="button"
             className="lang"
             lang={t.switchLang}
-            onClick={() => setLocale(t.switchLang)}
+            onClick={switchLanguage}
           >
             {t.switchTo}
           </button>
@@ -241,11 +255,6 @@ export default function Home() {
               region={region}
               rules={rules}
               onRegion={setRegion}
-              onReread={
-                upload && readIn !== locale
-                  ? () => send(upload, true)
-                  : undefined
-              }
               onScreen={() => setView({ name: "screening", data: view.data })}
               onRetake={retake}
             />

@@ -89,7 +89,6 @@ const en = {
   papersTitle: "Papers to send",
   notSure: "Not sure. Check the letter or call.",
   checkExemptions: "Check exemptions",
-  readAgain: "Read again in English",
   scanAnother: "Scan another letter",
   noticeLabels: {
     work_requirement_info: "Work rules information",
@@ -246,7 +245,6 @@ const es: Messages = {
   papersTitle: "Documentos para enviar",
   notSure: "No estamos seguros. Revise la carta o llame.",
   checkExemptions: "Revisar exenciones",
-  readAgain: "Leer de nuevo en español",
   scanAnother: "Escanear otra carta",
   noticeLabels: {
     work_requirement_info: "Información sobre las reglas de trabajo",

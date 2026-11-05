@@ -67,41 +67,40 @@ test("Spanish result and exemption questions (US-061, US-063)", async ({
   expect(serious).toEqual([]);
 });
 
-test("a Spanish phone asks for the letter in Spanish (US-061)", async ({
+test("switching language translates the letter, and switching back is instant (US-061)", async ({
   page,
 }) => {
   const langs: (string | null)[] = [];
   await page.route("**/api/read", async (route) => {
     const body = route.request().postDataBuffer()?.toString("latin1") ?? "";
-    langs.push(/name="lang"\r\n\r\n(\w+)/.exec(body)?.[1] ?? null);
-    await route.fulfill({ json: fixture });
+    const lang = /name="lang"\r\n\r\n(\w+)/.exec(body)?.[1] ?? null;
+    langs.push(lang);
+    await route.fulfill({
+      json: {
+        ...fixture,
+        summary: lang === "es" ? "Resumen en español." : "Summary in English.",
+      },
+    });
   });
   await page.goto("/");
   await page.getByRole("button", { name: "Empezar con mi carta" }).click();
   await page.getByLabel("Escanear mi carta").setInputFiles(PNG);
   await page.getByRole("button", { name: /^Leer mi carta/ }).click();
-  await expect(
-    page.getByRole("heading", { name: "Esto es lo que dice su carta" }),
-  ).toBeVisible();
+  await expect(page.getByText("Resumen en español.")).toBeVisible();
   expect(langs).toEqual(["es"]);
-  // Already in the screen's language, so no read-again button.
-  await expect(
-    page.getByRole("button", { name: "Leer de nuevo en español" }),
-  ).toHaveCount(0);
+  // A state the user picked survives the translation.
+  await page.getByLabel("Estado que envió la carta").selectOption("WA");
 
-  // Switching language offers one tap to read the same photo again.
+  // The switch re-reads the same photo in English: no extra button to find.
   await page.getByRole("button", { name: "English" }).click();
-  // A state the user picked survives the re-read.
-  await page.getByLabel("State that sent this letter").selectOption("WA");
-  await page.getByRole("button", { name: "Read again in English" }).click();
-  await expect(
-    page.getByRole("heading", { name: "Here's what your letter says" }),
-  ).toBeVisible();
+  await expect(page.getByText("Summary in English.")).toBeVisible();
   expect(langs).toEqual(["es", "en"]);
   await expect(page.getByLabel("State that sent this letter")).toHaveValue(
     "WA",
   );
-  await expect(
-    page.getByRole("button", { name: "Read again in English" }),
-  ).toHaveCount(0);
+
+  // Back to Spanish comes from memory: no new read.
+  await page.getByRole("button", { name: "Español" }).click();
+  await expect(page.getByText("Resumen en español.")).toBeVisible();
+  expect(langs).toEqual(["es", "en"]);
 });
