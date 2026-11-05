@@ -208,7 +208,7 @@ Every pull request must pass hygiene and secret scan, dependency audit and licen
 7. Sample notices used for evaluation: Oregon Health Authority, Washington State Health Care Authority, California Department of Health Care Services and Vermont Department of Vermont Health Access. Each file's source URL is in [`eval/labels.json`](eval/labels.json).
 8. Test split results, prompt v3, 3 runs, pull request #30: https://github.com/AdityaJadhav17/coverage-keeper/pull/30#issuecomment-6640037012
 9. Test split results, prompt v4, English and Spanish, 3 runs each, pull request #33: https://github.com/AdityaJadhav17/coverage-keeper/pull/33
-10. Test split results, prompt v5, page 1 and full PDFs, 3 runs, issue #17: https://github.com/AdityaJadhav17/coverage-keeper/issues/17
+10. Test split results, prompt v5, page 1 and full PDFs, 3 runs, pull request #34: https://github.com/AdityaJadhav17/coverage-keeper/pull/34
 
 ## Disclaimer
 
