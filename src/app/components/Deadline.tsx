@@ -6,12 +6,10 @@ import { formatDate, safe } from "./shared";
 
 export function Deadline({
   data,
-  multiPage,
   phone,
   rules,
 }: {
   data: LetterExtraction;
-  multiPage: boolean;
   phone: string;
   rules: StateRules | null;
 }) {
@@ -23,7 +21,8 @@ export function Deadline({
       <blockquote>
         <mark>{safe(data.deadline_quote, locale)}</mark>
       </blockquote>
-      {multiPage && data.deadline_page && (
+      {/* Page 1 is where people look anyway, so only later pages are named (US-074). */}
+      {data.deadline_page && data.deadline_page > 1 && (
         <p className="from-page">{t.fromPage(data.deadline_page)}</p>
       )}
     </>

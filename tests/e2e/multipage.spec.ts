@@ -200,11 +200,15 @@ test("shows which page the deadline is on (US-074)", async ({ page }) => {
   await expectNoSeriousA11yIssues(page);
 });
 
-test("a one-page letter doesn't say which page", async ({ page }) => {
+test("a deadline on page 1 doesn't name the page, even in a PDF", async ({
+  page,
+}) => {
   await mockReader(page, { ...fixture, deadline_page: 1 });
   await start(page);
-  await page.getByLabel("Scan my letter").setInputFiles(file("page-1.png"));
-  await page.getByRole("button", { name: "Read my letter (1 page)" }).click();
+  await page
+    .getByLabel("Choose photos or a PDF")
+    .setInputFiles(file("letter.pdf"));
+  await page.getByRole("button", { name: /Read my letter/ }).click();
   await expect(page.getByTestId("deadline")).toBeVisible();
   await expect(page.getByText("From page")).toHaveCount(0);
 });

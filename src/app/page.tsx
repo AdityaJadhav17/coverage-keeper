@@ -237,7 +237,6 @@ export default function Home() {
           ) : (
             <Result
               data={view.data}
-              multiPage={upload?.kind !== "images" || upload.pages.length > 1}
               phone={phoneText}
               region={region}
               rules={rules}

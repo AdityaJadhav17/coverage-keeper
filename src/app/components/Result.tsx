@@ -7,7 +7,6 @@ import { StatePicker } from "./StatePicker";
 
 export function Result({
   data,
-  multiPage,
   phone,
   region,
   rules,
@@ -17,8 +16,6 @@ export function Result({
   onRetake,
 }: {
   data: LetterExtraction;
-  // More than one page, or a PDF: the deadline's page is worth showing (US-074).
-  multiPage: boolean;
   phone: string;
   region: Region | null;
   rules: StateRules | null;
@@ -53,7 +50,7 @@ export function Result({
       )}
       <StatePicker value={region} onChange={onRegion} />
 
-      <Deadline data={data} multiPage={multiPage} phone={phone} rules={rules} />
+      <Deadline data={data} phone={phone} rules={rules} />
 
       <h3>{t.askTitle}</h3>
       <p>
