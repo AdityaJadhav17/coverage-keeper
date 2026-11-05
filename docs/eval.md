@@ -4,14 +4,16 @@ This backs the stage claim ("deadline correct on N of M real letters"). Report w
 
 ## Dataset
 
-- Location: `eval/letters/` (PNG, JPEG or WebP; convert PDF pages to PNG first) and `eval/labels.json` (one entry per letter).
+- Location: `eval/letters/` (PNG, JPEG, WebP or PDF) and `eval/labels.json` (one entry per letter).
+- A PDF is read whole, as the app reads an uploaded PDF. A letter photographed page by page lists its photos in page order under `files` instead of `file`.
+- Full letters: each multi-page sample also has a `<id>-full` entry with its whole PDF, in the same split and with the same `state` as its page-1 entry. Its labels are checked against every page, since some deadlines, actions and papers are only on later pages.
 - Source: **only public sample notices published by a state agency** (`.gov` domains), for example Oregon Health Authority notice guides and sample notices, or the Vermont DVHA notice page. Never a real person's letter, even with permission.
 - Each label entry (schema in `eval/labels.schema.json`):
-  - `id`, `file`, `split` (`dev` or `test`)
+  - `id`, `file` (one image or PDF) or `files` (2-10 page photos, in order), `split` (`dev` or `test`)
   - `state` (`WA`, `OR`, `CA`, `NV`, `AZ`, or `other` for any other state)
   - `notice_type`, `deadline` (ISO date or `null`), `required_action`, `documents` (list)
   - `source_url`, `retrieved` (date), `usage_note` (e.g. "Public government sample notice, used for evaluation")
-- Size: 10-15 letters. At least 3 must be phone photos of a printed sample (taken by the team) so the score reflects real use.
+- Size: 10-15 sample letters, plus a full-PDF entry for each multi-page sample. At least 3 must be phone photos of a printed sample (taken by the team) so the score reflects real use.
 - Sample notices often show placeholder dates such as `MM/DD/YYYY`. Label those as `deadline: null` and expect the reader to say "unsure".
 
 CI rejects any file in `eval/` that is not listed in `labels.json` with a `.gov` source, and any file matching personal-data patterns (see [ci.md](ci.md)).
