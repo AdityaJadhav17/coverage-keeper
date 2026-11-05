@@ -97,6 +97,37 @@ describe("POST /api/read", () => {
     expect(res.status).toBe(413);
   });
 
+  it("stops reading a body with no Content-Length once it passes the limit (security audit L3)", async () => {
+    const form = new FormData();
+    form.append("image", png("a.png", 8 * MB));
+    const encoded = new Response(form);
+    const all = new Uint8Array(await encoded.arrayBuffer());
+    let pulled = 0;
+    // A chunked upload: no Content-Length header, 64 KB arrives per pull.
+    const body = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        if (pulled >= all.length) return controller.close();
+        const piece = all.subarray(pulled, pulled + 64 * 1024);
+        pulled += piece.length;
+        controller.enqueue(piece);
+      },
+    });
+    const res = await POST(
+      new Request("http://test/api/read", {
+        method: "POST",
+        body,
+        duplex: "half",
+        headers: {
+          "content-type": encoded.headers.get("content-type")!,
+          "x-forwarded-for": "198.51.100.250",
+        },
+      } as RequestInit),
+    );
+    expect(res.status).toBe(413);
+    expect(pulled).toBeLessThan(5 * MB);
+    expect(reader).not.toHaveBeenCalled();
+  });
+
   it("limits one client to 10 reads a minute (cost abuse)", async () => {
     const from = (ip: string) => post(png(), { "x-forwarded-for": ip });
     for (let i = 0; i < 10; i++) {
