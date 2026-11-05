@@ -43,6 +43,7 @@ test("Spanish result and exemption questions (US-061, US-063)", async ({
   await page.goto("/");
   await page.getByRole("button", { name: "Empezar con mi carta" }).click();
   await page.getByLabel("Escanear mi carta").setInputFiles(PNG);
+  await page.getByRole("button", { name: /^Leer mi carta/ }).click();
   await expect(page.getByTestId("deadline")).toContainText("Quedan 5 días");
   await expect(
     page.getByRole("heading", { name: "Esto es lo que dice su carta" }),
@@ -78,6 +79,7 @@ test("a Spanish phone asks for the letter in Spanish (US-061)", async ({
   await page.goto("/");
   await page.getByRole("button", { name: "Empezar con mi carta" }).click();
   await page.getByLabel("Escanear mi carta").setInputFiles(PNG);
+  await page.getByRole("button", { name: /^Leer mi carta/ }).click();
   await expect(
     page.getByRole("heading", { name: "Esto es lo que dice su carta" }),
   ).toBeVisible();

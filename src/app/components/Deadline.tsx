@@ -6,10 +6,12 @@ import { formatDate, safe } from "./shared";
 
 export function Deadline({
   data,
+  multiPage,
   phone,
   rules,
 }: {
   data: LetterExtraction;
+  multiPage: boolean;
   phone: string;
   rules: StateRules | null;
 }) {
@@ -17,9 +19,14 @@ export function Deadline({
   const { status, days } = deadlineStatus(data.deadline, new Date());
   // The quoted line stays exactly as printed on the letter.
   const quote = data.deadline_quote && (
-    <blockquote>
-      <mark>{safe(data.deadline_quote, locale)}</mark>
-    </blockquote>
+    <>
+      <blockquote>
+        <mark>{safe(data.deadline_quote, locale)}</mark>
+      </blockquote>
+      {multiPage && data.deadline_page && (
+        <p className="from-page">{t.fromPage(data.deadline_page)}</p>
+      )}
+    </>
   );
   const badge = (
     <p className={`badge ${status}`}>

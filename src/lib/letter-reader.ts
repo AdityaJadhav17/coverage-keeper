@@ -3,6 +3,7 @@ import path from "node:path";
 import Anthropic, { APIError } from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import type {
+  ContentBlockParam,
   Message,
   MessageCreateParamsNonStreaming,
 } from "@anthropic-ai/sdk/resources/messages";
@@ -17,10 +18,14 @@ export type LetterImage = {
   base64: string;
 };
 
+// Every page of the letter: up to 10 photos, or one PDF (US-070, US-071).
+export type LetterInput =
+  { kind: "images"; images: LetterImage[] } | { kind: "pdf"; base64: string };
+
 export type ReadOptions = { lang: "en" | "es" };
 
 export type LetterReader = (
-  image: LetterImage,
+  input: LetterInput,
   opts?: ReadOptions,
 ) => Promise<LetterExtraction>;
 
@@ -35,6 +40,7 @@ export const UNSURE_RESULT: LetterExtraction = {
   documents: [],
   contact_phone: null,
   state: null,
+  deadline_page: null,
   confidence: "low",
 };
 
@@ -45,6 +51,32 @@ const FIXTURE_PATH = path.join(
   "tests/fixtures/reader/synthetic-work-requirement.json",
 );
 
+// A "Page N:" label before each photo lets the model report deadline_page.
+function pageBlocks(input: LetterInput): ContentBlockParam[] {
+  if (input.kind === "pdf")
+    return [
+      {
+        type: "document",
+        source: {
+          type: "base64",
+          media_type: "application/pdf",
+          data: input.base64,
+        },
+      },
+    ];
+  return input.images.flatMap((image, i): ContentBlockParam[] => [
+    { type: "text", text: `Page ${i + 1}:` },
+    {
+      type: "image",
+      source: {
+        type: "base64",
+        media_type: image.mediaType,
+        data: image.base64,
+      },
+    },
+  ]);
+}
+
 const isRetryable = (err: unknown) =>
   err instanceof APIError &&
   err.status !== undefined &&
@@ -54,7 +86,7 @@ export function createLetterReader(
   create: CreateFn,
   retryDelayMs = 1000,
 ): LetterReader {
-  return async (image, opts = { lang: "en" }) => {
+  return async (input, opts = { lang: "en" }) => {
     const params: MessageCreateParamsNonStreaming = {
       model: MODEL_ID,
       // Thinking tokens count toward this on claude-opus-5-5; too low truncates the JSON.
@@ -68,14 +100,7 @@ export function createLetterReader(
         {
           role: "user",
           content: [
-            {
-              type: "image",
-              source: {
-                type: "base64",
-                media_type: image.mediaType,
-                data: image.base64,
-              },
-            },
+            ...pageBlocks(input),
             { type: "text", text: "Read this letter." },
           ],
         },
@@ -105,7 +130,7 @@ export function createLetterReader(
 
 let live: LetterReader | undefined;
 
-export const readLetter: LetterReader = async (image, opts) => {
+export const readLetter: LetterReader = async (input, opts) => {
   if (process.env.LETTER_READER === "fixture") {
     return LetterExtraction.parse(
       JSON.parse(readFileSync(FIXTURE_PATH, "utf8")),
@@ -117,5 +142,5 @@ export const readLetter: LetterReader = async (image, opts) => {
     const client = new Anthropic({ maxRetries: 0, timeout: 30_000 });
     live = createLetterReader((params) => client.messages.create(params));
   }
-  return live(image, opts);
+  return live(input, opts);
 };

@@ -3,12 +3,13 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { LocaleContext } from "@/i18n/LocaleContext";
 import { messages, pickLocale, type Locale } from "@/i18n/messages";
-import { rejectReason, toUploadJpeg } from "@/lib/image";
+import { collectFiles, MAX_LETTER_BYTES } from "@/lib/collect-files";
+import { MAX_PICK_BYTES, toUploadJpegs } from "@/lib/image";
 import { phoneHref } from "@/lib/phone";
 import { LetterExtraction } from "@/lib/schema";
 import { stateRules, type Region } from "@/lib/states";
 import { BrandMark } from "./components/BrandMark";
-import { Capture } from "./components/Capture";
+import { Capture, type Tray } from "./components/Capture";
 import { Consent } from "./components/Consent";
 import { Problem } from "./components/Problem";
 import { Result } from "./components/Result";
@@ -27,6 +28,9 @@ type View =
   | { name: "result"; data: LetterExtraction }
   | { name: "screening"; data: LetterExtraction | null }
   | { name: "screened"; data: LetterExtraction | null; yes: string[] };
+
+// What was sent, kept for "Try again" and "Read again" (every page, US-070).
+type Upload = { kind: "images"; pages: Blob[] } | { kind: "pdf"; file: File };
 
 function subscribeLanguage(onChange: () => void) {
   window.addEventListener("languagechange", onChange);
@@ -50,13 +54,14 @@ export default function Home() {
   // Starts from the state the reader found on the letter; the user can change it (US-080).
   const [region, setRegion] = useState<Region | null>(null);
   const rules = region && region !== "other" ? stateRules(region) : null;
-  const [photo, setPhoto] = useState<Blob | null>(null);
+  const [tray, setTray] = useState<Tray>(null);
+  const [upload, setUpload] = useState<Upload | null>(null);
   // The language the current result was written in.
   const [readIn, setReadIn] = useState<Locale>("en");
   const busy = useRef(false);
 
-  // reread: the same photo again in the other language; keeps the state the user chose.
-  async function send(jpeg: Blob, reread = false) {
+  // reread: the same pages again in the other language; keeps the state the user chose.
+  async function send(letter: Upload, reread = false) {
     if (busy.current) return;
     busy.current = true;
     if (!navigator.onLine) {
@@ -67,13 +72,25 @@ export default function Home() {
     setView({ name: "reading" });
     try {
       const body = new FormData();
-      body.append("image", jpeg, "letter.jpg");
+      if (letter.kind === "pdf")
+        body.append("pdf", letter.file, letter.file.name);
+      else
+        letter.pages.forEach((page, i) =>
+          body.append("image", page, `page-${i + 1}.jpg`),
+        );
       body.append("lang", locale);
       const res = await fetch("/api/read", { method: "POST", body });
       if (!res.ok) {
         setView({
           name: "error",
-          message: res.status === 413 ? t.errorTooBig : t.errorService,
+          message:
+            res.status === 413
+              ? letter.kind === "pdf"
+                ? t.pdfTooBig
+                : t.errorTooBig
+              : res.status === 400
+                ? t.badFile
+                : t.errorService,
         });
         return;
       }
@@ -97,22 +114,52 @@ export default function Home() {
     }
   }
 
-  async function onPick(file: File | undefined) {
-    if (!file || busy.current) return;
-    const reason = rejectReason(file);
-    if (reason)
-      return setView({
-        name: "capture",
-        error: reason === "notImage" ? t.rejectNotImage : t.rejectTooLarge,
-      });
+  // New files join the pages already in the tray, then the whole set is checked again.
+  function onAdd(files: File[]) {
+    const held = !tray ? [] : tray.kind === "pdf" ? [tray.file] : tray.files;
+    const got = collectFiles([...held, ...files]);
+    if (got.kind === "error")
+      return setView({ name: "capture", error: t.collectErrors[got.code] });
+    const tooBig =
+      got.kind === "pdf"
+        ? got.file.size > MAX_LETTER_BYTES && t.pdfTooBig
+        : got.files.some((f) => f.size > MAX_PICK_BYTES) && t.rejectTooLarge;
+    if (tooBig) return setView({ name: "capture", error: tooBig });
+    setTray(
+      got.kind === "pdf"
+        ? { kind: "pdf", file: got.file }
+        : { kind: "images", files: got.files },
+    );
+    setView({
+      name: "capture",
+      error: got.skipped ? t.skipped(got.skipped) : undefined,
+    });
+  }
+
+  function onRemove(index: number) {
+    if (tray?.kind !== "images") return;
+    const files = tray.files.filter((_, i) => i !== index);
+    setTray(files.length ? { kind: "images", files } : null);
+    setView({ name: "capture" });
+  }
+
+  async function onRead() {
+    if (!tray || busy.current) return;
     try {
-      const jpeg = await toUploadJpeg(file);
-      setPhoto(jpeg);
-      await send(jpeg);
-    } catch {
+      const letter: Upload =
+        tray.kind === "pdf"
+          ? tray
+          : { kind: "images", pages: await toUploadJpegs(tray.files) };
+      setUpload(letter);
+      await send(letter);
+    } catch (err) {
       setView({
         name: "capture",
-        error: t.cantOpen,
+        // Say so here instead of letting the server answer 413 (US-070).
+        error:
+          err instanceof Error && /too large/.test(err.message)
+            ? t.pagesTooBig
+            : t.cantOpen,
       });
     }
   }
@@ -127,7 +174,11 @@ export default function Home() {
   // "the number on your letter" (US-084), as the welcome screen promises.
   const phone = letterPhone(data) || rules?.contact.phone || "";
   const phoneText = phone || t.letterNumber;
-  const retake = () => setView({ name: "capture" });
+  // A new letter starts with an empty tray.
+  const retake = () => {
+    setTray(null);
+    setView({ name: "capture" });
+  };
 
   return (
     <LocaleContext.Provider value={{ locale, setLocale }}>
@@ -150,7 +201,13 @@ export default function Home() {
           <Consent onAccept={() => setView({ name: "capture" })} />
         )}
         {view.name === "capture" && (
-          <Capture error={view.error} onPick={onPick} />
+          <Capture
+            tray={tray}
+            error={view.error}
+            onAdd={onAdd}
+            onRemove={onRemove}
+            onRead={onRead}
+          />
         )}
         {view.name === "reading" && (
           <p role="status" className="reading">
@@ -162,7 +219,7 @@ export default function Home() {
             title={t.offlineTitle}
             text={t.offlineText}
             action={t.tryAgain}
-            onAction={() => (photo ? send(photo) : retake())}
+            onAction={() => (upload ? send(upload) : retake())}
           />
         )}
         {view.name === "error" && (
@@ -170,7 +227,7 @@ export default function Home() {
             title={t.errorTitle}
             text={view.message}
             action={t.tryAgain}
-            onAction={() => (photo ? send(photo) : retake())}
+            onAction={() => (upload ? send(upload) : retake())}
           />
         )}
         {view.name === "unclear" && <Unclear onRetake={retake} />}
@@ -180,12 +237,15 @@ export default function Home() {
           ) : (
             <Result
               data={view.data}
+              multiPage={upload?.kind !== "images" || upload.pages.length > 1}
               phone={phoneText}
               region={region}
               rules={rules}
               onRegion={setRegion}
               onReread={
-                photo && readIn !== locale ? () => send(photo, true) : undefined
+                upload && readIn !== locale
+                  ? () => send(upload, true)
+                  : undefined
               }
               onScreen={() => setView({ name: "screening", data: view.data })}
               onRetake={retake}

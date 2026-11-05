@@ -1,35 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-  MAX_PICK_BYTES,
+  MAX_PAGES_BYTES,
   MAX_UPLOAD_BYTES,
   fitWithin,
-  rejectReason,
   toUploadJpeg,
+  toUploadJpegs,
 } from "./image";
-
-describe("rejectReason", () => {
-  it.each([
-    ["image/jpeg", 1000],
-    ["image/heic", 5_000_000],
-    ["image/png", MAX_PICK_BYTES],
-  ])("accepts %s of %i bytes", (type, size) => {
-    expect(rejectReason({ type, size })).toBeNull();
-  });
-
-  it.each([
-    ["application/pdf", 1000],
-    ["", 1000],
-    ["text/plain", 10],
-  ])("rejects non-image %j", (type, size) => {
-    expect(rejectReason({ type, size })).toBe("notImage");
-  });
-
-  it("rejects images over 15 MB", () => {
-    expect(rejectReason({ type: "image/jpeg", size: MAX_PICK_BYTES + 1 })).toBe(
-      "tooLarge",
-    );
-  });
-});
 
 describe("fitWithin", () => {
   it.each([
@@ -95,5 +71,31 @@ describe("toUploadJpeg", () => {
     const { revoke } = stubBrowser(1000);
     await expect(toUploadJpeg(new Blob())).rejects.toThrow(/too large/);
     expect(revoke).toHaveBeenCalled();
+  });
+
+  it("splits one request's budget across every page", async () => {
+    stubBrowser(1);
+    const pages = await toUploadJpegs(
+      Array.from({ length: 10 }, () => new Blob()),
+    );
+    expect(pages).toHaveLength(10);
+    const total = pages.reduce((sum, p) => sum + p.size, 0);
+    expect(total).toBeLessThanOrEqual(MAX_PAGES_BYTES);
+    for (const p of pages)
+      expect(p.size).toBeLessThanOrEqual(MAX_PAGES_BYTES / 10);
+  });
+
+  it("keeps the single-photo limit when there are few pages", async () => {
+    stubBrowser(1);
+    const [page] = await toUploadJpegs([new Blob()]);
+    expect(page!.size).toBeLessThanOrEqual(MAX_UPLOAD_BYTES);
+    expect(page!.size).toBeGreaterThan(MAX_PAGES_BYTES / 4);
+  });
+
+  it("says so when ten pages can't fit in one request", async () => {
+    stubBrowser(1000);
+    await expect(
+      toUploadJpegs(Array.from({ length: 10 }, () => new Blob())),
+    ).rejects.toThrow(/too large/);
   });
 });

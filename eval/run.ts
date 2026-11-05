@@ -5,6 +5,7 @@ import {
   MODEL_ID,
   readLetter,
   type LetterImage,
+  type LetterInput,
 } from "../src/lib/letter-reader";
 import { PROMPT_VERSION } from "../src/prompts/letter-reader";
 import {
@@ -14,9 +15,11 @@ import {
   textMatches,
 } from "./score";
 
+// `file` for one image or PDF; `files` for a letter photographed page by page.
 type Label = {
   id: string;
-  file: string;
+  file?: string;
+  files?: string[];
   split: "dev" | "test";
   state: "WA" | "OR" | "CA" | "NV" | "AZ" | "other";
   notice_type: string;
@@ -54,19 +57,32 @@ if (selected.length === 0) {
   process.exit(1);
 }
 
+const read = (file: string) =>
+  readFile(path.join("eval/letters", file)).then((b) => b.toString("base64"));
+
+// A PDF alone is read as a PDF; otherwise every file is a page photo, in order.
+async function letterInput(label: Label): Promise<LetterInput> {
+  const files = label.files ?? (label.file ? [label.file] : []);
+  const [only] = files;
+  if (only && files.length === 1 && path.extname(only).toLowerCase() === ".pdf")
+    return { kind: "pdf", base64: await read(only) };
+  const images: LetterImage[] = [];
+  for (const file of files) {
+    const mediaType = MEDIA_TYPES[path.extname(file).toLowerCase()];
+    if (!mediaType)
+      throw new Error(
+        `${label.id}: ${file} must be an image, or a single PDF on its own`,
+      );
+    images.push({ mediaType, base64: await read(file) });
+  }
+  if (images.length === 0) throw new Error(`${label.id}: no file listed`);
+  return { kind: "images", images };
+}
+
 const rows = [];
 for (const label of selected) {
-  const ext = path.extname(label.file).toLowerCase();
-  const mediaType = MEDIA_TYPES[ext];
-  if (!mediaType)
-    throw new Error(
-      `${label.id}: unsupported file type ${ext}; convert PDF pages to PNG`,
-    );
-  const base64 = (
-    await readFile(path.join("eval/letters", label.file))
-  ).toString("base64");
   try {
-    const out = await readLetter({ mediaType, base64 }, { lang });
+    const out = await readLetter(await letterInput(label), { lang });
     const docs = documentScores(label.documents, out.documents);
     rows.push({
       id: label.id,

@@ -5,9 +5,9 @@
   "items": {
     "type": "object",
     "additionalProperties": false,
+    "oneOf": [{ "required": ["file"] }, { "required": ["files"] }],
     "required": [
       "id",
-      "file",
       "split",
       "state",
       "notice_type",
@@ -25,7 +25,14 @@
       },
       "file": {
         "type": "string",
-        "description": "Path relative to eval/letters/"
+        "description": "One image or PDF, relative to eval/letters/. A PDF is read whole."
+      },
+      "files": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 10,
+        "items": { "type": "string" },
+        "description": "Page photos of one letter in page order, relative to eval/letters/. Use instead of file."
       },
       "split": {
         "enum": ["dev", "test"]

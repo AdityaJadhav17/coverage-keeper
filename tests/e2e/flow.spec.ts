@@ -31,8 +31,11 @@ async function start(page: Page) {
   await page.getByRole("button", { name: "Start with my letter" }).click();
 }
 
-const scan = (page: Page, file = PNG) =>
-  page.getByLabel("Scan my letter").setInputFiles(file);
+// One photo into the page tray, then read it (US-070).
+async function scan(page: Page, file = PNG) {
+  await page.getByLabel("Scan my letter").setInputFiles(file);
+  await page.getByRole("button", { name: /^Read my letter/ }).click();
+}
 
 async function expectNoSeriousA11yIssues(page: Page) {
   // Screen fade-ins would otherwise be measured at half opacity.
@@ -128,12 +131,17 @@ test("eligibility claims from the reader are replaced", async ({ page }) => {
 test("non-image file is rejected before upload", async ({ page }) => {
   const calls = await mockReader(page);
   await start(page);
-  await scan(page, {
-    name: "letter.pdf",
-    mimeType: "application/pdf",
-    buffer: Buffer.from("%PDF-1.4"),
+  await page.getByLabel("Scan my letter").setInputFiles({
+    name: "letter.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from("not a letter"),
   });
-  await expect(page.getByText("That file isn't a photo.")).toBeVisible();
+  await expect(
+    page.getByText("That file isn't a photo or a PDF."),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /^Read my letter/ }),
+  ).toHaveCount(0);
   expect(calls()).toBe(0);
 });
 

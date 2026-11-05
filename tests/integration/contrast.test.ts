@@ -44,6 +44,8 @@ const PAIRS: [string, string, number][] = [
   ["text", "surface-raised", 4.5],
   ["muted", "paper", 4.5],
   ["muted", "surface", 4.5],
+  // "From page N" sits in the due-date box, which turns urgent-bg once the date passes.
+  ["muted", "urgent-bg", 4.5],
   ["on-ink", "ink", 4.5],
   ["ink", "paper", 4.5],
   ["ink", "surface", 4.5],

@@ -13,6 +13,19 @@
     "usage_note": "Public government sample notice, used for evaluation (page 1 of PDF; Oregon; renewal date shown as <MM/DD/YYYY> placeholder)"
   },
   {
+    "id": "or-outreach-work-rules-full",
+    "file": "or-outreach-work-rules-full.pdf",
+    "split": "dev",
+    "state": "OR",
+    "notice_type": "work_requirement_info",
+    "deadline": null,
+    "required_action": "check exemptions",
+    "documents": [],
+    "source_url": "https://www.oregon.gov/oha/HSD/OHP/OHPLetters/ONE-Outreach-Notice-EN.pdf",
+    "retrieved": "2026-11-05",
+    "usage_note": "Public government sample notice, used for evaluation (full PDF, 3 pages; labels re-checked against every page: renewal date still a <MM/DD/YYYY> placeholder; later pages list ways to meet the rules, exemptions and how to report)"
+  },
+  {
     "id": "vt-ee307-renewal-ending",
     "file": "vt-ee307-renewal-ending.png",
     "split": "dev",
@@ -24,6 +37,19 @@
     "source_url": "https://dvha.vermont.gov/sites/dvha/files/doc_library/Sample%20EE307.pdf",
     "retrieved": "2026-10-28",
     "usage_note": "Public government sample notice, used for evaluation (page 1 of PDF; Vermont)"
+  },
+  {
+    "id": "vt-ee307-renewal-ending-full",
+    "file": "vt-ee307-renewal-ending-full.pdf",
+    "split": "dev",
+    "state": "other",
+    "notice_type": "coverage_ending",
+    "deadline": "2023-02-28",
+    "required_action": "return renewal form",
+    "documents": ["renewal form"],
+    "source_url": "https://dvha.vermont.gov/sites/dvha/files/doc_library/Sample%20EE307.pdf",
+    "retrieved": "2026-11-05",
+    "usage_note": "Public government sample notice, used for evaluation (full PDF, 5 pages; labels re-checked against every page: deadline and form on page 1; later pages are ways to renew, re-apply, disability rights and appeal rights)"
   },
   {
     "id": "vt-205ifar-renew",
@@ -39,6 +65,19 @@
     "usage_note": "Public government sample notice, used for evaluation (page 1 of PDF; Vermont; sample shows conflicting dates (Respond by December 12, 2026 vs September 12, 2022), labeled ambiguous)"
   },
   {
+    "id": "vt-205ifar-renew-full",
+    "file": "vt-205ifar-renew-full.pdf",
+    "split": "dev",
+    "state": "other",
+    "notice_type": "renewal",
+    "deadline": null,
+    "required_action": "sign return renewal form",
+    "documents": ["renewal form"],
+    "source_url": "https://dvha.vermont.gov/sites/dvha/files/documents/205IFAR-sample.pdf",
+    "retrieved": "2026-11-05",
+    "usage_note": "Public government sample notice, used for evaluation (full PDF, 2 pages; labels re-checked against every page: page 2 is the blank 205IFAR form with sample data; conflicting dates on page 1, labeled ambiguous)"
+  },
+  {
     "id": "vt-201p-review-reminder",
     "file": "vt-201p-review-reminder.png",
     "split": "dev",
@@ -50,6 +89,19 @@
     "source_url": "https://dvha.vermont.gov/sites/dvha/files/documents/201P-Review-short-sample.pdf",
     "retrieved": "2026-10-28",
     "usage_note": "Public government sample notice, used for evaluation (page 1 of PDF; Vermont)"
+  },
+  {
+    "id": "vt-201p-review-reminder-full",
+    "file": "vt-201p-review-reminder-full.pdf",
+    "split": "dev",
+    "state": "other",
+    "notice_type": "renewal",
+    "deadline": "2020-01-01",
+    "required_action": "sign return form",
+    "documents": ["review form"],
+    "source_url": "https://dvha.vermont.gov/sites/dvha/files/documents/201P-Review-short-sample.pdf",
+    "retrieved": "2026-11-05",
+    "usage_note": "Public government sample notice, used for evaluation (full PDF, 3 pages; labels re-checked against every page: pages 2-3 are the blank review form the notice encloses)"
   },
   {
     "id": "or-med005-eligibility",
@@ -65,6 +117,19 @@
     "usage_note": "Public government sample notice, used for evaluation (page 1 of PDF; Oregon; page 1 only, no dated deadline (hearing request within 10 days of receipt))"
   },
   {
+    "id": "or-med005-eligibility-full",
+    "file": "or-med005-eligibility-full.pdf",
+    "split": "test",
+    "state": "OR",
+    "notice_type": "approval_or_change",
+    "deadline": null,
+    "required_action": "report changes",
+    "documents": [],
+    "source_url": "https://www.oregon.gov/oha/HSD/OHP/OHPLetters/ONE-Transition-Notice-EN.pdf",
+    "retrieved": "2026-11-05",
+    "usage_note": "Public government sample notice, used for evaluation (full PDF, 14 pages; labels re-checked against every page: page 6 What To Do Now asks to report changes (within 10 days of a change); hearing deadlines are relative, no printed date)"
+  },
+  {
     "id": "or-open-card-move",
     "file": "or-open-card-move.png",
     "split": "test",
@@ -76,6 +141,19 @@
     "source_url": "https://www.oregon.gov/oha/HSD/OHP/OHPLetters/Open-Card-Notice-EN.pdf",
     "retrieved": "2026-10-28",
     "usage_note": "Public government sample notice, used for evaluation (page 1 of PDF; Oregon; informational, no deadline)"
+  },
+  {
+    "id": "or-open-card-move-full",
+    "file": "or-open-card-move-full.pdf",
+    "split": "test",
+    "state": "OR",
+    "notice_type": "approval_or_change",
+    "deadline": null,
+    "required_action": "ask providers accept open card",
+    "documents": [],
+    "source_url": "https://www.oregon.gov/oha/HSD/OHP/OHPLetters/Open-Card-Notice-EN.pdf",
+    "retrieved": "2026-11-05",
+    "usage_note": "Public government sample notice, used for evaluation (full PDF, 4 pages; labels re-checked against every page: page 2 asks you to check whether your providers accept OHP Open Card; Jan 1, 2027 is the move date, not a reply deadline, so deadline stays null)"
   },
   {
     "id": "vt-re005ep-renewal-decision",
@@ -91,6 +169,19 @@
     "usage_note": "Public government sample notice, used for evaluation (page 1 of PDF; Vermont; relative deadline (10 days of getting the notice), no date)"
   },
   {
+    "id": "vt-re005ep-renewal-decision-full",
+    "file": "vt-re005ep-renewal-decision-full.pdf",
+    "split": "test",
+    "state": "other",
+    "notice_type": "approval_or_change",
+    "deadline": null,
+    "required_action": "call if information wrong",
+    "documents": [],
+    "source_url": "https://dvha.vermont.gov/sites/dvha/files/doc_library/RE005EP%20Renewal%20NOD%20sample.pdf",
+    "retrieved": "2026-11-05",
+    "usage_note": "Public government sample notice, used for evaluation (full PDF, 4 pages; labels re-checked against every page: later pages list changes to report, MABD and appeal rights; call within 10 days if information is wrong (relative, no date))"
+  },
+  {
     "id": "vt-202med-review-reminder",
     "file": "vt-202med-review-reminder.png",
     "split": "test",
@@ -102,6 +193,19 @@
     "source_url": "https://dvha.vermont.gov/sites/dvha/files/documents/202MED-Review-short-sample.pdf",
     "retrieved": "2026-10-28",
     "usage_note": "Public government sample notice, used for evaluation (page 1 of PDF; Vermont)"
+  },
+  {
+    "id": "vt-202med-review-reminder-full",
+    "file": "vt-202med-review-reminder-full.pdf",
+    "split": "test",
+    "state": "other",
+    "notice_type": "renewal",
+    "deadline": "2024-08-01",
+    "required_action": "sign return form",
+    "documents": ["review form"],
+    "source_url": "https://dvha.vermont.gov/sites/dvha/files/documents/202MED-Review-short-sample.pdf",
+    "retrieved": "2026-11-05",
+    "usage_note": "Public government sample notice, used for evaluation (full PDF, 4 pages; labels re-checked against every page: pages 2-4 are the renewal instructions and the blank review form)"
   },
   {
     "id": "vt-ee415-work-heads-up",
@@ -117,6 +221,19 @@
     "usage_note": "Public government sample notice, used for evaluation (page 1 of PDF; Vermont; informational, no deadline)"
   },
   {
+    "id": "vt-ee415-work-heads-up-full",
+    "file": "vt-ee415-work-heads-up-full.pdf",
+    "split": "test",
+    "state": "other",
+    "notice_type": "work_requirement_info",
+    "deadline": null,
+    "required_action": "keep records",
+    "documents": [],
+    "source_url": "https://dvha.vermont.gov/sites/dvha/files/documents/EE415-MM-HR1-Medicaid-Work-Requirements-Heads-Up.pdf",
+    "retrieved": "2026-11-05",
+    "usage_note": "Public government sample notice, used for evaluation (full PDF, 5 pages; labels re-checked against every page: page 4 lists steps to take now: update contact information, report changes, plan ahead and keep records of income or hours; no deadline)"
+  },
+  {
     "id": "vt-ee312-immigration-closure",
     "file": "vt-ee312-immigration-closure.png",
     "split": "test",
@@ -128,6 +245,19 @@
     "source_url": "https://dvha.vermont.gov/sites/dvha/files/documents/EE312-MM-HR1-Immigration-Closure-English.pdf",
     "retrieved": "2026-10-28",
     "usage_note": "Public government sample notice, used for evaluation (page 1 of PDF; Vermont; end date shown as EndDate placeholder)"
+  },
+  {
+    "id": "vt-ee312-immigration-closure-full",
+    "file": "vt-ee312-immigration-closure-full.pdf",
+    "split": "test",
+    "state": "other",
+    "notice_type": "coverage_ending",
+    "deadline": null,
+    "required_action": null,
+    "documents": [],
+    "source_url": "https://dvha.vermont.gov/sites/dvha/files/documents/EE312-MM-HR1-Immigration-Closure-English.pdf",
+    "retrieved": "2026-11-05",
+    "usage_note": "Public government sample notice, used for evaluation (full PDF, 6 pages; labels re-checked against every page: end date is an EndDate placeholder; appeal is optional, so no required action)"
   },
   {
     "id": "vt-201p-review-reminder-photo",
@@ -180,6 +310,19 @@
     "source_url": "https://hca.wa.gov/assets/free-or-low-cost/Apple-Health-renewal-action-required-for-individuals-turning-65.pdf",
     "retrieved": "2026-11-04",
     "usage_note": "Public government sample notice, used for evaluation (page 1 of PDF; Washington HCA EE009 renewal, placeholder name Jane Doe)"
+  },
+  {
+    "id": "wa-ee009-renewal-action-full",
+    "file": "wa-ee009-renewal-action-full.pdf",
+    "split": "test",
+    "state": "WA",
+    "notice_type": "renewal",
+    "deadline": "2019-05-31",
+    "required_action": "complete your renewal",
+    "documents": ["proof of income and resources"],
+    "source_url": "https://hca.wa.gov/assets/free-or-low-cost/Apple-Health-renewal-action-required-for-individuals-turning-65.pdf",
+    "retrieved": "2026-11-05",
+    "usage_note": "Public government sample notice, used for evaluation (full PDF, 12 pages; labels re-checked against every page: page 2 says DSHS will require proof of income and resources; pages 8-12 are the attached application with placeholder sample data (Jane Doe))"
   },
   {
     "id": "ca-mc020-1095b",

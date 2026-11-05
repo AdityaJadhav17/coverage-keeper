@@ -276,13 +276,107 @@ textarea {
   gap: 0.625rem;
 }
 
-.pick span::before {
+.camera span::before {
   content: "";
   width: 1.375rem;
   height: 1.375rem;
   background: currentColor;
   -webkit-mask: var(--icon-camera) center / contain no-repeat;
   mask: var(--icon-camera) center / contain no-repeat;
+}
+
+/* Letter pages: camera, file and folder pickers, drop area and page tray (US-070 to US-073). */
+.pickers {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.drop {
+  display: grid;
+  gap: 0.25rem;
+  justify-items: center;
+  min-height: 9rem;
+  padding: 1.5rem 1rem;
+  border: 2px dashed var(--ink);
+  border-radius: 16px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  font-size: 1.15rem;
+  cursor: pointer;
+}
+
+.drop .hint {
+  color: var(--text);
+  font-weight: 400;
+  font-size: 1rem;
+}
+
+.drop.over {
+  border-style: solid;
+  background: var(--primary-soft);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .drop:hover {
+    background: var(--primary-soft);
+  }
+}
+
+.tray {
+  display: grid;
+  /* Three across on a phone; thumbnails stay small on wide screens. */
+  grid-template-columns: repeat(auto-fill, minmax(5.5rem, 7rem));
+  gap: 0.75rem;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.tray li {
+  display: grid;
+  gap: 0.25rem;
+  align-content: start;
+  font-weight: 700;
+}
+
+.tray img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.tray .tray-pdf {
+  grid-column: 1 / -1;
+  padding: 1rem;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--surface);
+  overflow-wrap: anywhere;
+}
+
+.link {
+  justify-self: start;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 400;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.from-page {
+  margin: 0 0 0.75rem;
+  color: var(--muted);
 }
 
 .alert {

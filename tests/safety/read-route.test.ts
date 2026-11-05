@@ -17,7 +17,12 @@ async function read(lang?: string) {
   const form = new FormData();
   form.set(
     "image",
-    new File([new Uint8Array(10)], "a.png", { type: "image/png" }),
+    // A real PNG signature: the route checks file bytes (US-075).
+    new File(
+      [new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])],
+      "a.png",
+      { type: "image/png" },
+    ),
   );
   if (lang) form.set("lang", lang);
   const res = await POST(

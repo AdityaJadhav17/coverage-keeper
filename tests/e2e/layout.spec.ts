@@ -25,6 +25,7 @@ async function openResult(page: Page) {
   await page.goto("/");
   await page.getByRole("button", { name: "Start with my letter" }).click();
   await page.getByLabel("Scan my letter").setInputFiles(PNG);
+  await page.getByRole("button", { name: /^Read my letter/ }).click();
   await expect(page.getByTestId("deadline")).toBeVisible();
   await page.evaluate(() =>
     Promise.all(document.getAnimations().map((a) => a.finished)),

@@ -37,7 +37,11 @@ for (const f of files) {
 }
 
 const labels = JSON.parse(readFileSync("eval/labels.json", "utf8"));
-const labeled = new Map(labels.map((l) => [`eval/letters/${l.file}`, l]));
+const labeled = new Map(
+  labels.flatMap((l) =>
+    (l.files ?? [l.file]).map((f) => [`eval/letters/${f}`, l]),
+  ),
+);
 for (const l of labels) {
   if (!/^https:\/\/([a-z0-9-]+\.)*[a-z0-9-]+\.gov\//.test(l.source_url ?? "")) {
     errors.push(`eval label ${l.id}: source_url must be a public .gov page`);

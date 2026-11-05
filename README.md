@@ -69,35 +69,37 @@ Details: [docs/safety-and-privacy.md](docs/safety-and-privacy.md), [ADR-0004 pri
 
 ## Evaluation
 
-**Method.** The eval set is 15 labeled images: 12 public sample notices from state `.gov` sites (3 Oregon, 1 Washington, 1 California, 7 Vermont; page 1 of each PDF) and 3 phone photos. The split was fixed before any run: 4 dev, 11 test. The Washington and California letters were added to the test split for state detection and were never used to tune the prompt. The test split ran with `claude-opus-5-5` on prompt v1 [5], v2 [6], v3 [8] and v4 [9]. Prompt v3 adds the sending state. Prompt v4 adds Spanish output; its English text is unchanged from v3. Because one run can swing by ±2 on required action, v3 and v4 are reported as the mean of 3 runs with the range. Nobody tuned the prompt on test failures. Scoring rules are in [docs/eval.md](docs/eval.md).
+**Method.** The eval set has 26 labeled letters: 12 public sample notices from state `.gov` sites (3 Oregon, 1 Washington, 1 California, 7 Vermont) read as page 1 only, 3 phone photos, and the full PDF of each of the 11 notices that has more than one page (`<id>-full`). The split was fixed before any run: 8 dev, 18 test. Each full PDF is in the same split as its page-1 entry, and its labels were re-checked against every page before any run, because some actions and papers are only on later pages. The Washington and California letters were added to the test split for state detection and were never used to tune the prompt. The test split ran with `claude-opus-5-5` on prompt v1 [5], v2 [6], v3 [8], v4 [9] and v5 [10]. Prompt v3 adds the sending state. Prompt v4 adds Spanish output. Prompt v5 reads every page of a photo set or PDF and reports which page the deadline is on. Because one run can swing by ±2 on required action, v3 to v5 are reported as the mean of 3 runs with the range. Nobody tuned the prompt on test failures. Scoring rules are in [docs/eval.md](docs/eval.md).
 
-**Results (test split, prompt v4, mean of 3 runs per language).** Deadline, state, notice type and guardrail were identical on every run.
+**Results (test split, prompt v5, English, mean of 3 runs).** Deadline, state, notice type and guardrail were identical on every run.
 
-| Metric                                 | English, 11 letters | English, same 9 as v2 | v2 (1 run) | Spanish, 11 letters         |
-| -------------------------------------- | ------------------- | --------------------- | ---------- | --------------------------- |
-| Printed deadline read correctly        | 5 of 5              | 4 of 4                | 4 of 4     | 5 of 5                      |
-| No deadline correctly reported as none | 6 of 6              | 5 of 5                | 5 of 5     | 6 of 6                      |
-| State identified                       | 11 of 11            | 9 of 9                | not scored | 11 of 11                    |
-| Notice type correct                    | 10 of 11            | 8 of 9                | 8 of 9     | 10.3 of 11 (10–11)          |
-| Required action correct                | 7.7 of 11 (7–8)     | 5.7 of 9 (5–6)        | 6 of 9     | not scored (English labels) |
-| Document recall (mean)                 | 1.00                | 1.00                  | 1.00       | not scored                  |
-| Document precision (mean)              | 0.80 (0.77–0.86)    | 0.83                  | 0.83       | not scored                  |
-| Guardrail hits                         | 0                   | 0                     | 0          | 0                           |
+| Metric                                 | Page 1, 11 letters | Page 1, same 7 as full | Full PDF, 7 letters | v4 page 1, 11 letters |
+| -------------------------------------- | ------------------ | ---------------------- | ------------------- | --------------------- |
+| Printed deadline read correctly        | 5 of 5             | 2 of 2                 | 2 of 2              | 5 of 5                |
+| No deadline correctly reported as none | 6 of 6             | 5 of 5                 | 5 of 5              | 6 of 6                |
+| State identified                       | 11 of 11           | 7 of 7                 | 7 of 7              | 11 of 11              |
+| Notice type correct                    | 10 of 11           | 6 of 7                 | 6 of 7              | 10 of 11              |
+| Required action correct                | 8.0 of 11 (7–9)    | 4.7 of 7 (4–5)         | 5.3 of 7 (5–6)      | 7.7 of 11 (7–8)       |
+| Document recall (mean)                 | 1.00               | 1.00                   | 0.81 (0.71–0.86)    | 1.00                  |
+| Document precision (mean)              | 0.83 (0.77–0.86)   | 0.88 (0.79–0.93)       | 0.71 (0.64–0.79)    | 0.80 (0.77–0.86)      |
+| Guardrail hits                         | 0                  | 0                      | 0                   | 0                     |
 
-In Spanish runs the summary, action and documents come back in Spanish using "usted", and the quoted deadline line stays exactly as printed on the letter. A fluent speaker still needs to review that output.
+Page-1 results on v5 stay within the v4 run-to-run range. Reading the whole letter finds more of what it asks you to do (5.3 vs 4.7 on the same 7 letters), but finds the papers to send less reliably. The v4 Spanish run is in [9]; v5 was not re-run in Spanish.
 
 **Failures.**
 
-- On every English run (v4): notice type for `vt-re005ep-renewal-decision`, and required action for `or-med005-eligibility` and `vt-ee307-renewal-ending-photo`.
-- On some runs: required action for `vt-ee415-work-heads-up` and `or-open-card-move`. On letters that ask for nothing, the reader sometimes writes "the letter does not ask you to do anything" instead of returning none.
-- The same letters fail on v1, v2 and v3. Which ones fail on every run versus only some runs shifts between batches.
+- On every run (v5): notice type for `vt-re005ep-renewal-decision` and its full PDF, required action for `or-med005-eligibility` (page 1) and `vt-ee312-immigration-closure-full`.
+- On some runs: required action for `or-open-card-move` and its full PDF, `vt-ee415-work-heads-up` and `vt-ee307-renewal-ending-photo`. On letters that ask for nothing, the reader sometimes writes "the letter does not ask you to do anything" instead of returning none.
+- Document recall on full PDFs: the review form in `vt-202med-review-reminder-full` and the proof of income and resources in `wa-ee009-renewal-action-full` were each missed on 2 of 3 runs.
+- `or-med005-eligibility` fails required action on page 1 on every run, while its full PDF, where "report your changes" is on page 6, passes on every run.
 
 **Caveats.**
 
 - The set is small: 11 test letters.
 - It is mostly Vermont. Oregon publishes only 3 sample notices online, and Washington and California have 1 each in the set.
 - Nevada and Arizona have no sample letters in the set.
-- Only page 1 of each notice is read.
+- Full PDFs are scored only on the 7 test notices with more than one page, so each full-letter number moves a lot with one letter.
+- No eval letter is a set of several phone photos; multi-photo letters are covered by tests, not by the eval.
 - The 3 phone photos show a screen, not printed paper.
 - 2 of the 3 photos (`vt-201p`, `vt-ee307`) show letters whose PDF versions are in the dev split.
 
@@ -206,6 +208,7 @@ Every pull request must pass hygiene and secret scan, dependency audit and licen
 7. Sample notices used for evaluation: Oregon Health Authority, Washington State Health Care Authority, California Department of Health Care Services and Vermont Department of Vermont Health Access. Each file's source URL is in [`eval/labels.json`](eval/labels.json).
 8. Test split results, prompt v3, 3 runs, pull request #30: https://github.com/AdityaJadhav17/coverage-keeper/pull/30#issuecomment-6640037012
 9. Test split results, prompt v4, English and Spanish, 3 runs each, pull request #33: https://github.com/AdityaJadhav17/coverage-keeper/pull/33
+10. Test split results, prompt v5, page 1 and full PDFs, 3 runs, pull request #34: https://github.com/AdityaJadhav17/coverage-keeper/pull/34
 
 ## Disclaimer
 
