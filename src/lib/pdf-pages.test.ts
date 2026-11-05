@@ -53,6 +53,32 @@ describe("pdfPageCount (security audit M1)", () => {
     );
   });
 
+  it("counts a page once when an edited PDF repeats it in later revisions", () => {
+    const page = "3 0 obj << /Type /Page >> endobj\n%%EOF\n";
+    expect(pdfPageCount(enc(`%PDF-1.7\n${page}${page}${page}`))).toBe(1);
+  });
+
+  it("reads object numbers from a real object stream header (/First)", () => {
+    const objects = "<< /Type /Page >> << /Type /Page >> << /Type /Page >>";
+    const header = "3 0 4 18 5 36 ";
+    const body = deflateSync(header + objects);
+    const stream = (n: number) =>
+      join(
+        `${n} 0 obj << /Type /ObjStm /N 3 /First ${header.length} /Filter /FlateDecode >> stream\n`,
+        body,
+        "\nendstream endobj\n",
+      );
+    // The same three pages, saved twice.
+    expect(
+      pdfPageCount(join("%PDF-1.7\n", stream(9), stream(10), "%%EOF")),
+    ).toBe(3);
+  });
+
+  it("ignores /Count outside the page tree, such as bookmarks", () => {
+    const outline = "20 0 obj << /Type /Outlines /Count 8 >> endobj\n";
+    expect(pdfPageCount(enc(`%PDF-1.7\n${pages(2)}${outline}%%EOF`))).toBe(2);
+  });
+
   it("does not count /Pages nodes as pages", () => {
     expect(
       pdfPageCount(
@@ -76,12 +102,22 @@ describe("pdfPageCount (security audit M1)", () => {
     expect(pdfPageCount(data)).toBeNull();
   });
 
+  // Page counts from pdfinfo. Several of these were saved more than once.
   it.each([
     ["or-med005-eligibility-full.pdf", 14],
+    ["or-open-card-move-full.pdf", 4],
+    ["or-outreach-work-rules-full.pdf", 3],
+    ["vt-201p-review-reminder-full.pdf", 3],
+    ["vt-202med-review-reminder-full.pdf", 4],
+    ["vt-205ifar-renew-full.pdf", 2],
     ["vt-ee307-renewal-ending-full.pdf", 5],
-  ])("counts the real letter %s without under-counting", (file, real) => {
+    ["vt-ee312-immigration-closure-full.pdf", 6],
+    ["vt-ee415-work-heads-up-full.pdf", 5],
+    ["vt-re005ep-renewal-decision-full.pdf", 4],
+    ["wa-ee009-renewal-action-full.pdf", 12],
+  ])("counts the real letter %s exactly", (file, real) => {
     const n = pdfPageCount(readFileSync(`eval/letters/${file}`));
-    expect(n).toBeGreaterThanOrEqual(real);
+    expect(n).toBe(real);
     expect(n).toBeLessThanOrEqual(MAX_PDF_PAGES);
   });
 });
