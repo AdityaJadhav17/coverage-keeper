@@ -1,5 +1,10 @@
-import { MAX_LETTER_BYTES, MAX_PAGES } from "@/lib/collect-files";
+import {
+  MAX_LETTER_BYTES,
+  MAX_PAGES,
+  MAX_PDF_PAGES,
+} from "@/lib/collect-files";
 import { sniffType } from "@/lib/file-type";
+import { pdfPageCount } from "@/lib/pdf-pages";
 import { enforceGuardrail } from "@/lib/guardrails";
 import {
   MODEL_ID,
@@ -69,6 +74,7 @@ export async function POST(req: Request) {
     files.map(async (f) => {
       const data = new Uint8Array(await f.arrayBuffer());
       return {
+        data,
         type: sniffType(data),
         base64: Buffer.from(data).toString("base64"),
       };
@@ -79,6 +85,15 @@ export async function POST(req: Request) {
     const [file] = read;
     if (file?.type !== "application/pdf") {
       return error(400, "That file is not a PDF.");
+    }
+    // Before the model call: each page is billed (security audit M1).
+    const pages = pdfPageCount(file.data);
+    if (pages === null) return error(400, "That file is not a PDF.");
+    if (pages > MAX_PDF_PAGES) {
+      return error(
+        413,
+        "This PDF has too many pages. Take photos of up to 10 pages instead.",
+      );
     }
     input = { kind: "pdf", base64: file.base64 };
   } else {

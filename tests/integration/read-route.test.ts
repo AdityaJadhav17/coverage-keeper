@@ -27,10 +27,12 @@ const png = (name = "a.png", size?: number) =>
   new File([bytes([...PNG_SIG, name.length], size)], name, {
     type: "image/png",
   });
-const pdf = (size?: number) =>
-  new File([bytes("%PDF-1.7", size)], "letter.pdf", {
-    type: "application/pdf",
-  });
+const pdf = (size?: number, pages = 1) =>
+  new File(
+    [bytes(`%PDF-1.7\n${"<< /Type /Page >>\n".repeat(pages)}`, size)],
+    "letter.pdf",
+    { type: "application/pdf" },
+  );
 
 let ipCount = 0;
 // Each request gets its own IP so the shared rate limiter never trips by accident.
@@ -186,6 +188,25 @@ describe("POST /api/read", () => {
         image: [png("a.png", 2 * MB), png("b.png", 2 * MB + 1)],
       });
       expect(res.status).toBe(413);
+      expect(reader).not.toHaveBeenCalled();
+    });
+
+    it("refuses a PDF over 20 pages before calling the reader (security audit M1)", async () => {
+      expect((await send({ pdf: [pdf(undefined, 20)] })).status).toBe(200);
+      reader.mockClear();
+      const res = await send({ pdf: [pdf(undefined, 21)] });
+      expect(res.status).toBe(413);
+      expect((await res.json()).error).toBe(
+        "This PDF has too many pages. Take photos of up to 10 pages instead.",
+      );
+      expect(reader).not.toHaveBeenCalled();
+    });
+
+    it("refuses a PDF whose pages can't be counted", async () => {
+      const res = await send({
+        pdf: [new File([bytes("%PDF-1.7\n%%EOF")], "a.pdf")],
+      });
+      expect(res.status).toBe(400);
       expect(reader).not.toHaveBeenCalled();
     });
 
