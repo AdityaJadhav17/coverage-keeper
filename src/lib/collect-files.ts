@@ -1,0 +1,32 @@
+export const MAX_PAGES = 10;
+
+export type Collected =
+  | { kind: "images"; files: File[]; skipped: number }
+  | { kind: "pdf"; file: File; skipped: number }
+  | {
+      kind: "error";
+      code: "onePdf" | "pdfAndPhotos" | "notPhotos" | "empty";
+    };
+
+// Turns picked or dropped files into up to 10 images or one PDF (US-070 to US-073).
+// Codes, not text: the UI words them. Real bytes are checked on the server (US-075).
+export function collectFiles(files: File[]): Collected {
+  if (files.length === 0) return { kind: "error", code: "empty" };
+  const pdfs = files.filter((f) => f.type === "application/pdf");
+  const images = files
+    .filter((f) => f.type.startsWith("image/"))
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+  const others = files.length - pdfs.length - images.length;
+
+  if (pdfs.length > 0 && images.length > 0)
+    return { kind: "error", code: "pdfAndPhotos" };
+  if (pdfs.length > 1) return { kind: "error", code: "onePdf" };
+  const [pdf] = pdfs;
+  if (pdf) return { kind: "pdf", file: pdf, skipped: others };
+  if (images.length === 0) return { kind: "error", code: "notPhotos" };
+  return {
+    kind: "images",
+    files: images.slice(0, MAX_PAGES),
+    skipped: others + Math.max(0, images.length - MAX_PAGES),
+  };
+}
