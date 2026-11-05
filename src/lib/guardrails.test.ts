@@ -96,3 +96,60 @@ describe("Spanish eligibility claims (US-064)", () => {
     expect(enforceGuardrail("Usted es elegible").text).toBe(SAFE_FALLBACK);
   });
 });
+
+// Phrasings and Unicode tricks that slipped past (security audit L1).
+describe("claims that used to slip past", () => {
+  it.each([
+    "You have been approved for OHP.",
+    "You were approved.",
+    "You qualified for an exemption.",
+    "Good news: you are covered.",
+    "You're covered through June.",
+    "You will keep your coverage.",
+    "You meet the work requirement.",
+    "You meet all the requirements.",
+    "You are e​ligible.",
+    "You​are eligible.",
+    "You are еligible.",
+    "Yоu аre exempt.",
+    "You are ｅｌｉｇｉｂｌｅ.",
+    "Usted ha sido aprobado.",
+    "Usted fue aprobada.",
+    "Usted quedó exento.",
+    "Usted calificó.",
+    "Usted no calificará.",
+    "Usted cumple los requisitos.",
+    "Usted cumple con el requisito de trabajo.",
+    "Usted reúne los requisitos.",
+    "Usted mantendrá su cobertura.",
+    "Usted tiene derecho a Medicaid.",
+    "Usted es e​legible.",
+  ])("blocks %j", (text) => {
+    expect(findForbiddenClaims(text)).not.toHaveLength(0);
+  });
+
+  it.each([
+    "You must show that you meet the work requirement.",
+    "Send proof that you meet the requirements by June 1.",
+    "Tell OHP if you meet the requirements.",
+    "If you do not reply, your coverage may end.",
+    "The letter lists who is covered.",
+    "Do you meet the work requirements?",
+    "Debe demostrar que cumple los requisitos.",
+    "¿Cumple con los requisitos de trabajo de SNAP o TANF?",
+    "Si la persona incumple los requisitos, llame a la oficina.",
+    "Pregunte si usted cumple los requisitos.",
+    "Si no responde, su cobertura puede terminar.",
+    "Llame para saber si tiene derecho a una exención.",
+  ])("allows %j", (text) => {
+    expect(findForbiddenClaims(text)).toEqual([]);
+  });
+
+  it("keeps the original text when nothing is blocked", () => {
+    expect(enforceGuardrail("Call ＯＨＰ.").text).toBe("Call ＯＨＰ.");
+  });
+
+  it("still defaults to the English fallback", () => {
+    expect(enforceGuardrail("Usted es elegible").text).toBe(SAFE_FALLBACK);
+  });
+});
