@@ -1,16 +1,8 @@
 export const MAX_PICK_BYTES = 15 * 1024 * 1024;
 export const MAX_UPLOAD_BYTES = 2 * 1024 * 1024;
+// Shared by all pages of one read; the route allows 4 MB plus form overhead.
+export const MAX_PAGES_BYTES = 3.8 * 1024 * 1024;
 export const MAX_EDGE = 2000;
-
-// Why a picked file can't be used, or null if it's fine (US-005). The UI words it.
-export function rejectReason(file: {
-  type: string;
-  size: number;
-}): "notImage" | "tooLarge" | null {
-  if (!file.type.startsWith("image/")) return "notImage";
-  if (file.size > MAX_PICK_BYTES) return "tooLarge";
-  return null;
-}
 
 // Size that keeps the aspect ratio with the long edge at most maxEdge. Never upscales.
 export function fitWithin(width: number, height: number, maxEdge = MAX_EDGE) {
@@ -21,8 +13,11 @@ export function fitWithin(width: number, height: number, maxEdge = MAX_EDGE) {
   };
 }
 
-// Re-encode any browser-decodable image (incl. iPhone HEIC in Safari) to a JPEG under 2 MB.
-export async function toUploadJpeg(file: Blob): Promise<Blob> {
+// Re-encode any browser-decodable image (incl. iPhone HEIC in Safari) to a JPEG under maxBytes.
+export async function toUploadJpeg(
+  file: Blob,
+  maxBytes = MAX_UPLOAD_BYTES,
+): Promise<Blob> {
   const url = URL.createObjectURL(file);
   try {
     const img = new Image();
@@ -38,7 +33,7 @@ export async function toUploadJpeg(file: Blob): Promise<Blob> {
         canvas.toBlob(resolve, "image/jpeg", 0.85 - attempt * 0.1),
       );
       if (!blob) throw new Error("Could not encode image");
-      if (blob.size <= MAX_UPLOAD_BYTES) return blob;
+      if (blob.size <= maxBytes) return blob;
       ({ width, height } = fitWithin(
         width,
         height,
@@ -49,4 +44,12 @@ export async function toUploadJpeg(file: Blob): Promise<Blob> {
   } finally {
     URL.revokeObjectURL(url);
   }
+}
+
+// Every page of one letter, each within an equal share of one request (US-070).
+export function toUploadJpegs(files: Blob[]): Promise<Blob[]> {
+  const budget = Math.floor(
+    Math.min(MAX_UPLOAD_BYTES, MAX_PAGES_BYTES / files.length),
+  );
+  return Promise.all(files.map((f) => toUploadJpeg(f, budget)));
 }

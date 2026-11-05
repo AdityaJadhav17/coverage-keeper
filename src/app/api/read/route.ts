@@ -1,4 +1,4 @@
-import { MAX_PAGES } from "@/lib/collect-files";
+import { MAX_LETTER_BYTES, MAX_PAGES } from "@/lib/collect-files";
 import { sniffType } from "@/lib/file-type";
 import { enforceGuardrail } from "@/lib/guardrails";
 import {
@@ -9,9 +9,7 @@ import {
 } from "@/lib/letter-reader";
 import { createRateLimiter } from "@/lib/rate-limit";
 
-// All pages together; Vercel's function body limit is about 4.5 MB.
-const MAX_BYTES = 4 * 1024 * 1024;
-const MAX_BODY = MAX_BYTES + 64 * 1024; // files + multipart overhead
+const MAX_BODY = MAX_LETTER_BYTES + 64 * 1024; // files + multipart overhead
 
 // Each call spends paid model credits; cap one client looping (security audit H1).
 const limited = createRateLimiter({ max: 10, windowMs: 60_000 });
@@ -57,7 +55,7 @@ export async function POST(req: Request) {
   }
   if (pdfs.length > 1) return error(400, "Send one PDF at a time.");
   if (images.length > MAX_PAGES) return error(400, "Send up to 10 pages.");
-  if (files.reduce((sum, f) => sum + f.size, 0) > MAX_BYTES) {
+  if (files.reduce((sum, f) => sum + f.size, 0) > MAX_LETTER_BYTES) {
     return error(
       413,
       pdfs.length > 0

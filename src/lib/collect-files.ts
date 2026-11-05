@@ -1,4 +1,6 @@
 export const MAX_PAGES = 10;
+// One read's files together; Vercel's function body limit is about 4.5 MB.
+export const MAX_LETTER_BYTES = 4 * 1024 * 1024;
 
 export type Collected =
   | { kind: "images"; files: File[]; skipped: number }

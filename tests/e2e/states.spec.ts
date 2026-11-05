@@ -23,6 +23,7 @@ async function toScreening(page: Page) {
   await page.goto("/");
   await page.getByRole("button", { name: "Start with my letter" }).click();
   await page.getByLabel("Scan my letter").setInputFiles(PNG);
+  await page.getByRole("button", { name: /^Read my letter/ }).click();
   await expect(page.locator(".callbar")).toContainText(
     "the number on your letter",
   );
@@ -133,6 +134,7 @@ test("the state chosen on the result screen carries into the exemption check", a
   await page.goto("/");
   await page.getByRole("button", { name: "Start with my letter" }).click();
   await page.getByLabel("Scan my letter").setInputFiles(PNG);
+  await page.getByRole("button", { name: /^Read my letter/ }).click();
   await page.getByLabel("State that sent this letter").selectOption("CA");
   await page.getByRole("button", { name: "Check exemptions" }).click();
   await expect(page.getByLabel("State that sent this letter")).toHaveValue(
@@ -152,6 +154,7 @@ test("the state read from the letter is already chosen (US-080)", async ({
   await page.goto("/");
   await page.getByRole("button", { name: "Start with my letter" }).click();
   await page.getByLabel("Scan my letter").setInputFiles(PNG);
+  await page.getByRole("button", { name: /^Read my letter/ }).click();
   await expect(page.getByLabel("State that sent this letter")).toHaveValue(
     "CA",
   );

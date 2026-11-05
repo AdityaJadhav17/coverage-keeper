@@ -26,15 +26,41 @@ const en = {
   promiseLead: "Rather talk to a person?",
   promise: "Call the number on your letter. We show it on every screen.",
 
-  captureTitle: "Photograph the first page",
+  captureTitle: "Photograph your letter",
   captureLead:
-    "Lay it flat near a window or lamp, and get all four corners in the frame.",
+    "Lay each page flat near a window or lamp, and get all four corners in the frame.",
   scan: "Scan my letter",
-  rejectNotImage:
-    "That file isn't a photo. Please pick a photo of your letter.",
   rejectTooLarge:
     "That photo is too large. Please take a new photo of your letter.",
   cantOpen: "This phone couldn't open that photo. Take a new one.",
+  choose: "Choose photos or a PDF",
+  chooseFolder: "Choose a folder",
+  dropHere: "Drag your letter here",
+  dropHint: "or click to choose files",
+  pageN: (n: number) => `Page ${n}`,
+  remove: "Remove",
+  removePage: (n: number) => `Remove page ${n}`,
+  addPage: "Add another page",
+  // null: a PDF, whose page count we don't know.
+  readPages: (n: number | null) =>
+    n === null
+      ? "Read my letter"
+      : `Read my letter (${n} ${n === 1 ? "page" : "pages"})`,
+  collectErrors: {
+    onePdf: "Choose one PDF at a time.",
+    pdfAndPhotos: "Use photos or one PDF, not both.",
+    notPhotos:
+      "That file isn't a photo or a PDF. Please pick a photo or PDF of your letter.",
+    empty: "No files were found. Pick photos or a PDF of your letter.",
+  } as Record<"onePdf" | "pdfAndPhotos" | "notPhotos" | "empty", string>,
+  skipped: (n: number) =>
+    `Skipped ${n} ${n === 1 ? "file" : "files"}. We read up to 10 photos or one PDF.`,
+  pdfTooBig: "This PDF is too big. Take photos of each page instead.",
+  pagesTooBig:
+    "These pages are too big to send together. Remove a page, or take the photos from a little farther back.",
+  badFile:
+    "We couldn't open one of these files. Use photos or a PDF of your letter.",
+  fromPage: (n: number) => `From page ${n}`,
 
   reading: "Reading your letter. This can take up to 30 seconds.",
   offlineTitle: "No connection. Your photo wasn't sent.",
@@ -156,15 +182,42 @@ const es: Messages = {
   promise:
     "Llame al número que aparece en su carta. Lo mostramos en todas las pantallas.",
 
-  captureTitle: "Tome una foto de la primera página",
+  captureTitle: "Tome fotos de su carta",
   captureLead:
-    "Póngala sobre una superficie plana, cerca de una ventana o lámpara, y que se vean las cuatro esquinas.",
+    "Ponga cada página sobre una superficie plana, cerca de una ventana o lámpara, y que se vean las cuatro esquinas.",
   scan: "Escanear mi carta",
-  rejectNotImage:
-    "Ese archivo no es una foto. Elija una foto de su carta, por favor.",
   rejectTooLarge:
     "Esa foto es demasiado grande. Tome una foto nueva de su carta, por favor.",
   cantOpen: "Este teléfono no pudo abrir esa foto. Tome otra.",
+  choose: "Elegir fotos o un PDF",
+  chooseFolder: "Elegir una carpeta",
+  dropHere: "Arrastre su carta aquí",
+  dropHint: "o haga clic para elegir archivos",
+  pageN: (n) => `Página ${n}`,
+  remove: "Quitar",
+  removePage: (n) => `Quitar la página ${n}`,
+  addPage: "Agregar otra página",
+  readPages: (n) =>
+    n === null
+      ? "Leer mi carta"
+      : `Leer mi carta (${n} ${n === 1 ? "página" : "páginas"})`,
+  collectErrors: {
+    onePdf: "Elija un solo PDF a la vez.",
+    pdfAndPhotos: "Use fotos o un solo PDF, no ambos.",
+    notPhotos:
+      "Ese archivo no es una foto ni un PDF. Elija una foto o un PDF de su carta, por favor.",
+    empty: "No encontramos archivos. Elija fotos o un PDF de su carta.",
+  },
+  skipped: (n) =>
+    n === 1
+      ? "Se omitió 1 archivo. Leemos hasta 10 fotos o un solo PDF."
+      : `Se omitieron ${n} archivos. Leemos hasta 10 fotos o un solo PDF.`,
+  pdfTooBig: "Este PDF es demasiado grande. Tome fotos de cada página.",
+  pagesTooBig:
+    "Estas páginas son demasiado grandes para enviarlas juntas. Quite una página o tome las fotos desde un poco más lejos.",
+  badFile:
+    "No pudimos abrir uno de estos archivos. Use fotos o un PDF de su carta.",
+  fromPage: (n) => `De la página ${n}`,
 
   reading: "Leyendo su carta. Puede tardar hasta 30 segundos.",
   offlineTitle: "Sin conexión. Su foto no se envió.",

@@ -51,3 +51,28 @@ it("no fixed message in either language makes an eligibility claim", () => {
   expect(findForbiddenClaims(text(messages.en))).toEqual([]);
   expect(findForbiddenClaims(text(messages.es))).toEqual([]);
 });
+
+it.each([
+  ["en", 1, "Read my letter (1 page)", "Skipped 1 file."],
+  ["en", 3, "Read my letter (3 pages)", "Skipped 3 files."],
+  ["es", 1, "Leer mi carta (1 página)", "Se omitió 1 archivo."],
+  ["es", 3, "Leer mi carta (3 páginas)", "Se omitieron 3 archivos."],
+] as const)(
+  "%s page counts for %i (US-070, US-073)",
+  (locale, n, read, skip) => {
+    const t = messages[locale];
+    expect(t.readPages(n)).toBe(read);
+    expect(t.skipped(n)).toMatch(new RegExp(`^${skip}`));
+  },
+);
+
+it("a PDF reads without a page count", () => {
+  expect(messages.en.readPages(null)).toBe("Read my letter");
+  expect(messages.es.readPages(null)).toBe("Leer mi carta");
+});
+
+it("both languages word every file error", () => {
+  expect(Object.keys(messages.es.collectErrors).sort()).toEqual(
+    Object.keys(messages.en.collectErrors).sort(),
+  );
+});
