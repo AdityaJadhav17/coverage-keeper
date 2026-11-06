@@ -11,10 +11,20 @@ export function createRateLimiter({
 }) {
   const hits = new Map<string, { n: number; reset: number }>();
   const OVERFLOW = "\0overflow";
-  return (key: string, now: number): boolean => {
+  const sweep = (now: number) => {
+    for (const [k, h] of hits) if (h.reset <= now) hits.delete(k);
+  };
+  let swept = 0;
+  const limited = (key: string, now: number): boolean => {
+    // Keys are IP addresses: drop expired ones at least once a window, so none is held
+    // much past its minute (the privacy notice says so).
+    if (now - swept >= windowMs) {
+      sweep(now);
+      swept = now;
+    }
     if (!hits.has(key) && hits.size >= maxKeys) {
       // Bound memory without wiping live counts (security audit I2).
-      for (const [k, h] of hits) if (h.reset <= now) hits.delete(k);
+      sweep(now);
       if (hits.size >= maxKeys) key = OVERFLOW;
     }
     const h = hits.get(key);
@@ -24,4 +34,6 @@ export function createRateLimiter({
     }
     return ++h.n > max;
   };
+  // How many keys are held, so tests can check expired IPs are gone.
+  return Object.assign(limited, { size: () => hits.size });
 }
