@@ -219,7 +219,7 @@ Every pull request must pass hygiene and secret scan, dependency audit and licen
 11. Test split results, prompt v6, English 3 runs and Spanish 1 run, pull request #35: https://github.com/AdityaJadhav17/coverage-keeper/pull/35
 12. Spanish-language letters, prompt v6, 3 runs each with English and Spanish answers, pull request #38: https://github.com/AdityaJadhav17/coverage-keeper/pull/38
 13. Fairer required-action scoring, test split 3 runs and dev 1 run, pull request #39: https://github.com/AdityaJadhav17/coverage-keeper/pull/39
-14. Test split results, prompt v7, English 3 runs and Spanish 1 run, with the Nevada letters: PR_URL
+14. Test split results, prompt v7, English 3 runs and Spanish 1 run, with the Nevada letters, pull request #40: https://github.com/AdityaJadhav17/coverage-keeper/pull/40
 
 ## Disclaimer
 
