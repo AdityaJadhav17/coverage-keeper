@@ -41,8 +41,10 @@ CI rejects any file in `eval/` that is not listed in `labels.json` with a `.gov`
 npm run eval                            # all splits, real model, reads ANTHROPIC_API_KEY from .env.local
 npm run eval -- --split test            # stage number
 npm run eval -- --split test --lang es  # Spanish output
+npm run eval -- --match -es             # only letters whose id contains "-es" (written in Spanish)
 ```
 
+- Letters written in Spanish have ids ending in `-es`. Each is an agency's Spanish version of an English sample and copies its labels and split, so an English-answer run scores every field.
 - `--lang es` asks for Spanish output. Labels are English, so a Spanish run scores deadline, state, notice type and guardrail only; required action and documents are reported as not scored.
 - One run can swing by ±2 on required action. Report the mean and range of 3 runs.
 
