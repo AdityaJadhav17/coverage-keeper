@@ -50,4 +50,14 @@ describe("createRateLimiter", () => {
     expect(limited("c", 0)).toBe(false);
     expect(limited("d", 0)).toBe(true);
   });
+
+  // Keys are IP addresses; the privacy notice says they aren't held past their window.
+  it("forgets expired keys once a window has passed, even when memory isn't full", () => {
+    const limited = createRateLimiter({ max: 5, windowMs: 60_000 });
+    for (const ip of ["198.51.100.1", "198.51.100.2", "198.51.100.3"])
+      limited(ip, 0);
+    expect(limited.size()).toBe(3);
+    limited("198.51.100.4", 60_000);
+    expect(limited.size()).toBe(1);
+  });
 });

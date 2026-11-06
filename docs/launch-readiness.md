@@ -11,7 +11,7 @@ This is not legal advice. Items marked **Lawyer** need review by a lawyer or a p
 - [ ] Move hosting off the Hobby plan, or get Vercel's written OK for Hobby ([Vercel](#2-vercel)).
 - [ ] Decide the data arrangement with Anthropic: standard retention, ZDR or HIPAA readiness ([Anthropic API](#1-anthropic-api)).
 - [ ] Set an Anthropic monthly spend limit and add a Vercel WAF rate-limit rule on `/api/read` ([Cost and guards](#3-cost-model-and-guards)).
-- [ ] Publish a privacy notice and terms of use, and link them from the consent screen and footer ([Legal pages](#4-legal-pages)).
+- [ ] Publish a privacy notice and terms of use, and link them from the consent screen and footer ([Legal pages](#4-legal-pages)). The privacy notice is drafted in English and Spanish in [legal/privacy-notice.md](legal/privacy-notice.md). It needs the blanks filled (operator, contact, effective date, ZDR or not) and a lawyer's review. Terms of use are not drafted yet.
 - [ ] Get a lawyer's read on HIPAA, the FTC Health Breach Notification Rule and Washington's My Health My Data Act (**Lawyer**).
 - [ ] Open a support channel that never asks for letter photos ([Support](#5-support-and-feedback)).
 - [ ] Run the accessibility checks ([Accessibility](#accessibility-checks-before-launch)).
