@@ -16,7 +16,7 @@
 
 Request ID, timestamp, route, status code, latency, model ID, prompt version, error class, guardrail-hit count.
 
-Vercel Web Analytics counts page views without cookies (per Vercel's documentation: path, referrer, browser, OS, device type, country). Every screen lives at `/`, so the path never reveals a letter or a result. The app sends no custom events.
+Vercel Web Analytics counts page views without cookies. Per Vercel's [privacy and compliance page](https://vercel.com/docs/analytics/privacy-policy), each data point can store a timestamp, the URL and path, the referrer, filtered query parameters, location (country, region, city), OS and version, browser and version, device type and script version. Visitors are identified by a hash of the request that is discarded after 24 hours. Every screen lives at `/`, so the path never reveals a letter or a result. The app sends no custom events.
 
 ## What we never store or log
 
