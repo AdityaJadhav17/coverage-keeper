@@ -43,7 +43,7 @@ This is not legal advice. Items marked **Lawyer** need review by a lawyer or a p
 
 Two fixes for our docs:
 
-- [safety-and-privacy.md](safety-and-privacy.md) lists Web Analytics fields as "path, referrer, browser, OS, device type, country". Vercel's list also has timestamp, query params, region and city. Update the list in that file and in the privacy notice.
+- Done: [safety-and-privacy.md](safety-and-privacy.md) now lists every Web Analytics field Vercel documents (timestamp, query params, region and city were missing). The privacy notice still needs the same list.
 - The upload passes through a Vercel Function. We do not store it, but Vercel processes it in transit. The privacy notice should name Vercel as the host.
 
 ## 3. Cost model and guards

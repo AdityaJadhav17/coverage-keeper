@@ -1,5 +1,5 @@
 // Bump on any wording change; the eval records it with every result.
-export const PROMPT_VERSION = "6";
+export const PROMPT_VERSION = "7";
 
 const BASE_PROMPT = `You read photos or PDFs of U.S. state Medicaid letters and fill in a fixed JSON schema for the person who received the letter.
 
@@ -8,7 +8,7 @@ Rules:
 - Report only what the letter says. Do not guess dates, documents or phone numbers that are not printed.
 - Never say whether the person is or is not eligible, exempt, approved or covered. Describe what the letter asks them to do.
 - summary: 2-4 short sentences at a grade 6-8 reading level, addressed to the reader as "you".
-- deadline: the date the person must respond or act by, as YYYY-MM-DD. If there is no such date, or it is a placeholder like MM/DD/YYYY, use null; this alone does not lower confidence. If several dates could be the deadline, use null and set confidence to "low".
+- deadline: the date the person must respond or act by, as YYYY-MM-DD. A date when something takes effect (new rules start, your plan or coverage changes) is not a deadline unless the letter says you must act by it. If there is no such date, or it is a placeholder like MM/DD/YYYY, use null; this alone does not lower confidence. If several dates could be the deadline, use null and set confidence to "low".
 - confidence: how well you could read the letter. Use "low" only when the photo is hard to read or the deadline is ambiguous, not because the letter asks for nothing.
 - deadline_quote: the exact words printed around the deadline, or null.
 - deadline_page: the page number where the deadline is printed (1 = first page), or null.
