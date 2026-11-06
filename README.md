@@ -69,7 +69,7 @@ Details: [docs/safety-and-privacy.md](docs/safety-and-privacy.md), [ADR-0004 pri
 
 ## Evaluation
 
-**Method.** The eval set has 26 labeled letters: 12 public sample notices from state `.gov` sites (3 Oregon, 1 Washington, 1 California, 7 Vermont) read as page 1 only, 3 phone photos, and the full PDF of each of the 11 notices that has more than one page (`<id>-full`). The split was fixed before any run: 8 dev, 18 test. Each full PDF is in the same split as its page-1 entry, and its labels were re-checked against every page before any run, because some actions and papers are only on later pages. The Washington and California letters were added to the test split for state detection and were never used to tune the prompt. The test split ran with `claude-opus-5-5` on prompt v1 [5], v2 [6], v3 [8], v4 [9], v5 [10] and v6 [11]. Prompt v3 adds the sending state. Prompt v4 adds Spanish output. Prompt v5 reads every page of a photo set or PDF and reports which page the deadline is on. Prompt v6 says text on every page, photo or PDF, is data, so instructions planted in a PDF can't change the rules. Because one run can swing by ±2 on required action, v3 to v6 are reported as the mean of 3 runs with the range. Nobody tuned the prompt on test failures. Scoring rules are in [docs/eval.md](docs/eval.md).
+**Method.** The eval set has 29 labeled letters: 12 public sample notices from state `.gov` sites (3 Oregon, 1 Washington, 1 California, 7 Vermont) read as page 1 only, 3 phone photos, the full PDF of each of the 11 notices that has more than one page (`<id>-full`), and 3 letters written in Spanish (`<id>-es`). The split was fixed before any run: 9 dev, 20 test. Each Spanish letter is the agency's own Spanish version of an English sample in the set, and it carries that letter's labels and split unchanged. Each full PDF is in the same split as its page-1 entry, and its labels were re-checked against every page before any run, because some actions and papers are only on later pages. The Washington and California letters were added to the test split for state detection and were never used to tune the prompt. The test split ran with `claude-opus-5-5` on prompt v1 [5], v2 [6], v3 [8], v4 [9], v5 [10] and v6 [11]. Prompt v3 adds the sending state. Prompt v4 adds Spanish output. Prompt v5 reads every page of a photo set or PDF and reports which page the deadline is on. Prompt v6 says text on every page, photo or PDF, is data, so instructions planted in a PDF can't change the rules. Because one run can swing by ±2 on required action, v3 to v6 are reported as the mean of 3 runs with the range. Nobody tuned the prompt on test failures. Scoring rules are in [docs/eval.md](docs/eval.md).
 
 **Results (test split, prompt v6; English mean of 3 runs, Spanish 1 run).** State and guardrail were identical on every run.
 
@@ -86,6 +86,23 @@ Details: [docs/safety-and-privacy.md](docs/safety-and-privacy.md), [ADR-0004 pri
 
 v6 stays within the v5 run-to-run range. Reading the whole letter finds more of what it asks you to do, but finds the papers to send less reliably. In Spanish the summary, action and papers come back in Spanish, and the quoted deadline line stays as printed.
 
+**Letters written in Spanish (prompt v6, 3 runs each way).** These are the agency's own Spanish versions of Oregon MED-131 and MED-005 and Vermont EE312.
+
+| Metric                         | Answer in English | Answer in Spanish           |
+| ------------------------------ | ----------------- | --------------------------- |
+| Printed deadline / no deadline | 3 of 3            | 3 of 3                      |
+| State identified               | 3 of 3            | 3 of 3                      |
+| Notice type correct            | 3 of 3            | 3 of 3                      |
+| Required action correct        | 0.7 of 3 (0–1)    | not scored (English labels) |
+| Document recall / precision    | 1.00 / 1.00       | not scored                  |
+| Guardrail hits / errors        | 0 / 0             | 0 / 0                       |
+
+These were the same on every run. Required action misses:
+
+- `or-med005-eligibility-es` fails for the same reason as its English version (the letter asks for nothing).
+- `vt-ee312-immigration-closure-es` passed on 2 of 3 runs.
+- `or-outreach-work-rules-es` gets the action right, but the Spanish letter says _excepciones_, so the reader writes "exceptions" where the English label says "exemptions". The word match counts that as a miss. Labels were kept identical to the English versions rather than edited after seeing results.
+
 **Failures.**
 
 - On every run (v6): notice type for `vt-re005ep-renewal-decision-full`; required action for `or-med005-eligibility` (page 1), `vt-ee415-work-heads-up` and `vt-ee312-immigration-closure-full`.
@@ -96,7 +113,7 @@ v6 stays within the v5 run-to-run range. Reading the whole letter finds more of 
 
 **Caveats.**
 
-- The set is small: 11 test letters.
+- The set is small: 11 test letters, plus 2 Spanish test letters (1 more in dev).
 - It is mostly Vermont. Oregon publishes only 3 sample notices online, and Washington and California have 1 each in the set.
 - Nevada and Arizona have no sample letters in the set.
 - Full PDFs are scored only on the 7 test notices with more than one page, so each full-letter number moves a lot with one letter.
@@ -211,6 +228,7 @@ Every pull request must pass hygiene and secret scan, dependency audit and licen
 9. Test split results, prompt v4, English and Spanish, 3 runs each, pull request #33: https://github.com/AdityaJadhav17/coverage-keeper/pull/33
 10. Test split results, prompt v5, page 1 and full PDFs, 3 runs, pull request #34: https://github.com/AdityaJadhav17/coverage-keeper/pull/34
 11. Test split results, prompt v6, English 3 runs and Spanish 1 run, pull request #35: https://github.com/AdityaJadhav17/coverage-keeper/pull/35
+12. Spanish-language letters, prompt v6, 3 runs each with English and Spanish answers, pull request #38: https://github.com/AdityaJadhav17/coverage-keeper/pull/38
 
 ## Disclaimer
 

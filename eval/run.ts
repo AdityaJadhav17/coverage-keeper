@@ -49,7 +49,12 @@ const lang: "en" | "es" = langArg;
 const textScored = lang === "en";
 
 const labels: Label[] = JSON.parse(await readFile("eval/labels.json", "utf8"));
-const selected = labels.filter((l) => !split || l.split === split);
+// --match <text>: only letters whose id contains it, e.g. "-es" for the Spanish ones.
+const matchArg = process.argv.indexOf("--match");
+const match = matchArg > -1 ? process.argv[matchArg + 1] : undefined;
+const selected = labels.filter(
+  (l) => (!split || l.split === split) && (!match || l.id.includes(match)),
+);
 if (selected.length === 0) {
   console.error(
     `No labeled letters for split "${split ?? "all"}". Add entries to eval/labels.json.`,
