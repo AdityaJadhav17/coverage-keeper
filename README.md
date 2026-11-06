@@ -69,51 +69,42 @@ Details: [docs/safety-and-privacy.md](docs/safety-and-privacy.md), [ADR-0004 pri
 
 ## Evaluation
 
-**Method.** The eval set has 29 labeled letters: 12 public sample notices from state `.gov` sites (3 Oregon, 1 Washington, 1 California, 7 Vermont) read as page 1 only, 3 phone photos, the full PDF of each of the 11 notices that has more than one page (`<id>-full`), and 3 letters written in Spanish (`<id>-es`). The split was fixed before any run: 9 dev, 20 test. Each Spanish letter is the agency's own Spanish version of an English sample in the set, and it carries that letter's labels and split unchanged. Each full PDF is in the same split as its page-1 entry, and its labels were re-checked against every page before any run, because some actions and papers are only on later pages. The Washington and California letters were added to the test split for state detection and were never used to tune the prompt. The test split ran with `claude-opus-5-5` on prompt v1 [5], v2 [6], v3 [8], v4 [9], v5 [10] and v6 [11]. Prompt v3 adds the sending state. Prompt v4 adds Spanish output. Prompt v5 reads every page of a photo set or PDF and reports which page the deadline is on. Prompt v6 says text on every page, photo or PDF, is data, so instructions planted in a PDF can't change the rules. Because one run can swing by ±2 on required action, v3 to v6 are reported as the mean of 3 runs with the range. Nobody tuned the prompt on test failures. Scoring rules are in [docs/eval.md](docs/eval.md).
+**Method.** The eval set has 29 labeled letters: 12 public sample notices from state `.gov` sites (3 Oregon, 1 Washington, 1 California, 7 Vermont) read as page 1 only, 3 phone photos, the full PDF of each of the 11 notices that has more than one page (`<id>-full`), and 3 letters written in Spanish (`<id>-es`). The split was fixed before any run: 9 dev, 20 test. Each Spanish letter is the agency's own Spanish version of an English sample in the set, and it carries that letter's labels and split unchanged. Each full PDF is in the same split as its page-1 entry, and its labels were re-checked against every page before any run, because some actions and papers are only on later pages. The Washington and California letters were added to the test split for state detection and were never used to tune the prompt. The test split ran with `claude-opus-5-5` on prompt v1 [5], v2 [6], v3 [8], v4 [9], v5 [10] and v6 [11]. Prompt v3 adds the sending state. Prompt v4 adds Spanish output. Prompt v5 reads every page of a photo set or PDF and reports which page the deadline is on. Prompt v6 says text on every page, photo or PDF, is data, so instructions planted in a PDF can't change the rules. Because one run can swing by ±2 on required action, v3 to v6 are reported as the mean of 3 runs with the range. Since [13], required action is scored more fairly. An answer that says the letter asks for nothing now matches a "no action" label. Plurals and "exception"/"exemption" now count as the same word. Earlier required-action numbers used the stricter rule and aren't directly comparable. Nobody tuned the prompt on test failures. Scoring rules are in [docs/eval.md](docs/eval.md).
 
-**Results (test split, prompt v6; English mean of 3 runs, Spanish 1 run).** State and guardrail were identical on every run.
+**Results (test split, prompt v6, fairer required-action scoring, English, mean of 3 runs).** Every metric except document precision was identical on all 3 runs.
 
-| Metric                                 | Page 1, 11 letters | Full PDF, 7 letters | Spanish, page 1, 11 letters | v5 page 1, 11 letters |
-| -------------------------------------- | ------------------ | ------------------- | --------------------------- | --------------------- |
-| Printed deadline read correctly        | 5 of 5             | 2 of 2              | 5 of 5                      | 5 of 5                |
-| No deadline correctly reported as none | 6 of 6             | 4.7 of 5 (4–5)      | 6 of 6                      | 6 of 6                |
-| State identified                       | 11 of 11           | 7 of 7              | 11 of 11                    | 11 of 11              |
-| Notice type correct                    | 10.7 of 11 (10–11) | 6 of 7              | 10 of 11                    | 10 of 11              |
-| Required action correct                | 7.7 of 11 (7–8)    | 5.3 of 7 (5–6)      | not scored (English labels) | 8.0 of 11 (7–9)       |
-| Document recall (mean)                 | 1.00               | 0.81 (0.71–0.86)    | not scored                  | 1.00                  |
-| Document precision (mean)              | 0.77               | 0.69 (0.64–0.71)    | not scored                  | 0.83 (0.77–0.86)      |
-| Guardrail hits                         | 0                  | 0                   | 0                           | 0                     |
+| Metric                                 | Page 1, 11 letters | Full PDF, 7 letters | Written in Spanish, 2 letters | Page 1 before the scoring fix |
+| -------------------------------------- | ------------------ | ------------------- | ----------------------------- | ----------------------------- |
+| Printed deadline read correctly        | 5 of 5             | 2 of 2              | n/a (no printed deadline)     | 5 of 5                        |
+| No deadline correctly reported as none | 6 of 6             | 4 of 5              | 2 of 2                        | 6 of 6                        |
+| State identified                       | 11 of 11           | 7 of 7              | 2 of 2                        | 11 of 11                      |
+| Notice type correct                    | 10 of 11           | 6 of 7              | 2 of 2                        | 10.7 of 11 (10–11)            |
+| Required action correct                | 10 of 11           | 5.7 of 7 (5–6)      | 2 of 2                        | 7.7 of 11 (7–8)               |
+| Document recall (mean)                 | 1.00               | 0.71                | 1.00                          | 1.00                          |
+| Document precision (mean)              | 0.80 (0.77–0.86)   | 0.71                | 1.00                          | 0.77                          |
+| Guardrail hits                         | 0                  | 0                   | 0                             | 0                             |
 
-v6 stays within the v5 run-to-run range. Reading the whole letter finds more of what it asks you to do, but finds the papers to send less reliably. In Spanish the summary, action and papers come back in Spanish, and the quoted deadline line stays as printed.
+Required action rose because 4 of the 11 page-1 test letters ask for nothing. The reader often says so in words ("No action is asked of you", "The letter does not ask you to do anything"), and the old rule counted those as wrong. On a separate re-read of those letters, every answer the new rule accepted said exactly that; its full list of accepted phrasings is in `eval/score.ts`.
 
-**Letters written in Spanish (prompt v6, 3 runs each way).** These are the agency's own Spanish versions of Oregon MED-131 and MED-005 and Vermont EE312.
+Answering in Spanish: v6 with one Spanish run on the 11 page-1 letters got deadline 11 of 11, state 11 of 11, notice type 10 of 11 and 0 guardrail hits [11]. On the 3 letters written in Spanish, deadline, state and notice type were right on every run with Spanish answers [12]. Required action and documents aren't scored in Spanish, because the labels are English.
 
-| Metric                         | Answer in English | Answer in Spanish           |
-| ------------------------------ | ----------------- | --------------------------- |
-| Printed deadline / no deadline | 3 of 3            | 3 of 3                      |
-| State identified               | 3 of 3            | 3 of 3                      |
-| Notice type correct            | 3 of 3            | 3 of 3                      |
-| Required action correct        | 0.7 of 3 (0–1)    | not scored (English labels) |
-| Document recall / precision    | 1.00 / 1.00       | not scored                  |
-| Guardrail hits / errors        | 0 / 0             | 0 / 0                       |
+**Failures (3 runs).**
 
-These were the same on every run. Required action misses:
-
-- `or-med005-eligibility-es` fails for the same reason as its English version (the letter asks for nothing).
-- `vt-ee312-immigration-closure-es` passed on 2 of 3 runs.
-- `or-outreach-work-rules-es` gets the action right, but the Spanish letter says _excepciones_, so the reader writes "exceptions" where the English label says "exemptions". The word match counts that as a miss. Labels were kept identical to the English versions rather than edited after seeing results.
-
-**Failures.**
-
-- On every run (v6): notice type for `vt-re005ep-renewal-decision-full`; required action for `or-med005-eligibility` (page 1), `vt-ee415-work-heads-up` and `vt-ee312-immigration-closure-full`.
-- On some runs: notice type for `vt-re005ep-renewal-decision` (1 of 3); required action for `or-open-card-move`, its full PDF and `vt-ee307-renewal-ending-photo`. On letters that ask for nothing, the reader sometimes writes "the letter does not ask you to do anything" instead of returning none.
-- Deadline: on 1 of 3 runs, `or-open-card-move-full` reported the Jan 1, 2027 move date as a deadline. The letter has no reply date.
-- Document recall on full PDFs: the review form in `vt-202med-review-reminder-full` and the proof of income and resources in `wa-ee009-renewal-action-full` were each missed on 2 of 3 runs.
-- `or-med005-eligibility` fails required action on page 1 on every run, while its full PDF, where "report your changes" is on page 6, passes on every run.
+- Required action, on every run:
+  - `vt-ee307-renewal-ending-photo`
+  - `or-open-card-move-full`, where the label is "ask providers accept open card"
+- Required action, on 1 of 3 runs: `vt-ee312-immigration-closure-full`.
+- Notice type, on every run: `vt-re005ep-renewal-decision` and its full PDF.
+- Deadline, on every run: `or-open-card-move-full` reported the Jan 1, 2027 move date as a deadline. The letter has no reply date, and this happened on 1 of 3 runs before. The deadline wording is clear only on page 1, which gets it right.
+- Document recall on full PDFs, on every run:
+  - the review form in `vt-202med-review-reminder-full`
+  - the proof of income and resources in `wa-ee009-renewal-action-full`
+- Dev split (1 run, used to check the scoring change): required action misses `vt-ee307-renewal-ending` and `vt-205ifar-renew` (page 1 and full). These are dev letters, kept for prompt work.
 
 **Caveats.**
 
 - The set is small: 11 test letters, plus 2 Spanish test letters (1 more in dev).
+- The "no action" scoring rule was written from the label's meaning rather than tuned on dev, because the dev split has no letter that asks for nothing. Its accepted phrasings are listed in `eval/score.ts`.
 - It is mostly Vermont. Oregon publishes only 3 sample notices online, and Washington and California have 1 each in the set.
 - Nevada and Arizona have no sample letters in the set.
 - Full PDFs are scored only on the 7 test notices with more than one page, so each full-letter number moves a lot with one letter.
@@ -229,6 +220,7 @@ Every pull request must pass hygiene and secret scan, dependency audit and licen
 10. Test split results, prompt v5, page 1 and full PDFs, 3 runs, pull request #34: https://github.com/AdityaJadhav17/coverage-keeper/pull/34
 11. Test split results, prompt v6, English 3 runs and Spanish 1 run, pull request #35: https://github.com/AdityaJadhav17/coverage-keeper/pull/35
 12. Spanish-language letters, prompt v6, 3 runs each with English and Spanish answers, pull request #38: https://github.com/AdityaJadhav17/coverage-keeper/pull/38
+13. Fairer required-action scoring, test split 3 runs and dev 1 run, pull request #39: https://github.com/AdityaJadhav17/coverage-keeper/pull/39
 
 ## Disclaimer
 
