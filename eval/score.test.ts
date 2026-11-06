@@ -32,9 +32,42 @@ describe("textMatches", () => {
     expect(textMatches("Report work hours", "Send a pay stub.")).toBe(false);
   });
 
-  it("treats null as matching only null", () => {
+  it("treats null as matching null, or an answer that says nothing is asked", () => {
     expect(textMatches(null, null)).toBe(true);
     expect(textMatches(null, "something")).toBe(false);
+    expect(textMatches("Report work hours", null)).toBe(false);
+  });
+
+  it.each([
+    "No action is required right now.",
+    "The letter does not ask you to do anything.",
+    "This letter doesn't ask you to send anything.",
+    "There is nothing you need to do.",
+    "We are not asking you to do anything now.",
+  ])("a null label matches %j", (answer) => {
+    expect(textMatches(null, answer)).toBe(true);
+  });
+
+  it.each([
+    "Send proof of income by Feb 15.",
+    "Call if the information is wrong. No deadline is printed.",
+  ])("a null label does not match a real action: %j", (answer) => {
+    expect(textMatches(null, answer)).toBe(false);
+  });
+
+  it("a real label is not satisfied by a no-action answer", () => {
+    expect(textMatches("Report work hours", "No action is required.")).toBe(
+      false,
+    );
+  });
+
+  it("treats plurals and exception/exemption as the same word", () => {
+    expect(textMatches("sign return form", "Sign and return the forms.")).toBe(
+      true,
+    );
+    expect(
+      textMatches("check exemptions", "Check the exceptions on the next page."),
+    ).toBe(true);
   });
 });
 
