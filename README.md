@@ -179,7 +179,7 @@ scripts/   Repo hygiene check run in CI                                      (sc
 | E2E         | `tests/e2e/` (iPhone 15, Pixel 7)    | `npm run test:e2e`         |
 | Eval        | `eval/` (real model, not in PR CI)   | `npm run eval`             |
 
-Every pull request must pass hygiene and secret scan, dependency audit and licenses, lint/format/types, unit tests with coverage, the safety suite, integration tests, build and E2E with axe checks. Merges to `main` deploy to Vercel after all gates. See [docs/testing.md](docs/testing.md) and [docs/ci.md](docs/ci.md).
+Every pull request must pass hygiene and secret scan, dependency audit and licenses, lint/format/types, unit tests with coverage, the safety suite, integration tests, build and E2E with axe checks. Merges to `main` deploy to Vercel (its Git integration; PRs merge only when every gate is green, see [docs/ci.md](docs/ci.md#how-production-deploys-today) for the gated deploy job). See [docs/testing.md](docs/testing.md) and [docs/ci.md](docs/ci.md).
 
 ## Documentation
 

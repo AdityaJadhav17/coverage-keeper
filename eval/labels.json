@@ -375,5 +375,57 @@
     "source_url": "https://www.dhcs.ca.gov/formsandpubs/forms/Pages/MCEDFormsMCinfo.aspx",
     "retrieved": "2026-11-04",
     "usage_note": "Public government sample notice, used for evaluation (MC Information Notice 020, file MC-020-Eng-TY-2020.pdf, listed under MC Information Notices; one page; no personal data, no deadline)"
+  },
+  {
+    "id": "nv-mm-work-rules",
+    "file": "nv-mm-work-rules.png",
+    "split": "test",
+    "state": "NV",
+    "notice_type": "work_requirement_info",
+    "deadline": null,
+    "required_action": "update contact information",
+    "documents": [],
+    "source_url": "https://www.nevadamedicaid.nv.gov/siteassets/content/partner-resources-toolkit/mm---eng_example.pdf",
+    "retrieved": "2026-11-06",
+    "usage_note": "Public government sample notice, used for evaluation (page 1 of PDF; Nevada work requirements mass mailer, MM - Eng_EXAMPLE; published by the agency as an example with a blank name and an example case number; added after prompt v6 and labeled from the letter before any model run)"
+  },
+  {
+    "id": "nv-mm-work-rules-es",
+    "file": "nv-mm-work-rules-es.png",
+    "split": "test",
+    "state": "NV",
+    "notice_type": "work_requirement_info",
+    "deadline": null,
+    "required_action": "update contact information",
+    "documents": [],
+    "source_url": "https://www.nevadamedicaid.nv.gov/siteassets/content/partner-resources-toolkit/mm---span_example.pdf",
+    "retrieved": "2026-11-06",
+    "usage_note": "Public government sample notice, used for evaluation (page 1 of PDF; Nevada work requirements mass mailer, MM - Span_EXAMPLE, Spanish version; published by the agency as an example with a blank name and an example case number; added after prompt v6 and labeled from the letter before any model run)"
+  },
+  {
+    "id": "nv-ep10322-noncitizen",
+    "file": "nv-ep10322-noncitizen.png",
+    "split": "test",
+    "state": "NV",
+    "notice_type": "other_medicaid",
+    "deadline": null,
+    "required_action": null,
+    "documents": [],
+    "source_url": "https://www.nevadamedicaid.nv.gov/siteassets/content/public/adminsupport/publicnoticedocs/ep-10322-noncitizen-mass-mailing-outreach-notice---english.pdf",
+    "retrieved": "2026-11-06",
+    "usage_note": "Public government sample notice, used for evaluation (page 1 of PDF; Nevada non-citizen eligibility changes notice EP-10322; published by the agency as an example with a blank name and an example case number; added after prompt v6 and labeled from the letter before any model run)"
+  },
+  {
+    "id": "nv-ep10322-noncitizen-es",
+    "file": "nv-ep10322-noncitizen-es.png",
+    "split": "test",
+    "state": "NV",
+    "notice_type": "other_medicaid",
+    "deadline": null,
+    "required_action": null,
+    "documents": [],
+    "source_url": "https://www.nevadamedicaid.nv.gov/siteassets/content/public/adminsupport/publicnoticedocs/ep-10322-noncitizen-mass-mailing-outreach-notice---spanish-updated.pdf",
+    "retrieved": "2026-11-06",
+    "usage_note": "Public government sample notice, used for evaluation (page 1 of PDF; Nevada non-citizen eligibility changes notice EP-10322, Spanish version; published by the agency as an example with a blank name and an example case number; added after prompt v6 and labeled from the letter before any model run)"
   }
 ]
