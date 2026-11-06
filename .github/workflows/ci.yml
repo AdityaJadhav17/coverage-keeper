@@ -191,10 +191,17 @@ jobs:
         with:
           name: next-build
           path: .next/
-      # The browser download sometimes hangs (#31, #35): cut it off at 4 min and retry once.
+      # Package downloads sometimes hang (#31, #35, #41). apt gets its own timeouts and
+      # retries; the step is capped at 4 min; a stuck apt-get is cleared before the one
+      # retry, since it outlives `timeout` and holds the dpkg lock.
       - run: |
-          timeout 240 npx playwright install --with-deps chromium webkit ||
+          echo 'Acquire::Retries "3"; Acquire::http::Timeout "30"; Acquire::https::Timeout "30";' |
+            sudo tee /etc/apt/apt.conf.d/99-ci-timeouts > /dev/null
+          timeout 240 npx playwright install --with-deps chromium webkit || {
+            sudo pkill -f apt-get || true
+            sleep 5
             timeout 240 npx playwright install --with-deps chromium webkit
+          }
       - run: npm run test:e2e
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: failure()
