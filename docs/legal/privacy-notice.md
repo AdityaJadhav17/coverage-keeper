@@ -3,11 +3,11 @@
 > **Draft for review. Not published.** Every fact below matches the code on `main` as of 2026-11-06. Before this goes live as a page in the app:
 >
 > 1. Fill every `[BLANK: …]`.
-> 2. Get a lawyer or pro bono clinic to review it, especially the Washington and Nevada sections (see [launch-readiness.md](../launch-readiness.md#4-legal-pages)).
+> 2. Get a lawyer or pro bono clinic to review it, especially the Washington and Nevada sections. The research behind them is in [wa.md](wa.md#topic-2-health-data-privacy), [nv.md](nv.md#topic-2-health-data-privacy) and the [checklist](checklist.md#privacy-notice-per-state-content); open points are in [questions-for-counsel.md](questions-for-counsel.md#a-launch-blocking).
 > 3. Get a fluent Spanish speaker to review the Spanish version.
 > 4. Re-check Anthropic's retention terms (linked at the end); they changed wording in 2026.
 >
-> Blanks: operator name, contact email, mailing address, effective date, and whether the production Anthropic organization has zero data retention (ZDR).
+> Blanks: operator name, contact email, mailing address, effective date, whether the production Anthropic organization has zero data retention (ZDR), links to the Washington and Nevada consumer health data privacy policies, the appeal method, and the consent question for Washington and Nevada.
 
 ---
 
@@ -90,11 +90,23 @@ Because we don't keep your letter or results, we have nothing to show you, corre
 
 ### Washington residents
 
-[BLANK: Lawyer review. Washington's My Health My Data Act may treat a Medicaid letter as consumer health data. Confirm whether this notice can serve as the required consumer health data privacy policy, whether the consent screen is enough, and how a person can make a request (for example, to confirm or delete data, or withdraw consent) given that we keep nothing.]
+Washington's My Health My Data Act covers consumer health data, and a Medicaid letter can contain it. Our Consumer Health Data Privacy Policy is a separate page: [BLANK: link to the Washington consumer health data privacy policy].
+
+You can ask us to confirm whether we collect your consumer health data, to give you a copy, or to delete it. Email [BLANK: email]. You don't need an account. We answer within 45 days. If we need more time, we tell you, and we take at most 45 more days. We don't keep your letter, so we will usually have nothing to give you. We still pass every deletion request to Anthropic.
+
+If we turn down your request, you can appeal: [BLANK: how to appeal]. If we turn down your appeal, we will tell you how to contact the Washington State Attorney General.
+
+[BLANK: Lawyer review. Whether we must ask for your consent before you upload a letter is open. See questions-for-counsel.md, questions 1 and 2.]
 
 ### Nevada residents
 
-[BLANK: Lawyer review. Nevada has a similar consumer health data law. Confirm what it requires.]
+Nevada law (NRS 603A.400 to 603A.550) covers consumer health data, and a Medicaid letter can contain it. Our Nevada Consumer Health Data Privacy Policy is a separate page: [BLANK: link to the Nevada consumer health data privacy policy].
+
+You can ask us to confirm whether we collect, share or sell your consumer health data, to list the companies we shared it with, to stop collecting or sharing it, or to delete it. Email [BLANK: email]. We answer within 45 days. When you ask us to delete your data, we delete it within 30 days and tell Anthropic to delete its copy.
+
+If we turn down your request, you can appeal: [BLANK: how to appeal]. If we turn down your appeal, we will give you the Nevada Attorney General's contact details.
+
+[BLANK: Lawyer review. Nevada counts sending your letter to Anthropic as "sharing". Confirm whether we need a separate consent for it, and whether "we don't sell or share your information" in the short version above is accurate for Nevada. See questions-for-counsel.md, questions 2 and 7.]
 
 ### Children
 
@@ -193,9 +205,21 @@ Como no guardamos su carta ni sus resultados, después no tenemos nada que mostr
 
 ### Residentes de Washington
 
+La ley My Health My Data de Washington protege los datos de salud del consumidor, y una carta de Medicaid puede contenerlos. Nuestra Política de Privacidad de Datos de Salud del Consumidor es una página aparte: [BLANK: enlace a la política de Washington].
+
+Puede pedirnos que confirmemos si recopilamos sus datos de salud del consumidor, que le demos una copia o que los eliminemos. Escriba a [BLANK: correo]. No necesita una cuenta. Respondemos en un plazo de 45 días. Si necesitamos más tiempo, se lo diremos, y tomaremos como máximo 45 días más. No guardamos su carta, así que normalmente no tendremos nada que darle. Aun así, enviamos cada solicitud de eliminación a Anthropic.
+
+Si rechazamos su solicitud, puede apelar: [BLANK: cómo apelar]. Si rechazamos su apelación, le diremos cómo comunicarse con la Oficina del Procurador General del Estado de Washington.
+
 [BLANK: Revisión legal. Ver la nota de la versión en inglés.]
 
 ### Residentes de Nevada
+
+La ley de Nevada (NRS 603A.400 a 603A.550) protege los datos de salud del consumidor, y una carta de Medicaid puede contenerlos. Nuestra Política de Privacidad de Datos de Salud del Consumidor de Nevada es una página aparte: [BLANK: enlace a la política de Nevada].
+
+Puede pedirnos que confirmemos si recopilamos, compartimos o vendemos sus datos de salud del consumidor, que le demos la lista de empresas con las que los compartimos, que dejemos de recopilarlos o compartirlos, o que los eliminemos. Escriba a [BLANK: correo]. Respondemos en un plazo de 45 días. Cuando nos pide eliminar sus datos, los eliminamos en un plazo de 30 días y le pedimos a Anthropic que elimine su copia.
+
+Si rechazamos su solicitud, puede apelar: [BLANK: cómo apelar]. Si rechazamos su apelación, le daremos los datos de contacto del Procurador General de Nevada.
 
 [BLANK: Revisión legal. Ver la nota de la versión en inglés.]
 
