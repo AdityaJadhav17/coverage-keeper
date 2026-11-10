@@ -1,7 +1,2 @@
 # Read by osv-scanner in CI (ci.yml audit job, security.yml). Each exception needs a reason
 # and an expiry so the nightly audit fails again and the finding gets re-checked.
-
-[[IgnoredVulns]]
-id = "GHSA-3g3m-2fjr-6pw4"
-ignoreUntil = 2026-12-03
-reason = "glob AbortSignal bypass (moderate). Dev-only: license-checker-rseidelsohn's npm internals (glob 13). Not in the production bundle and never given untrusted input. Re-check when license-checker updates @npmcli to glob 14."
