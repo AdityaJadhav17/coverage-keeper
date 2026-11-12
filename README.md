@@ -10,11 +10,12 @@ Photograph a Medicaid letter and learn what it asks for, when it is due, and who
 [![Deployed on Vercel](https://img.shields.io/badge/deployed%20on-Vercel-000000?logo=vercel&logoColor=white)](https://coverage-keeper.vercel.app)
 [![Printed deadline read correctly: 4/4 test letters](https://img.shields.io/badge/printed%20deadline-4%2F4%20test%20letters-2E7D32)](#evaluation)
 
-Solix Empower Hackathon, AI in Healthcare track.
+Winner, AI in Healthcare track, Solix AI Hackathon 2026.
 
 ## Demo
 
 - Live app: [coverage-keeper.vercel.app](https://coverage-keeper.vercel.app)
+- Case study: [adityajadhav.dev/projects/coverage-keeper](https://adityajadhav.dev/projects/coverage-keeper/)
 
 | Consent                                                        | Result                                                       | Exemption screening                                               |
 | -------------------------------------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------- |

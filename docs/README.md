@@ -16,7 +16,7 @@ Product, safety, testing and decision documents for Coverage Keeper.
 
 ## Images
 
-`assets/screenshots/` holds the light and dark UI screenshots (consent, result, screened, draft).
+`assets/screenshots/` holds the light and dark UI screenshots (consent, result, screened, draft) and the `portfolio-*` captures (desktop result and welcome, phone result).
 
 ## Related
 
