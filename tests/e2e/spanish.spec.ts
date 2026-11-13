@@ -48,6 +48,9 @@ test("Spanish result and exemption questions (US-061, US-063)", async ({
   await expect(
     page.getByRole("heading", { name: "Esto es lo que dice su carta" }),
   ).toBeVisible();
+  await expect(page.getByTestId("ai-label")).toHaveText(
+    "Escrito por IA. Puede cometer errores. Revise su carta y llame a Oregon Health Plan (OHP).",
+  );
   // The quoted line stays exactly as printed on the letter.
   await expect(page.getByTestId("deadline")).toContainText(
     fixture.deadline_quote,

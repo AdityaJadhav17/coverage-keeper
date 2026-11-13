@@ -85,6 +85,9 @@ const en = {
   notMedicaidText: (phone: string) =>
     `If it came from your state's Medicaid program, call ${phone} and they can tell you what it means.`,
   resultTitle: "Here's what your letter says",
+  // On every result (legal checklist ISSUE-2, #45). null: no state chosen yet.
+  aiLabel: (program: string | null) =>
+    `Written by AI. It can make mistakes. Check your letter and call ${program ?? "the number on it"}.`,
   askTitle: "What the letter asks you to do",
   papersTitle: "Papers to send",
   notSure: "Not sure. Check the letter or call.",
@@ -241,6 +244,10 @@ const es: Messages = {
   notMedicaidText: (phone: string) =>
     `Si la envió el programa de Medicaid de su estado, llame al ${phone} y le explicarán qué significa.`,
   resultTitle: "Esto es lo que dice su carta",
+  aiLabel: (program) =>
+    program
+      ? `Escrito por IA. Puede cometer errores. Revise su carta y llame a ${program}.`
+      : "Escrito por IA. Puede cometer errores. Revise su carta y llame al número que aparece en ella.",
   askTitle: "Lo que la carta le pide",
   papersTitle: "Documentos para enviar",
   notSure: "No estamos seguros. Revise la carta o llame.",
