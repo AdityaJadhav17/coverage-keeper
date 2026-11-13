@@ -1,0 +1,56 @@
+/* Shared look for synthetic test letters. US letter page at 96 dpi. */
+body {
+  margin: 0;
+  background: #fff;
+}
+.page {
+  width: 816px;
+  height: 1056px;
+  box-sizing: border-box;
+  padding: 0 72px 48px;
+  font:
+    15px/1.45 Arial,
+    Helvetica,
+    sans-serif;
+  color: #111;
+  position: relative;
+  overflow: hidden;
+}
+.banner {
+  margin: 0 -72px 28px;
+  padding: 10px;
+  background: #ffe14d;
+  border-bottom: 3px solid #000;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+.head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+.org {
+  font-size: 20px;
+  font-weight: bold;
+}
+h1 {
+  font-size: 19px;
+  margin: 24px 0 12px;
+}
+.foot {
+  position: absolute;
+  bottom: 32px;
+  left: 72px;
+  right: 72px;
+  font-size: 13px;
+  border-top: 1px solid #999;
+  padding-top: 6px;
+  display: flex;
+  justify-content: space-between;
+}
+.injected {
+  font-size: 13px;
+  color: #444;
+}
