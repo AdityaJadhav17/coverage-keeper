@@ -4,16 +4,17 @@ Scores the letter reader against labeled public sample notices and writes a resu
 
 ## Contents
 
-| Path                 | Description                                                                                    |
-| -------------------- | ---------------------------------------------------------------------------------------------- |
-| `letters/`           | Sample notice images (PNG and JPG) from Oregon and Vermont government sites                    |
-| `labels.json`        | One entry per image: expected fields, split, source and retrieval date                         |
-| `labels.schema.json` | JSON Schema for `labels.json` (all fields required, no extra fields)                           |
-| `LABEL_CHANGES.md`   | Every change to an existing label, with the reason                                             |
-| `run.ts`             | Reads each letter with `readLetter`, compares to the label, writes results                     |
-| `score.ts`           | Scoring helpers: text, deadline, quote, phone and page matchers, document scores, group counts |
-| `score.test.ts`      | Unit tests for the scoring helpers                                                             |
-| `results/`           | Output of each run, git-ignored                                                                |
+| Path                 | Description                                                                                        |
+| -------------------- | -------------------------------------------------------------------------------------------------- |
+| `letters/`           | Public sample notices (PNG, JPG, PDF) from state and federal .gov sites; `synthetic/` test letters |
+| `labels.json`        | One entry per image: expected fields, split, source and retrieval date                             |
+| `labels.schema.json` | JSON Schema for `labels.json` (all fields required, no extra fields)                               |
+| `COVERAGE.md`        | Letters per state and category against the targets, and every URL searched for samples             |
+| `LABEL_CHANGES.md`   | Every change to an existing label, with the reason                                                 |
+| `run.ts`             | Reads each letter with `readLetter`, compares to the label, writes results                         |
+| `score.ts`           | Scoring helpers: text, deadline, quote, phone and page matchers, document scores, group counts     |
+| `score.test.ts`      | Unit tests for the scoring helpers                                                                 |
+| `results/`           | Output of each run, git-ignored                                                                    |
 
 ## Labels and splits
 
@@ -31,11 +32,11 @@ This calls the real model (`claude-opus-5-5`), needs `ANTHROPIC_API_KEY` set, an
 
 ## Data rule
 
-Every file in `letters/` must be a public .gov sample notice listed in `labels.json` with a .gov `source_url`. No real person's letter goes in this folder. `../scripts/check-hygiene.mjs` (`npm run check:hygiene`) fails on unlisted files, non-.gov sources, and personal-data patterns in `eval/` text files.
+Every public sample in `letters/` must come from an agency: a .gov `source_url`, or an agency site that a .gov page links to (`source_linked_from`). Synthetic test letters live in `letters/synthetic/`, each rendered from a template in `synthetic/` by `../scripts/render-synthetic.ts` and carrying the SYNTHETIC banner. No real person's letter goes in this folder. `../scripts/check-hygiene.mjs` (`npm run check:hygiene`) fails on unlisted files, non-.gov sources, and personal-data patterns in `eval/` text files.
 
 ## Adding a letter
 
-1. Save the public sample as PNG or JPG in `letters/`.
+1. Save page 1 as PNG (`pdftoppm -r 145 -png -f 1 -l 1 -singlefile`) in `letters/`, and the whole PDF as `<id>-full.pdf` when it has more pages. Check by eye that it holds no real personal data.
 2. Label it per the guide, before any model run, and add the entry to `labels.json`.
 3. Run `npm run check:hygiene` and `npm run test:integration`.
 
