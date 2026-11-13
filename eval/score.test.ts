@@ -3,6 +3,11 @@ import {
   deadlineMatches,
   deadlineSplit,
   documentScores,
+  groupCounts,
+  missingFiles,
+  pageMatches,
+  phoneMatches,
+  quoteMatches,
   textMatches,
 } from "./score";
 
@@ -107,6 +112,102 @@ describe("deadlineSplit", () => {
     ).toEqual({
       printed: { correct: 1, total: 2 },
       none: { correct: 1, total: 1 },
+    });
+  });
+});
+
+describe("phoneMatches", () => {
+  it.each([
+    ["1-800-699-9075", "(800) 699-9075 TTY 711", true],
+    ["800.699.9075 TTY 711", "1-800-699-9075", true],
+    ["800-699-9075", "855-899-9600", false],
+    ["800-699-9075", null, false],
+    [null, "800-699-9075", false],
+    [null, null, true],
+  ] as const)("%j vs %j -> %s", (expected, actual, result) => {
+    expect(phoneMatches(expected, actual)).toBe(result);
+  });
+});
+
+describe("quoteMatches", () => {
+  const label = "Please return your completed form by February 15, 2027.";
+
+  it("matches the same sentence split across two lines", () => {
+    expect(
+      quoteMatches(
+        label,
+        "Please return your completed\nform by February 15, 2027.",
+      ),
+    ).toBe(true);
+  });
+
+  it.each([
+    "Please return your completed form by Feb 15, 2027.",
+    "Please return your completed form by 02/15/2027.",
+    "Please return your completed form by 2027-02-15.",
+  ])("matches the date in another format: %j", (actual) => {
+    expect(quoteMatches(label, actual)).toBe(true);
+  });
+
+  it("matches a Spanish date", () => {
+    expect(
+      quoteMatches(
+        "Devuelva el formulario antes del 15 de febrero de 2027.",
+        "Devuelva el formulario antes del 15 de febrero de 2027",
+      ),
+    ).toBe(true);
+  });
+
+  it("fails on a different date or a missing word", () => {
+    expect(
+      quoteMatches(label, "Please return your completed form by Feb 16, 2027."),
+    ).toBe(false);
+    expect(quoteMatches(label, "Return it by February 15, 2027.")).toBe(false);
+  });
+
+  it("treats null as matching only null", () => {
+    expect(quoteMatches(null, null)).toBe(true);
+    expect(quoteMatches(null, label)).toBe(false);
+    expect(quoteMatches(label, null)).toBe(false);
+  });
+});
+
+describe("pageMatches", () => {
+  it.each([
+    [3, 3, true],
+    [3, 1, false],
+    [null, 1, false],
+    [null, null, true],
+  ] as const)("%s vs %s -> %s", (expected, actual, result) => {
+    expect(pageMatches(expected, actual)).toBe(result);
+  });
+});
+
+describe("missingFiles", () => {
+  it("lists a file a label names that isn't on disk", () => {
+    expect(
+      missingFiles([
+        { id: "a", files: ["or-outreach-work-rules.png", "no-such-page.png"] },
+        { id: "b", file: "or-outreach-work-rules.png" },
+      ]),
+    ).toEqual(["a: no-such-page.png"]);
+  });
+});
+
+describe("groupCounts", () => {
+  it("counts N of M per group, a row counting in each of its groups", () => {
+    expect(
+      groupCounts(
+        [
+          { g: ["renewal", "multi_page"], ok: true },
+          { g: ["renewal"], ok: false },
+        ],
+        (r) => r.g,
+        (r) => r.ok,
+      ),
+    ).toEqual({
+      renewal: { correct: 1, total: 2 },
+      multi_page: { correct: 1, total: 1 },
     });
   });
 });

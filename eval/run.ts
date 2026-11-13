@@ -12,6 +12,11 @@ import {
   deadlineMatches,
   deadlineSplit,
   documentScores,
+  groupCounts,
+  missingFiles,
+  pageMatches,
+  phoneMatches,
+  quoteMatches,
   textMatches,
 } from "./score";
 
@@ -24,8 +29,12 @@ type Label = {
   state: "WA" | "OR" | "CA" | "NV" | "AZ" | "other";
   notice_type: string;
   deadline: string | null;
+  deadline_quote: string | null;
+  deadline_page: number | null;
   required_action: string | null;
   documents: string[];
+  contact_phone: string | null;
+  category: string[];
 };
 
 const MEDIA_TYPES: Record<string, LetterImage["mediaType"]> = {
@@ -52,12 +61,26 @@ const labels: Label[] = JSON.parse(await readFile("eval/labels.json", "utf8"));
 // --match <text>: only letters whose id contains it, e.g. "-es" for the Spanish ones.
 const matchArg = process.argv.indexOf("--match");
 const match = matchArg > -1 ? process.argv[matchArg + 1] : undefined;
+// --category <name>: only letters labeled with that category.
+const categoryArg = process.argv.indexOf("--category");
+const category = categoryArg > -1 ? process.argv[categoryArg + 1] : undefined;
 const selected = labels.filter(
-  (l) => (!split || l.split === split) && (!match || l.id.includes(match)),
+  (l) =>
+    (!split || l.split === split) &&
+    (!match || l.id.includes(match)) &&
+    (!category || l.category.includes(category)),
 );
 if (selected.length === 0) {
   console.error(
     `No labeled letters for split "${split ?? "all"}". Add entries to eval/labels.json.`,
+  );
+  process.exit(1);
+}
+// A letter with a missing page must never be scored on the pages that exist.
+const missing = missingFiles(selected);
+if (missing.length > 0) {
+  console.error(
+    `Missing letter files, no model call made:\n${missing.join("\n")}`,
   );
   process.exit(1);
 }
@@ -97,6 +120,10 @@ for (const label of selected) {
       notice_type: label.notice_type === out.notice_type,
       deadline: deadlineMatches(label.deadline, out.deadline),
       required_action: textMatches(label.required_action, out.required_action),
+      phone: phoneMatches(label.contact_phone, out.contact_phone),
+      quote: quoteMatches(label.deadline_quote, out.deadline_quote),
+      page: pageMatches(label.deadline_page, out.deadline_page),
+      category: label.category,
       doc_recall: docs.recall,
       doc_precision: docs.precision,
       guardrail_hits: findForbiddenClaims(
@@ -106,6 +133,10 @@ for (const label of selected) {
       actual_deadline: out.deadline,
       expected_state: label.state,
       actual_state: out.state,
+      expected_phone: label.contact_phone,
+      actual_phone: out.contact_phone,
+      expected_page: label.deadline_page,
+      actual_page: out.deadline_page,
       error: null as string | null,
     });
   } catch (err) {
@@ -117,8 +148,39 @@ const ok = rows.filter((r) => !r.error) as Extract<
   (typeof rows)[number],
   { deadline: boolean }
 >[];
-const count = (key: "state" | "notice_type" | "deadline" | "required_action") =>
-  ok.filter((r) => r[key]).length;
+type Check =
+  | "state"
+  | "notice_type"
+  | "deadline"
+  | "required_action"
+  | "phone"
+  | "quote"
+  | "page";
+const count = (key: Check) => ok.filter((r) => r[key]).length;
+const fraction = ({ correct, total }: { correct: number; total: number }) =>
+  `${correct} of ${total}`;
+// One row per group: deadline, notice type and required action as N of M.
+const groupTable = (
+  title: string,
+  groups: (r: (typeof ok)[number]) => string[],
+) => {
+  const checks: Check[] = textScored
+    ? ["deadline", "notice_type", "required_action"]
+    : ["deadline", "notice_type"];
+  const counts = checks.map((c) => groupCounts(ok, groups, (r) => r[c]));
+  return [
+    `## By ${title}`,
+    "",
+    `| ${title} | ${checks.join(" | ")} |`,
+    `| --- |${checks.map(() => " --- |").join("")}`,
+    ...Object.keys(counts[0]!)
+      .sort()
+      .map(
+        (g) => `| ${g} | ${counts.map((c) => fraction(c[g]!)).join(" | ")} |`,
+      ),
+    "",
+  ];
+};
 const mean = (key: "doc_recall" | "doc_precision") =>
   ok.length ? ok.reduce((s, r) => s + r[key], 0) / ok.length : 0;
 
@@ -140,6 +202,10 @@ const summary = {
   state_correct: count("state"),
   notice_type_correct: count("notice_type"),
   required_action_correct: count("required_action"),
+  contact_phone_correct: count("phone"),
+  deadline_quote_correct: count("quote"),
+  deadline_page_correct: count("page"),
+  category: category ?? "all",
   doc_recall_mean: mean("doc_recall"),
   doc_precision_mean: mean("doc_precision"),
   guardrail_hits: ok.reduce((s, r) => s + r.guardrail_hits, 0),
@@ -156,22 +222,29 @@ const md = [
   `| No deadline correctly reported as none | ${dl.none.correct} of ${dl.none.total} |`,
   `| State identified | ${summary.state_correct} of ${rows.length} |`,
   `| Notice type correct | ${summary.notice_type_correct} of ${rows.length} |`,
+  `| Contact phone correct | ${summary.contact_phone_correct} of ${rows.length} |`,
+  `| Deadline page correct | ${summary.deadline_page_correct} of ${rows.length} |`,
   ...(textScored
     ? [
         `| Required action correct | ${summary.required_action_correct} of ${rows.length} |`,
+        `| Deadline quote correct | ${summary.deadline_quote_correct} of ${rows.length} |`,
         `| Document recall (mean) | ${summary.doc_recall_mean.toFixed(2)} |`,
         `| Document precision (mean) | ${summary.doc_precision_mean.toFixed(2)} |`,
       ]
-    : ["| Required action, documents | not scored (English labels) |"]),
+    : [
+        "| Required action, documents, deadline quote | not scored (English labels) |",
+      ]),
   `| Guardrail hits | ${summary.guardrail_hits} |`,
   `| Errors | ${summary.errors} |`,
   "",
+  ...groupTable("category", (r) => r.category),
+  ...groupTable("state", (r) => [r.expected_state]),
   "## Per letter",
   "",
   ...rows.map((r) =>
     r.error
       ? `- ${r.id}: ERROR ${r.error}`
-      : `- ${r.id}: deadline ${r.deadline ? "ok" : `FAIL (expected ${r.expected_deadline}, got ${r.actual_deadline})`}; state ${r.state ? "ok" : `FAIL (expected ${r.expected_state}, got ${r.actual_state})`}`,
+      : `- ${r.id}: deadline ${r.deadline ? "ok" : `FAIL (expected ${r.expected_deadline}, got ${r.actual_deadline})`}; state ${r.state ? "ok" : `FAIL (expected ${r.expected_state}, got ${r.actual_state})`}; phone ${r.phone ? "ok" : `FAIL (expected ${r.expected_phone}, got ${r.actual_phone})`}; page ${r.page ? "ok" : `FAIL (expected ${r.expected_page}, got ${r.actual_page})`}${textScored ? `; quote ${r.quote ? "ok" : "FAIL"}` : ""}`,
   ),
 ].join("\n");
 
