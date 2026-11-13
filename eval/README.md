@@ -9,14 +9,15 @@ Scores the letter reader against labeled public sample notices and writes a resu
 | `letters/`           | Sample notice images (PNG and JPG) from Oregon and Vermont government sites                    |
 | `labels.json`        | One entry per image: expected fields, split, source and retrieval date                         |
 | `labels.schema.json` | JSON Schema for `labels.json` (all fields required, no extra fields)                           |
+| `LABEL_CHANGES.md`   | Every change to an existing label, with the reason                                             |
 | `run.ts`             | Reads each letter with `readLetter`, compares to the label, writes results                     |
-| `score.ts`           | Scoring helpers: `tokens`, `textMatches`, `deadlineMatches`, `documentScores`, `deadlineSplit` |
+| `score.ts`           | Scoring helpers: text, deadline, quote, phone and page matchers, document scores, group counts |
 | `score.test.ts`      | Unit tests for the scoring helpers                                                             |
 | `results/`           | Output of each run, git-ignored                                                                |
 
 ## Labels and splits
 
-Each label has `id`, `file` (relative to `letters/`), `split` (`dev` or `test`), `state` (`WA`, `OR`, `CA`, `NV`, `AZ` or `other`), `notice_type`, `deadline` (ISO date or null), `required_action`, `documents`, `source_url`, `retrieved` and `usage_note`. Use `dev` while changing the prompt and `test` for the final check.
+Fields and labeling rules: [../docs/eval-labeling.md](../docs/eval-labeling.md). Use `dev` while changing the prompt and `test` for the final check.
 
 ## Run
 
@@ -35,8 +36,8 @@ Every file in `letters/` must be a public .gov sample notice listed in `labels.j
 ## Adding a letter
 
 1. Save the public sample as PNG or JPG in `letters/`.
-2. Add an entry to `labels.json` that matches `labels.schema.json`.
-3. Run `npm run check:hygiene` and `npm test`.
+2. Label it per the guide, before any model run, and add the entry to `labels.json`.
+3. Run `npm run check:hygiene` and `npm run test:integration`.
 
 ## Results
 
