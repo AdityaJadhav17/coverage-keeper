@@ -98,8 +98,11 @@ const images = (p: Part[]) => p.filter((x) => x.name === "image");
 const lang = (p: Part[]) => p.find((x) => x.name === "lang")?.body.toString();
 
 async function expectNoSeriousA11yIssues(page: Page) {
+  // A hover transition cancelled by a layout shift rejects `finished`; it is over either way.
   await page.evaluate(() =>
-    Promise.all(document.getAnimations().map((a) => a.finished)),
+    Promise.all(
+      document.getAnimations().map((a) => a.finished.catch(() => undefined)),
+    ),
   );
   const results = await new AxeBuilder({ page }).analyze();
   const serious = results.violations.filter(
