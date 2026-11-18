@@ -77,6 +77,20 @@ it("both languages word every file error", () => {
   );
 });
 
+describe("consent facts say where the letter goes and how long it may be kept (#44)", () => {
+  it.each(["en", "es"] as const)("%s", (locale) => {
+    const facts = messages[locale].facts.join(" ");
+    for (const word of ["Vercel", "Anthropic", "30", "2"])
+      expect(facts).toContain(word);
+    // The old line claimed less than what happens: a photo, an unnamed service, no retention.
+    expect(facts).not.toMatch(/your photo|su foto/);
+  });
+
+  it("both languages list the same number of facts", () => {
+    expect(messages.es.facts).toHaveLength(messages.en.facts.length);
+  });
+});
+
 describe("AI label on every result (#45)", () => {
   it.each([
     [

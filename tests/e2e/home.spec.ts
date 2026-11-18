@@ -43,7 +43,17 @@ test("welcome screen leads with the outcome and states what we are", async ({
   await expect(
     page.getByText("About a minute · No sign-up · Free"),
   ).toBeVisible();
-  await expect(page.getByText("We don't save your photo.")).toBeVisible();
+  // The consent says where the letter goes and how long it may be kept (#44).
+  await expect(
+    page.getByText(
+      "We don't save your letter. To read it, we send it through Vercel (our web host) to Anthropic (an AI company).",
+    ),
+  ).toBeVisible();
+  await expect(
+    page.getByText(
+      "Anthropic may keep your letter for up to 30 days, or up to 2 years if its safety systems flag it.",
+    ),
+  ).toBeVisible();
   await expect(page.getByText("Not run by any state agency.")).toBeVisible();
   await expect(page.getByRole("list", { name: "How it works" })).toContainText(
     "What to send",
@@ -58,17 +68,22 @@ test("consent facts come before the consent button", async ({ page }) => {
       el.textContent?.startsWith("Free and independent."),
     );
     const save = all.findIndex((el) =>
-      el.textContent?.startsWith("We don't save your photo."),
+      el.textContent?.startsWith("We don't save your letter."),
+    );
+    const kept = all.findIndex((el) =>
+      el.textContent?.startsWith("Anthropic may keep your letter"),
     );
     const button = all.findIndex(
       (el) => el.textContent === "Start with my letter",
     );
-    return { ai, save, button };
+    return { ai, save, kept, button };
   });
   expect(order.ai).toBeGreaterThan(-1);
   expect(order.save).toBeGreaterThan(-1);
   expect(order.ai).toBeLessThan(order.button);
   expect(order.save).toBeLessThan(order.button);
+  expect(order.kept).toBeGreaterThan(-1);
+  expect(order.kept).toBeLessThan(order.button);
 });
 
 test("welcome facts are a scannable list with room around the button", async ({
@@ -79,7 +94,7 @@ test("welcome facts are a scannable list with room around the button", async ({
     Promise.all(document.getAnimations().map((a) => a.finished)),
   );
   const facts = page.getByRole("list", { name: "Before you start" });
-  await expect(facts.getByRole("listitem")).toHaveCount(4);
+  await expect(facts.getByRole("listitem")).toHaveCount(5);
   const list = (await facts.boundingBox())!;
   const button = (await page
     .getByRole("button", { name: "Start with my letter" })
