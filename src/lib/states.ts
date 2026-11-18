@@ -13,7 +13,14 @@ export type StateRules = {
   status: "published" | "pending";
   program: string;
   agency: string;
-  contact: { name: string; phone: string };
+  // source_url and retrieved are set when the number is printed on a different page
+  // than the rules (#53).
+  contact: {
+    name: string;
+    phone: string;
+    source_url?: string;
+    retrieved?: string;
+  };
   source_url: string;
   // Set when source_url is the agency's own non-.gov site: the .gov page that links to it.
   source_linked_from?: string;
