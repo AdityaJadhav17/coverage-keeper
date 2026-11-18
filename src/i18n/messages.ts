@@ -16,7 +16,9 @@ const en = {
   steps: ["Photo", "What it means", "What to send"],
   beforeYouStart: "Before you start",
   facts: [
-    "We don't save your photo. An AI service reads it for us.",
+    // Must stay exactly true and match docs/legal/privacy-notice.md (legal checklist ISSUE-1, #44).
+    "We don't save your letter. To read it, we send it through Vercel (our web host) to Anthropic (an AI company).",
+    "Anthropic may keep your letter for up to 30 days, or up to 2 years if its safety systems flag it.",
     "You decide what to send. We never contact the state for you.",
     "Free and independent. Not run by any state agency.",
     "Not legal advice. Only your state decides your coverage.",
@@ -178,7 +180,8 @@ const es: Messages = {
   steps: ["Foto", "Qué significa", "Qué enviar"],
   beforeYouStart: "Antes de empezar",
   facts: [
-    "No guardamos su foto. Un servicio de IA la lee por nosotros.",
+    "No guardamos su carta. Para leerla, la enviamos a través de Vercel (nuestro servicio de alojamiento web) a Anthropic (una empresa de IA).",
+    "Anthropic puede conservar su carta hasta 30 días, o hasta 2 años si sus sistemas de seguridad la marcan.",
     "Usted decide qué enviar. Nunca nos comunicamos con el estado por usted.",
     "Gratis e independiente. No lo maneja ninguna agencia del estado.",
     "No es asesoría legal. Solo su estado decide sobre su cobertura.",

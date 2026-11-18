@@ -29,6 +29,13 @@ test("a Spanish phone gets the app in Spanish, and can switch to English (US-060
   await expect(page.getByTestId("independent")).toHaveText(
     "Coverage Keeper es independiente. No forma parte de ningún programa estatal de Medicaid ni de ninguna agencia del gobierno, y ninguno de ellos lo ha aprobado ni respaldado.",
   );
+  // The consent names who handles the letter and how long it may be kept (#44).
+  await expect(
+    page.getByText(
+      "Anthropic puede conservar su carta hasta 30 días, o hasta 2 años si sus sistemas de seguridad la marcan.",
+    ),
+  ).toBeVisible();
+  await expect(page.getByText(/a través de Vercel/)).toBeVisible();
   await page.getByRole("button", { name: "English" }).click();
   await expect(
     page.getByRole("heading", {
