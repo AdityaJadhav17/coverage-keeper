@@ -11,6 +11,11 @@ test("home page shows the product and who to call, with no serious a11y issues",
   await expect(page.locator(".callbar")).toContainText(
     "Questions? Call the number on your letter",
   );
+  // Before any state is known, the page still says it isn't a government site (#46).
+  await expect(page.getByTestId("independent")).toHaveText(
+    "Coverage Keeper is independent. It is not part of, approved by, or endorsed by any state Medicaid program or government agency.",
+  );
+  await expect(page.locator(".callbar")).not.toContainText("(official)");
 
   // Screen fade-ins would otherwise be measured at half opacity.
   await page.evaluate(() =>

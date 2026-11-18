@@ -155,6 +155,14 @@ const en = {
   share: "Share",
 
   questions: "Questions? Call",
+  // Under the call bar number: whose number it is (legal checklist ISSUE-3, #46).
+  official: (name: string) => `${name} (official)`,
+  fromLetter: "from your letter",
+  // On every screen (#46). null: no state chosen yet.
+  notPartOf: (s: { program: string; agency: string; state: string } | null) =>
+    s
+      ? `Coverage Keeper is independent. It is not part of, approved by, or endorsed by ${s.program}, the ${s.agency} or the State of ${s.state}.`
+      : "Coverage Keeper is independent. It is not part of, approved by, or endorsed by any state Medicaid program or government agency.",
 };
 
 export type Messages = typeof en;
@@ -313,6 +321,12 @@ const es: Messages = {
   share: "Compartir",
 
   questions: "¿Preguntas? Llame al",
+  official: (name) => `${name} (oficial)`,
+  fromLetter: "de su carta",
+  notPartOf: (s) =>
+    s
+      ? `Coverage Keeper es independiente. No forma parte de ${s.program}, ${s.agency} ni del estado de ${s.state}, y ninguno de ellos lo ha aprobado ni respaldado.`
+      : "Coverage Keeper es independiente. No forma parte de ningún programa estatal de Medicaid ni de ninguna agencia del gobierno, y ninguno de ellos lo ha aprobado ni respaldado.",
 };
 
 export const messages: Record<Locale, Messages> = { en, es };

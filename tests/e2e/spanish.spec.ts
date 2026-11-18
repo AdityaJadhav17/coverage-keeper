@@ -26,6 +26,9 @@ test("a Spanish phone gets the app in Spanish, and can switch to English (US-060
     }),
   ).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("lang", "es");
+  await expect(page.getByTestId("independent")).toHaveText(
+    "Coverage Keeper es independiente. No forma parte de ningún programa estatal de Medicaid ni de ninguna agencia del gobierno, y ninguno de ellos lo ha aprobado ni respaldado.",
+  );
   await page.getByRole("button", { name: "English" }).click();
   await expect(
     page.getByRole("heading", {

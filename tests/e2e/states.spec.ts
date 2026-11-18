@@ -53,6 +53,13 @@ test("California shows Medi-Cal's questions; switching to Washington swaps quest
     page.getByRole("group", { name: "Are you 18 or younger?" }),
   ).toBeVisible();
   await expect(page.getByRole("link", { name: "800-541-5555" })).toBeVisible();
+  // The state's own line is labeled official, and the page says it isn't the state's (#46).
+  await expect(page.locator(".callbar")).toContainText(
+    "Medi-Cal Helpline (official)",
+  );
+  await expect(page.getByTestId("independent")).toHaveText(
+    "Coverage Keeper is independent. It is not part of, approved by, or endorsed by Medi-Cal, the California Department of Health Care Services or the State of California.",
+  );
   await expect(page.getByText(/\bOHP\b|Oregon Health/)).toHaveCount(0);
   await expectNoSeriousA11yIssues(page);
 
@@ -64,6 +71,12 @@ test("California shows Medi-Cal's questions; switching to Washington swaps quest
     page.getByRole("group", { name: "Are you 18 or younger?" }),
   ).toHaveCount(0);
   await expect(page.getByRole("link", { name: "800-562-3022" })).toBeVisible();
+  await expect(page.locator(".callbar")).toContainText(
+    "Apple Health customer service (official)",
+  );
+  await expect(page.getByTestId("independent")).toContainText(
+    "Apple Health (Medicaid), the Washington State Health Care Authority or the State of Washington.",
+  );
 
   await page
     .getByRole("group", { name: "Are you under 19?" })

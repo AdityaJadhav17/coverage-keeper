@@ -602,7 +602,8 @@ mark {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0 0.5rem;
   padding: 0.5rem calc(1rem + env(safe-area-inset-right, 0px))
     calc(0.5rem + env(safe-area-inset-bottom, 0px))
     calc(1rem + env(safe-area-inset-left, 0px));
@@ -622,6 +623,24 @@ mark {
   font-size: 1.25rem;
   touch-action: manipulation;
   font-variant-numeric: tabular-nums;
+}
+
+/* Whose number it is, on its own row under the number (#46). */
+.callbar .who {
+  flex-basis: 100%;
+  margin-top: -0.25rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+/* Not part of any agency: the last thing on every screen (#46). */
+.independent {
+  margin: 2.5rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule);
+  color: var(--muted);
+  font-size: 0.9375rem;
 }
 
 .callbar a::before {

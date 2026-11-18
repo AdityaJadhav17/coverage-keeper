@@ -71,6 +71,12 @@ test("photo to explanation shows summary, deadline, checklist and phone", async 
   await expect(page.getByRole("checkbox")).toHaveCount(2);
   await expect(page.getByLabel("Pay stubs for January 2027")).toBeVisible();
   await expect(page.getByRole("link", { name: "800-699-9075" })).toBeVisible();
+  // This number was read from the letter, so it's labeled as the letter's, not as official (#46).
+  await expect(page.locator(".callbar")).toContainText("from your letter");
+  await expect(page.locator(".callbar")).not.toContainText("(official)");
+  await expect(page.getByTestId("independent")).toContainText(
+    "Oregon Health Plan (OHP), the Oregon Health Authority or the State of Oregon.",
+  );
   expect(calls()).toBe(1);
   await expectNoSeriousA11yIssues(page);
 });
