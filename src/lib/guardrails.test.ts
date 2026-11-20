@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
-  enforceGuardrail,
-  findForbiddenClaims,
   SAFE_FALLBACK,
   SAFE_FALLBACK_ES,
+  enforceGuardrail,
+  findForbiddenClaims,
+  findSelfDescriptions,
 } from "./guardrails";
 
 describe("findForbiddenClaims", () => {
@@ -151,5 +152,63 @@ describe("claims that used to slip past", () => {
 
   it("still defaults to the English fallback", () => {
     expect(enforceGuardrail("Usted es elegible").text).toBe(SAFE_FALLBACK);
+  });
+});
+
+describe("banned self-descriptions (legal checklist ISSUE-7, #50)", () => {
+  it.each([
+    "I am a licensed counselor and can help.",
+    "As your nurse, I recommend sending the form.",
+    "We are certified application counselors.",
+    "We're navigators for Apple Health.",
+    "Coverage Keeper is an official Medi-Cal tool.",
+    "Coverage Keeper is HIPAA compliant.",
+    "This app is guaranteed to be accurate.",
+    "I'm your case worker for this renewal.",
+    "We are immigration consultants.",
+    "Our team is licensed in Nevada.",
+    "Soy notario y puedo ayudarle.",
+    "Somos abogados de inmigración.",
+    "Como su consejera, le recomiendo enviar el formulario.",
+    "Coverage Keeper es un servicio oficial del estado.",
+    "Somos consultores de inmigración certificados.",
+  ])("finds %j", (text) => {
+    expect(findSelfDescriptions(text)).not.toHaveLength(0);
+    expect(enforceGuardrail(text).blocked).toBe(true);
+  });
+
+  it.each([
+    // What a letter may ask for, or who it names: not about us.
+    "Ask your doctor to fill out the form.",
+    "Send a note from a licensed health professional.",
+    "Call a certified application counselor at the number on your letter.",
+    "A navigator or assister can help you renew for free.",
+    "Legal aid can help you with an appeal.",
+    "Send a certified copy of your birth certificate.",
+    "Make sure the information is accurate.",
+    "Call the official Medi-Cal Helpline.",
+    "Your case worker is listed at the top of the letter.",
+    "Pida a su médico que llene el formulario.",
+    "Un abogado de ayuda legal puede ayudarle con la apelación.",
+    // Saying what we are not is fine.
+    "We are not lawyers, and this is not legal advice.",
+    "Coverage Keeper is not an official state site.",
+    "No somos abogados.",
+    "Coverage Keeper no es un servicio oficial.",
+    "I am sending this as your doctor requested.",
+  ])("leaves %j alone", (text) => {
+    expect(findSelfDescriptions(text)).toEqual([]);
+    expect(enforceGuardrail(text)).toEqual({ text, blocked: false });
+  });
+
+  it("sees through look-alike letters and invisible characters", () => {
+    expect(findSelfDescriptions("We are nоtarios.")).not.toHaveLength(0);
+    expect(findSelfDescriptions("We are thera​pists.")).not.toHaveLength(0);
+  });
+
+  it("uses the reply's language for the fallback", () => {
+    expect(enforceGuardrail("Somos notarios.", "es").text).toBe(
+      SAFE_FALLBACK_ES,
+    );
   });
 });
