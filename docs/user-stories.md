@@ -53,7 +53,7 @@ As Priya I want the app to say when it isn't sure so that I can call instead of 
 **US-020: Deadline with days left** — Must, MVP: yes
 As Marisol I want the deadline and how many days I have left so that I plan around shifts.
 
-- Given an extracted deadline, When results show, Then I see the date, days remaining (computed in code from today in America/Los_Angeles), and the quoted line it came from.
+- Given an extracted deadline, When results show, Then I see the date, days remaining (computed in code from today on my own device), and the quoted line it came from.
 
 **US-021: Ambiguous deadline** — Must, MVP: yes
 As Priya I want to see when the date is unclear so that I don't miss it.
