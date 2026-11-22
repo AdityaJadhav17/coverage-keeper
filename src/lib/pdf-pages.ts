@@ -1,11 +1,25 @@
 import { inflateSync } from "node:zlib";
 
 // Name tokens may hide behind #xx escapes and comments (PDF 1.7 §7.2.3, §7.3.5).
-const PAGE = /\/Type(?:\s|%[^\r\n]*[\r\n])*\/Page(?![A-Za-z0-9#])/;
-const PAGES = /\/Type(?:\s|%[^\r\n]*[\r\n])*\/Pages(?![A-Za-z0-9#])/;
+// Every pattern here does bounded work per starting point, and objects are walked with
+// indexOf, so the whole count is linear in the file size. Before, an unbounded lazy
+// match up to "endobj", and a comment run rescanned from every "/Type" inside it, let
+// one 4 MB upload hold the server for minutes or hours.
+// Up to 4 comments of up to 200 bytes between two tokens; real files have none.
+const GAP = String.raw`\s*(?:%[^\r\n]{0,200}[\r\n]\s*){0,4}`;
+const PAGE = new RegExp(String.raw`\/Type${GAP}\/Page(?![A-Za-z0-9#])`);
+const PAGES = new RegExp(String.raw`\/Type${GAP}\/Pages(?![A-Za-z0-9#])`);
 const COUNT = /\/Count\s+(\d+)/;
-const OBJECT = /(\d+)\s+\d+\s+obj\b([\s\S]*?)\bendobj\b/g;
+const OBJECT_START = /(\d{1,10})\s+\d{1,10}\s+obj\b/g;
 const STREAM = /(?<!end)stream\r?\n/g;
+// Things we refuse to count rather than miscount, since a hidden page is a billed page:
+// a name followed by more comment than GAP reads (the lookahead plus backreference
+// stops the engine from giving comments back), and object or generation numbers too
+// long for OBJECT_START to tell apart.
+const UNREADABLE = new RegExp(String.raw`\/Type(?=(${GAP}))\1%`);
+const LONG_NUMBER = /\d{11}\s+(?:\d{1,10}\s+)?obj\b/;
+const uncountable = (text: string) =>
+  UNREADABLE.test(text) || LONG_NUMBER.test(text);
 const INFLATE_BUDGET = 16 * 1024 * 1024;
 
 const unescape = (s: string) =>
@@ -14,6 +28,31 @@ const unescape = (s: string) =>
   );
 
 type Found = { pages: Set<string>; counts: number[] };
+
+// Each "N G obj ... endobj", in order. Stops at the first object with no "endobj":
+// no later object can have one either.
+const WORD = /[A-Za-z0-9_]/;
+// The next "endobj" that stands alone: "/xendobj" is a name, not the end of an object.
+function endOfObject(text: string, from: number): number {
+  for (
+    let i = text.indexOf("endobj", from);
+    i >= 0;
+    i = text.indexOf("endobj", i + 1)
+  )
+    if (!WORD.test(text[i - 1] ?? " ") && !WORD.test(text[i + 6] ?? " "))
+      return i;
+  return -1;
+}
+
+function* objects(text: string): Generator<[num: string, body: string]> {
+  const start = new RegExp(OBJECT_START.source, "g");
+  for (let m = start.exec(text); m; m = start.exec(text)) {
+    const end = endOfObject(text, start.lastIndex);
+    if (end < 0) return;
+    yield [m[1]!, text.slice(start.lastIndex, end)];
+    start.lastIndex = end + "endobj".length;
+  }
+}
 
 // One object: a page adds its number (an edited PDF repeats objects under the same
 // number in each saved revision), and a page tree node adds its /Count. /Count on
@@ -27,19 +66,29 @@ function scan(num: string, body: string, found: Found) {
 }
 
 // Objects in a compressed object stream: "num offset" pairs, then the objects (§7.5.7).
-function scanStream(head: string, text: string, found: Found) {
+// False when the offsets are out of order or past the end: the file chooses them, and
+// overlapping ones would make every pair rescan the whole stream.
+function scanStream(head: string, text: string, found: Found): boolean {
   const first = Number(/\/First\s+(\d+)/.exec(head)?.[1]);
   if (!Number.isFinite(first)) {
-    for (const m of text.matchAll(OBJECT)) scan(m[1]!, m[2]!, found);
-    return;
+    for (const [num, body] of objects(text)) scan(num, body, found);
+    return true;
   }
   const pairs = text.slice(0, first).trim().split(/\s+/).map(Number);
+  const room = text.length - first;
+  for (let i = 0, last = 0; i + 1 < pairs.length; i += 2) {
+    const offset = pairs[i + 1]!;
+    if (!Number.isInteger(offset) || offset < last || offset > room)
+      return false;
+    last = offset;
+  }
   for (let i = 0; i + 1 < pairs.length; i += 2)
     scan(
       String(pairs[i]),
-      text.slice(first + pairs[i + 1]!, first + (pairs[i + 3] ?? text.length)),
+      text.slice(first + pairs[i + 1]!, first + (pairs[i + 3] ?? room)),
       found,
     );
+  return true;
 }
 
 // Pages the model would be billed for, or null when we can't be sure (security audit M1).
@@ -51,21 +100,42 @@ export function pdfPageCount(data: Uint8Array): number | null {
   const buf = Buffer.from(data.buffer, data.byteOffset, data.byteLength);
   const raw = buf.toString("latin1");
   const text = unescape(raw);
+  if (uncountable(text)) return null;
   const found: Found = { pages: new Set(), counts: [] };
-  for (const m of text.matchAll(OBJECT)) scan(m[1]!, m[2]!, found);
+  for (const [num, body] of objects(text)) scan(num, body, found);
   let budget = INFLATE_BUDGET;
+  // Every lookup only moves forward through the file, and each stream's dictionary is
+  // read from the previous stream keyword at the earliest, so the slices never overlap.
+  let lastObj = -1;
+  let previousStream = 0;
+  let nextObj = raw.indexOf(" obj");
+  let endstream = -1;
+  let noEndstream = false;
   for (const m of raw.matchAll(STREAM)) {
-    const head = unescape(raw.slice(raw.lastIndexOf(" obj", m.index), m.index));
+    while (nextObj >= 0 && nextObj < m.index) {
+      lastObj = nextObj;
+      nextObj = raw.indexOf(" obj", nextObj + 1);
+    }
+    const head = unescape(
+      raw.slice(Math.max(lastObj, previousStream), m.index),
+    );
+    const start = m.index + m[0].length;
+    previousStream = start;
     if (!/\/Type\s*\/ObjStm\b/.test(head)) continue;
     if (!/\/Filter\s*\/FlateDecode\b/.test(head)) return null;
-    const start = m.index + m[0].length;
-    const end = raw.indexOf("endstream", start);
+    if (endstream < start && !noEndstream) {
+      endstream = raw.indexOf("endstream", start);
+      noEndstream = endstream < 0;
+    }
+    const end = endstream >= start ? endstream : -1;
     try {
       const out = inflateSync(buf.subarray(start, end < 0 ? buf.length : end), {
         maxOutputLength: budget,
       });
       budget -= out.length;
-      scanStream(head, unescape(out.toString("latin1")), found);
+      const inner = unescape(out.toString("latin1"));
+      if (uncountable(inner)) return null;
+      if (!scanStream(head, inner, found)) return null;
     } catch {
       return null; // corrupt, or past the budget
     }

@@ -121,3 +121,121 @@ describe("pdfPageCount (security audit M1)", () => {
     expect(n).toBeLessThanOrEqual(MAX_PDF_PAGES);
   });
 });
+
+// One upload must not pin the server: every scan stays linear in the file size.
+// Before the fix the first two took about 170 s and 80 s at this size.
+describe("pdfPageCount finishes fast on hostile files", () => {
+  const MB = 1024 * 1024;
+  const fill = (unit: string, bytes: number) =>
+    enc("%PDF-1.7\n" + unit.repeat(Math.ceil(bytes / unit.length)));
+
+  it.each([
+    ["objects that never end", fill("1 0 obj ", 4 * MB)],
+    ["streams with no object before them", fill("stream\n", 4 * MB)],
+    [
+      "object streams that never end",
+      enc(
+        "%PDF-1.7\n9 0 obj << /Type /ObjStm /Filter /FlateDecode >> " +
+          "stream\n".repeat((4 * MB) / 7),
+      ),
+    ],
+    ["comments that never end", fill("/Type%", 4 * MB)],
+    ["one long run of digits", fill("1", 4 * MB)],
+    [
+      "an offset table that points every object at the whole stream",
+      objStm(
+        deflateSync(
+          enc("1 0 1 00262144 ".repeat(MB / 15) + "/Type ".repeat(MB / 6)),
+        ),
+        `/FlateDecode /First ${Math.floor(MB / 15) * 15}`,
+      ),
+    ],
+    [
+      "names inside a run of comments, in an object",
+      enc(
+        "%PDF-1.7\n1 0 obj /Type" + "%/Type\n".repeat((4 * MB) / 7) + " endobj",
+      ),
+    ],
+    ["names inside a run of comments, no object", fill("%/Type\n", 4 * MB)],
+    ["escaped bytes before every stream", fill("#41stream\n", 4 * MB)],
+    [
+      "a tiny object stream that inflates to a run of comments",
+      objStm(
+        deflateSync(enc("1 0 /Type" + "%/Type\n".repeat((8 * MB) / 7))),
+        "/FlateDecode /First 4",
+      ),
+    ],
+    [
+      "one long run of spaces between numbers",
+      fill("1" + " ".repeat(4096), 4 * MB),
+    ],
+    [
+      "many streams before one far endstream",
+      enc(
+        "%PDF-1.7\n" +
+          "9 0 obj << /Type /ObjStm /Filter /FlateDecode >> stream\n".repeat(
+            20_000,
+          ) +
+          "x".repeat(2 * MB) +
+          "endstream endobj",
+      ),
+    ],
+  ])("%s", (_, data) => {
+    const started = performance.now();
+    pdfPageCount(data);
+    // These took 80 s to hours before; 10 s leaves room for a slow CI runner.
+    expect(performance.now() - started).toBeLessThan(10_000);
+  });
+
+  it("still counts pages that sit after an object with no endobj", () => {
+    // The unterminated object swallows nothing: the real file ends each object.
+    const data = enc(
+      `%PDF-1.7\n2 0 obj << /Type /Pages /Count 3 >> endobj\n${pages(3)}99 0 obj << /Broken`,
+    );
+    expect(pdfPageCount(data)).toBe(3);
+  });
+
+  // Pages must not be hidden from the count: each file has 30 pages behind a /Count 1.
+  const root = "%PDF-1.7\n2 0 obj << /Type /Pages /Count 1 >> endobj\n";
+  const hidden = (page: (i: number) => string) =>
+    enc(
+      root + Array.from({ length: 30 }, (_, i) => page(i)).join("") + "%%EOF",
+    );
+
+  it('counts pages whose dictionary has a name containing "endobj"', () => {
+    expect(
+      pdfPageCount(
+        hidden((i) => `${i + 3} 0 obj << /A /xendobj /Type /Page >> endobj\n`),
+      ),
+    ).toBe(30);
+  });
+
+  it.each([
+    [
+      "a comment longer than we read",
+      (i: number) =>
+        `${i + 3} 0 obj << /Type %${"x".repeat(201)}\n/Page >> endobj\n`,
+    ],
+    [
+      "more comments in a row than we read",
+      (i: number) =>
+        `${i + 3} 0 obj << /Type ${"%c\n".repeat(5)}/Page >> endobj\n`,
+    ],
+    [
+      "object numbers too long to tell apart",
+      (i: number) => `${i + 3}0000000001 0 obj << /Type /Page >> endobj\n`,
+    ],
+  ])("gives up on %s", (_, page) => {
+    expect(pdfPageCount(hidden(page))).toBeNull();
+  });
+
+  it("gives up on an object stream whose offsets are out of order", () => {
+    const table = "5 20 6 0 ";
+    const body = deflateSync(
+      enc(table + "<< /Type /Page >>".padEnd(20) + "<< /Type /Page >>"),
+    );
+    expect(
+      pdfPageCount(objStm(body, `/FlateDecode /First ${table.length}`)),
+    ).toBeNull();
+  });
+});
