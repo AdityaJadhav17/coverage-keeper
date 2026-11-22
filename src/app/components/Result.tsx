@@ -1,4 +1,5 @@
 import { useLocale } from "@/i18n/LocaleContext";
+import { paperOrNotice, shownOrNull } from "@/lib/guardrails";
 import type { LetterExtraction } from "@/lib/schema";
 import type { Region, StateRules } from "@/lib/states";
 import { Deadline } from "./Deadline";
@@ -45,9 +46,7 @@ export function Result({
       <Deadline data={data} phone={phone} rules={rules} />
 
       <h3>{t.askTitle}</h3>
-      <p>
-        {data.required_action ? safe(data.required_action, locale) : t.notSure}
-      </p>
+      <p>{shownOrNull(data.required_action) ?? t.notSure}</p>
 
       <h3>{t.papersTitle}</h3>
       {data.documents.length > 0 ? (
@@ -56,7 +55,7 @@ export function Result({
             <li key={i}>
               <label>
                 <input type="checkbox" />
-                <span>{safe(doc, locale)}</span>
+                <span>{paperOrNotice(doc, locale)}</span>
               </label>
             </li>
           ))}

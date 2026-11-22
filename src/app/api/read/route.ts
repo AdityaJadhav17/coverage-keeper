@@ -5,7 +5,7 @@ import {
 } from "@/lib/collect-files";
 import { sniffType } from "@/lib/file-type";
 import { pdfPageCount } from "@/lib/pdf-pages";
-import { enforceGuardrail } from "@/lib/guardrails";
+import { enforceGuardrail, paperOrNotice, shownOrNull } from "@/lib/guardrails";
 import {
   MODEL_ID,
   readLetter,
@@ -140,19 +140,23 @@ export async function POST(req: Request) {
   try {
     const result = await readLetter(input, { lang });
     // Every user-facing string, including text copied from the letter (ADR-0005).
-    let blocked = false;
-    const guard = (text: string) => {
-      const out = enforceGuardrail(text, lang);
-      blocked ||= out.blocked;
-      return out.text;
-    };
+    // The summary falls back to a fixed sentence. A blocked quote or action is left
+    // out and a blocked paper becomes a pointer to the letter, so the fallback is
+    // never shown as the letter's own words.
+    const summary = enforceGuardrail(result.summary, lang);
     const safe = {
       ...result,
-      summary: guard(result.summary),
-      required_action: result.required_action && guard(result.required_action),
-      deadline_quote: result.deadline_quote && guard(result.deadline_quote),
-      documents: result.documents.map(guard),
+      summary: summary.text,
+      required_action: shownOrNull(result.required_action),
+      deadline_quote: shownOrNull(result.deadline_quote),
+      documents: result.documents.map((doc) => paperOrNotice(doc, lang)),
     };
+    // Counts a field only when the check blocked it, not when the model left it empty.
+    const blocked =
+      summary.blocked ||
+      [result.required_action, result.deadline_quote, ...result.documents].some(
+        (text) => !!text && enforceGuardrail(text, lang).blocked,
+      );
     log({
       status: 200,
       ms: Date.now() - started,

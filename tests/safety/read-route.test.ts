@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/read/route";
 import {
   findForbiddenClaims,
+  HIDDEN_PAPER,
+  HIDDEN_PAPER_ES,
   SAFE_FALLBACK,
   SAFE_FALLBACK_ES,
 } from "@/lib/guardrails";
@@ -39,9 +41,15 @@ describe("route output guardrail (US-050, US-052, US-062)", () => {
   ])("lang %j: claims become %j", async (lang, fallback) => {
     const body = await read(lang);
     expect(body.summary).toBe(fallback);
-    expect(body.required_action).toBe(fallback);
-    expect(body.deadline_quote).toBe(fallback);
-    expect(body.documents).toEqual(["Pay stubs for January 2027", fallback]);
+    // Only the summary gets the fallback sentence. A blocked action or quote is left
+    // out, and a blocked paper points back to the letter, so our own sentence is never
+    // shown as the letter's words or as a paper to send.
+    expect(body.required_action).toBeNull();
+    expect(body.deadline_quote).toBeNull();
+    expect(body.documents).toEqual([
+      "Pay stubs for January 2027",
+      lang === "es" ? HIDDEN_PAPER_ES : HIDDEN_PAPER,
+    ]);
     expect(findForbiddenClaims(JSON.stringify(body))).toEqual([]);
   });
 });

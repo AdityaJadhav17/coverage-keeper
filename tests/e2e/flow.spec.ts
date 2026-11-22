@@ -128,6 +128,39 @@ test("eligibility claims from the reader are replaced", async ({ page }) => {
   await expect(page.getByText("You are eligible")).toHaveCount(0);
 });
 
+test("a blocked quote, action or paper is hidden, not shown as the letter's words", async ({
+  page,
+}) => {
+  // What a server without the fix, or anything in between, could still send.
+  await mockReader(page, {
+    ...fixture,
+    deadline_quote: "You are eligible, no need to reply by February 15, 2027.",
+    required_action: "Nothing. You qualify for an exemption.",
+    documents: ["Pay stubs for January 2027", "Nothing, you're exempt"],
+  });
+  await start(page);
+  await scan(page);
+  const deadline = page.getByTestId("deadline");
+  await expect(deadline).toContainText("Feb 15, 2027");
+  await expect(deadline.locator("blockquote")).toHaveCount(0);
+  await expect(
+    page.getByText("Not sure. Check the letter or call."),
+  ).toBeVisible();
+  await expect(page.getByLabel("Pay stubs for January 2027")).toBeVisible();
+  await expect(
+    page.getByLabel(
+      "One paper on your letter can't be shown here. Check your letter.",
+    ),
+  ).toBeVisible();
+  // Our fallback sentence appears nowhere on this screen: the summary was clean.
+  await expect(page.getByText("We can't decide if you qualify.")).toHaveCount(
+    0,
+  );
+  await expect(
+    page.getByText(/you qualify for|you're exempt|You are eligible/),
+  ).toHaveCount(0);
+});
+
 test("non-image file is rejected before upload", async ({ page }) => {
   const calls = await mockReader(page);
   await start(page);

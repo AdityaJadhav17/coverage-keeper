@@ -2,7 +2,8 @@ import { useLocale } from "@/i18n/LocaleContext";
 import { deadlineStatus } from "@/lib/deadline";
 import type { LetterExtraction } from "@/lib/schema";
 import type { StateRules } from "@/lib/states";
-import { formatDate, safe } from "./shared";
+import { shownOrNull } from "@/lib/guardrails";
+import { formatDate } from "./shared";
 
 export function Deadline({
   data,
@@ -15,11 +16,12 @@ export function Deadline({
 }) {
   const { t, locale } = useLocale();
   const { status, days } = deadlineStatus(data.deadline, new Date());
-  // The quoted line stays exactly as printed on the letter.
-  const quote = data.deadline_quote && (
+  // The quoted line stays exactly as printed on the letter, or is not shown at all.
+  const printed = shownOrNull(data.deadline_quote);
+  const quote = printed && (
     <>
       <blockquote>
-        <mark>{safe(data.deadline_quote, locale)}</mark>
+        <mark>{printed}</mark>
       </blockquote>
       {/* Page 1 is where people look anyway, so only later pages are named (US-074). */}
       {data.deadline_page && data.deadline_page > 1 && (
