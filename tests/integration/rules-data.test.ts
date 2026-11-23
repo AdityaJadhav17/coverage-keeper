@@ -22,6 +22,15 @@ describe.each(STATE_CODES)("%s rules data", (code) => {
     expect(rules.program.length).toBeGreaterThan(0);
   });
 
+  // A number printed on a different page than the rules cites that page (#53).
+  it("cites a .gov page for its phone number when it differs from the rules page", () => {
+    const { source_url, retrieved } = rules.contact;
+    if (source_url === undefined) return;
+    expect(source_url).toMatch(/^https:\/\/([a-z0-9-]+\.)*[a-z0-9-]+\.gov\//);
+    expect(source_url).not.toBe(rules.source_url);
+    expect(retrieved).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
   it("matches its status: published lists questions, pending lists none", () => {
     if (rules.status === "published") {
       const ids = rules.exemptions!.map((e) => e.id);
@@ -38,6 +47,13 @@ describe.each(STATE_CODES)("%s rules data", (code) => {
 
   it("makes no eligibility claim", () => {
     expect(findForbiddenClaims(JSON.stringify(rules))).toEqual([]);
+  });
+});
+
+it("cites the Nevada hotline from the page that prints it (#53)", () => {
+  expect(stateRules("NV").contact).toMatchObject({
+    phone: "702-631-3310",
+    source_url: "https://www.nevadamedicaid.nv.gov/WorkRequirements/get-help/",
   });
 });
 
