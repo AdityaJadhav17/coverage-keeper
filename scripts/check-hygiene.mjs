@@ -1,6 +1,6 @@
 // Fails if tool config files are tracked, or if eval data could be a real person's letter.
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { isForbiddenPath } from "./hygiene-rules.mjs";
 
 const PII = [
@@ -27,8 +27,22 @@ const labeled = new Map(
     (l.files ?? [l.file]).map((f) => [`eval/letters/${f}`, l]),
   ),
 );
+const GOV = /^https:\/\/([a-z0-9-]+\.)*[a-z0-9-]+\.gov\//;
 for (const l of labels) {
-  if (!/^https:\/\/([a-z0-9-]+\.)*[a-z0-9-]+\.gov\//.test(l.source_url ?? "")) {
+  if (l.source_kind === "synthetic") {
+    // Made-up test letters live apart, each rendered from a template in eval/synthetic/.
+    if (!(l.files ?? [l.file]).every((f) => f.startsWith("synthetic/")))
+      errors.push(
+        `eval label ${l.id}: synthetic files go in eval/letters/synthetic/`,
+      );
+    if (!existsSync(`eval/synthetic/${l.id}.html`))
+      errors.push(
+        `eval label ${l.id}: no template eval/synthetic/${l.id}.html`,
+      );
+  } else if (
+    !GOV.test(l.source_url ?? "") &&
+    !GOV.test(l.source_linked_from ?? "")
+  ) {
     errors.push(`eval label ${l.id}: source_url must be a public .gov page`);
   }
 }

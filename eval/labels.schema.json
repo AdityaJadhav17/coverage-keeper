@@ -5,16 +5,29 @@
   "items": {
     "type": "object",
     "additionalProperties": false,
-    "oneOf": [{ "required": ["file"] }, { "required": ["files"] }],
+    "oneOf": [
+      {
+        "required": ["file"]
+      },
+      {
+        "required": ["files"]
+      }
+    ],
     "required": [
       "id",
       "split",
       "state",
       "notice_type",
       "deadline",
+      "deadline_quote",
+      "deadline_page",
       "required_action",
       "documents",
-      "source_url",
+      "contact_phone",
+      "category",
+      "source_kind",
+      "labeled_by",
+      "label_version",
       "retrieved",
       "usage_note"
     ],
@@ -31,7 +44,9 @@
         "type": "array",
         "minItems": 2,
         "maxItems": 10,
-        "items": { "type": "string" },
+        "items": {
+          "type": "string"
+        },
         "description": "Page photos of one letter in page order, relative to eval/letters/. Use instead of file."
       },
       "split": {
@@ -48,6 +63,15 @@
         "type": ["string", "null"],
         "format": "date"
       },
+      "deadline_quote": {
+        "type": ["string", "null"],
+        "description": "The printed sentence that gives the deadline, copied from the letter, date included. null when deadline is null."
+      },
+      "deadline_page": {
+        "type": ["integer", "null"],
+        "minimum": 1,
+        "description": "1-based page the deadline is printed on. null when deadline is null."
+      },
       "required_action": {
         "type": ["string", "null"]
       },
@@ -57,13 +81,62 @@
           "type": "string"
         }
       },
+      "contact_phone": {
+        "type": ["string", "null"],
+        "description": "The first number the letter tells the reader to call about this letter, as printed. Not a TTY or fax."
+      },
+      "category": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "enum": [
+            "renewal",
+            "work_requirements",
+            "request_for_information",
+            "coverage_ending",
+            "approval_or_change",
+            "immigration",
+            "not_medicaid",
+            "multi_page",
+            "deadline_on_later_page",
+            "no_deadline",
+            "placeholder_date",
+            "effective_date_trap",
+            "phone_photo",
+            "low_quality_image",
+            "spanish_letter",
+            "prompt_injection"
+          ]
+        },
+        "description": "Every category that fits, from docs/eval-labeling.md."
+      },
+      "source_kind": {
+        "enum": ["gov_sample", "synthetic"]
+      },
       "source_url": {
         "type": "string",
-        "pattern": "^https://([a-z0-9-]+\\.)*[a-z0-9-]+\\.gov/"
+        "pattern": "^https://",
+        "description": "Where the sample came from. A gov_sample needs a .gov page here or in source_linked_from; a synthetic letter derived from a gov sample keeps that sample's page."
+      },
+      "source_linked_from": {
+        "type": "string",
+        "pattern": "^https://([a-z0-9-]+\\.)*[a-z0-9-]+\\.gov/",
+        "description": "The agency .gov page that links to source_url, when source_url is not itself .gov."
       },
       "retrieved": {
         "type": "string",
         "format": "date"
+      },
+      "labeled_by": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "string"
+        },
+        "description": "GitHub handles of everyone who labeled this letter."
+      },
+      "label_version": {
+        "const": 2
       },
       "usage_note": {
         "type": "string"

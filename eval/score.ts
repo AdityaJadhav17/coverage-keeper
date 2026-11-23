@@ -1,3 +1,7 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
+import { phoneHref } from "../src/lib/phone";
+
 const STOPWORDS = new Set([
   "a",
   "an",
@@ -94,4 +98,100 @@ export function deadlineSplit(
     printed: tally(rows.filter((r) => r.expected !== null)),
     none: tally(rows.filter((r) => r.expected === null)),
   };
+}
+
+// Same number: the first 10-digit US number in each (null = no number).
+export function phoneMatches(
+  expected: string | null,
+  actual: string | null,
+): boolean {
+  const dial = (s: string | null) => (s === null ? null : phoneHref(s));
+  return dial(expected) === dial(actual);
+}
+
+export function pageMatches(
+  expected: number | null,
+  actual: number | null,
+): boolean {
+  return expected === actual;
+}
+
+const MONTHS: Record<string, number> = {};
+[
+  "january february march april may june july august september october november december",
+  "enero febrero marzo abril mayo junio julio agosto septiembre octubre noviembre diciembre",
+].forEach((names) =>
+  names.split(" ").forEach((m, i) => {
+    MONTHS[m] = i + 1;
+    MONTHS[m.slice(0, 3)] = i + 1;
+  }),
+);
+const MONTH = Object.keys(MONTHS).join("|");
+// "February 15, 2027", "Feb. 15 2027", "15 de febrero de 2027", "02/15/2027", "2027-02-15".
+const DATE = new RegExp(
+  [
+    `\\b(?<m1>${MONTH})\\.?\\s+(?<d1>\\d{1,2})(?:st|nd|rd|th)?,?\\s+(?<y1>\\d{4})`,
+    `\\b(?<d2>\\d{1,2})\\s+de\\s+(?<m2>${MONTH})\\s+(?:de|del)?\\s*(?<y2>\\d{4})`,
+    `\\b(?<m3>\\d{1,2})/(?<d3>\\d{1,2})/(?<y3>\\d{4})`,
+    `\\b(?<y4>\\d{4})-(?<m4>\\d{2})-(?<d4>\\d{2})`,
+  ].join("|"),
+  "gi",
+);
+
+// Dates as ISO strings, and the text with the dates taken out.
+function splitDates(text: string): { dates: Set<string>; words: string } {
+  const dates = new Set<string>();
+  const words = text.replace(DATE, (...args) => {
+    const g = args.at(-1) as Record<string, string | undefined>;
+    const y = g.y1 ?? g.y2 ?? g.y3 ?? g.y4;
+    const m = g.m1 ?? g.m2 ?? g.m3 ?? g.m4 ?? "";
+    const d = g.d1 ?? g.d2 ?? g.d3 ?? g.d4;
+    const month = MONTHS[m.toLowerCase()] ?? Number(m);
+    dates.add(`${y}-${String(month).padStart(2, "0")}-${d?.padStart(2, "0")}`);
+    return " ";
+  });
+  return { dates, words };
+}
+
+// The label's words all appear in the output, and its date appears in any common format.
+export function quoteMatches(
+  expected: string | null,
+  actual: string | null,
+): boolean {
+  if (expected === null || actual === null) return expected === actual;
+  const e = splitDates(expected);
+  const a = splitDates(actual);
+  const words = tokens(a.words);
+  return (
+    [...e.dates].every((d) => a.dates.has(d)) &&
+    [...tokens(e.words)].every((t) => words.has(t))
+  );
+}
+
+// Files a label lists that aren't on disk; the runner stops on any before calling the model.
+export function missingFiles(
+  labels: { id: string; file?: string; files?: string[] }[],
+  dir = "eval/letters",
+): string[] {
+  return labels.flatMap((l) =>
+    (l.files ?? (l.file ? [l.file] : []))
+      .filter((f) => !existsSync(path.join(dir, f)))
+      .map((f) => `${l.id}: ${f}`),
+  );
+}
+
+// "N of M" per group, e.g. per category or per state.
+export function groupCounts<R>(
+  rows: R[],
+  groups: (r: R) => string[],
+  correct: (r: R) => boolean,
+): Record<string, { correct: number; total: number }> {
+  const out: Record<string, { correct: number; total: number }> = {};
+  for (const r of rows)
+    for (const g of groups(r)) {
+      out[g] ??= { correct: 0, total: 0 };
+      out[g].total++;
+      if (correct(r)) out[g].correct++;
+    }
+  return out;
 }

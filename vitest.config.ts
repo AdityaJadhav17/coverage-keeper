@@ -18,7 +18,11 @@ export default defineConfig({
         extends: true,
         test: {
           name: "unit",
-          include: ["src/**/*.test.ts", "eval/**/*.test.ts"],
+          include: [
+            "src/**/*.test.ts",
+            "eval/**/*.test.ts",
+            "scripts/**/*.test.ts",
+          ],
         },
       },
       {
