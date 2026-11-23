@@ -22,6 +22,8 @@ const en = {
     "You decide what to send. We never contact the state for you.",
     "Free and independent. Not run by any state agency.",
     "Not legal advice. Only your state decides your coverage.",
+    // Legal checklist ISSUE-6 (#49).
+    "Not a health or mental health service. In a crisis, call or text 988.",
   ],
   start: "Start with my letter",
   effort: "About a minute · No sign-up · Free",
@@ -190,6 +192,7 @@ const es: Messages = {
     "Usted decide qué enviar. Nunca nos comunicamos con el estado por usted.",
     "Gratis e independiente. No lo maneja ninguna agencia del estado.",
     "No es asesoría legal. Solo su estado decide sobre su cobertura.",
+    "No es un servicio de salud ni de salud mental. Si está en crisis, llame o envíe un mensaje de texto al 988.",
   ],
   start: "Empezar con mi carta",
   effort: "Un minuto · Sin registrarse · Gratis",

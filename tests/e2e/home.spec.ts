@@ -99,7 +99,7 @@ test("welcome facts are a scannable list with room around the button", async ({
     Promise.all(document.getAnimations().map((a) => a.finished)),
   );
   const facts = page.getByRole("list", { name: "Before you start" });
-  await expect(facts.getByRole("listitem")).toHaveCount(5);
+  await expect(facts.getByRole("listitem")).toHaveCount(6);
   const list = (await facts.boundingBox())!;
   const button = (await page
     .getByRole("button", { name: "Start with my letter" })

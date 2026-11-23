@@ -92,6 +92,24 @@ const SELF_DESCRIPTION_PATTERNS: RegExp[] = [
 const LOOKALIKE_FROM = "аеорсухіјѕԁԛԝАВЕКМНОРСТХІЈЅοαικνρτυχΑΒΕΖΗΙΚΜΝΟΡΤΥΧ";
 const LOOKALIKE_TO = "aeopcyxijsdqwABEKMHOPCTXIJSoaikvptuxABEZHIKMNOPTYX";
 
+// Health and mental health care: a diagnosis, medicine advice or a treatment to try
+// (#49). Asking for a doctor's note and naming a "health condition" stay fine.
+const HEALTH_CARE_PATTERNS: RegExp[] = [
+  // "if you have a mental health condition, you may be exempt" names an exemption.
+  String.raw`(?<!\b(?:if|whether|unless)\s)\byou\s+(?:may|might|could|probably|likely|seem\s+to|appear\s+to)?\s*(?:have|suffer\s+from)\s+(?:a\s+|an\s+)?(?:depression|anxiety|ptsd|bipolar|schizophrenia|(?:\w+\s+)?(?:disorder|mental\s+illness)|mental\s+(?:health\s+)?(?:condition|disorder|illness))\b`,
+  String.raw`\b(?:stop|start|keep)\s+taking\s+(?:your\s+)?(?:medication|medicine|meds|pills|antidepressants)`,
+  String.raw`\b(?:try|consider|start)\s+(?:therapy|counseling|antidepressants|medication)\b`,
+  String.raw`(?<!\bsi\s)\busted\s+(?:podría\s+tener|tiene|probablemente\s+tiene|sufre\s+de)\s+(?:una\s+|un\s+)?(?:depresión|ansiedad|un\s+trastorno|trastorno|una\s+enfermedad\s+mental)`,
+  String.raw`\b(?:deje|dejar|empiece|empezar|siga)\s+(?:de\s+|a\s+)?tomar\s+(?:su\s+)?(?:medicamento|medicina|pastillas|antidepresivos)`,
+  String.raw`\bpruebe\s+(?:la\s+)?(?:terapia|consejería|medicación)`,
+].map((p) => new RegExp(p, "iu"));
+
+export const HEALTH_FALLBACK =
+  "We can't give health or mental health advice. Ask your doctor. In a crisis, call or text 988.";
+
+export const HEALTH_FALLBACK_ES =
+  "No podemos dar consejos de salud ni de salud mental. Pregúntele a su médico. Si está en crisis, llame o envíe un mensaje de texto al 988.";
+
 export const SAFE_FALLBACK =
   "We can't decide if you qualify. Only the state can. Call the number on your letter to ask.";
 
@@ -136,6 +154,24 @@ export const findForbiddenClaims = (text: string): string[] =>
 export const findSelfDescriptions = (text: string): string[] =>
   findAll(text, SELF_DESCRIPTION_PATTERNS);
 
+export const findHealthCare = (text: string): string[] =>
+  findAll(text, HEALTH_CARE_PATTERNS);
+
+// Each check with the sentence shown in place of a blocked text. The first hit wins.
+const CHECKS: {
+  find: (text: string) => string[];
+  fallback: { en: string; es: string };
+}[] = [
+  {
+    find: (t) => [...findForbiddenClaims(t), ...findSelfDescriptions(t)],
+    fallback: { en: SAFE_FALLBACK, es: SAFE_FALLBACK_ES },
+  },
+  {
+    find: findHealthCare,
+    fallback: { en: HEALTH_FALLBACK, es: HEALTH_FALLBACK_ES },
+  },
+];
+
 export function enforceGuardrail(
   text: string,
   locale: "en" | "es" = "en",
@@ -143,11 +179,8 @@ export function enforceGuardrail(
   text: string;
   blocked: boolean;
 } {
-  return findForbiddenClaims(text).length > 0 ||
-    findSelfDescriptions(text).length > 0
-    ? {
-        text: locale === "es" ? SAFE_FALLBACK_ES : SAFE_FALLBACK,
-        blocked: true,
-      }
+  const hit = CHECKS.find((check) => check.find(text).length > 0);
+  return hit
+    ? { text: hit.fallback[locale], blocked: true }
     : { text, blocked: false };
 }
