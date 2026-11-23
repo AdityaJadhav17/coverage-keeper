@@ -6,6 +6,7 @@ import {
   findForbiddenClaims,
   findHealthCare,
   findImmigrationAdvice,
+  findLegalStrategy,
 } from "@/lib/guardrails";
 import { messages } from "@/i18n/messages";
 import rules from "../../data/rules/or.json";
@@ -83,11 +84,12 @@ describe("shipped text contains no eligibility claims", () => {
   });
 });
 
-// The health (#49) and immigration (#48) checks must not fire on our own text or the
+// The health (#49), immigration (#48) and legal strategy (#47) checks must not fire on our own text or the
 // state rules.
 describe.each([
   ["health", findHealthCare],
   ["immigration", findImmigrationAdvice],
+  ["legal strategy", findLegalStrategy],
 ])("shipped text passes the %s check", (_, find) => {
   it.each(STATE_CODES)("%s rules", (code) => {
     expect(find(JSON.stringify(stateRules(code)))).toEqual([]);

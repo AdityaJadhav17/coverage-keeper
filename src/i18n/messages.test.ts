@@ -192,3 +192,14 @@ describe("the welcome screen points to 988 in a crisis (#49)", () => {
     expect(findForbiddenClaims(fact!)).toEqual([]);
   });
 });
+
+describe("the welcome screen points to free legal aid (#47)", () => {
+  it.each(["en", "es"] as const)("%s", (locale) => {
+    const t = messages[locale];
+    expect(t.legalHelpLead).toBeTruthy();
+    expect(t.legalHelpLink).toBeTruthy();
+    expect(
+      findForbiddenClaims(`${t.legalHelpLead} ${t.legalHelpLink}`),
+    ).toEqual([]);
+  });
+});

@@ -110,3 +110,15 @@ test("welcome facts are a scannable list with room around the button", async ({
   expect(button.y - (list.y + list.height)).toBeGreaterThanOrEqual(20);
   expect(promise.y - (button.y + button.height)).toBeGreaterThanOrEqual(40);
 });
+
+test("the welcome screen points to free legal aid (#47)", async ({ page }) => {
+  await page.goto("/");
+  const line = page.getByTestId("legal-help");
+  await expect(line).toContainText("Need legal help with your case?");
+  await expect(
+    line.getByRole("link", { name: "Find free legal aid near you." }),
+  ).toHaveAttribute(
+    "href",
+    "https://www.lsc.gov/about-lsc/what-legal-aid/i-need-legal-help",
+  );
+});

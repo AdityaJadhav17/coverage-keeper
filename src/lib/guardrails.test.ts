@@ -5,6 +5,9 @@ import {
   enforceGuardrail,
   findHealthCare,
   findImmigrationAdvice,
+  findLegalStrategy,
+  LEGAL_FALLBACK,
+  LEGAL_FALLBACK_ES,
   IMMIGRATION_FALLBACK,
   IMMIGRATION_FALLBACK_ES,
   HEALTH_FALLBACK,
@@ -320,6 +323,55 @@ describe("immigration advice", () => {
     );
     for (const text of [IMMIGRATION_FALLBACK, IMMIGRATION_FALLBACK_ES]) {
       expect(text).toMatch(/justice\.gov\/eoir/);
+      expect(enforceGuardrail(text).blocked).toBe(false);
+    }
+  });
+});
+
+// No legal strategy: whether to appeal, which option to pick, what to "do" (#47).
+describe("legal strategy", () => {
+  it.each([
+    "You should appeal this decision.",
+    "You should not ask for a hearing.",
+    "You should request a fair hearing.",
+    "We recommend that you appeal.",
+    "I suggest you choose option 2.",
+    "Your best option is to reapply.",
+    "It's best to sign the form.",
+    "The best choice for you is to appeal.",
+    "You should hire a lawyer.",
+    "Usted debería apelar.",
+    "Le recomendamos que pida una audiencia.",
+    "Su mejor opción es volver a solicitar.",
+    "Lo mejor es apelar.",
+  ])("blocks %j", (text) => {
+    expect(findLegalStrategy(text)).not.toHaveLength(0);
+    expect(enforceGuardrail(text)).toEqual({
+      text: LEGAL_FALLBACK,
+      blocked: true,
+    });
+  });
+
+  // Rights and instructions a letter states are not strategy.
+  it.each([
+    "If you disagree, you can ask for a hearing.",
+    "You have the right to appeal within 90 days.",
+    "Send your pay stubs by February 15.",
+    "You must report your hours every month.",
+    "You should get a renewal form in the mail.",
+    "Usted tiene derecho a pedir una audiencia.",
+    "Si no está de acuerdo, puede apelar.",
+    "Debe enviar sus talones de pago.",
+  ])("allows %j", (text) => {
+    expect(findLegalStrategy(text)).toEqual([]);
+  });
+
+  it("answers in Spanish, points to legal aid, and passes every check", () => {
+    expect(enforceGuardrail("Usted debería apelar.", "es").text).toBe(
+      LEGAL_FALLBACK_ES,
+    );
+    for (const text of [LEGAL_FALLBACK, LEGAL_FALLBACK_ES]) {
+      expect(text).toMatch(/lsc\.gov/);
       expect(enforceGuardrail(text).blocked).toBe(false);
     }
   });
