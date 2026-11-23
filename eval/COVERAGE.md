@@ -8,29 +8,26 @@ Targets from issue #42: per state, at least 3 English public samples and 1 Spani
 | ----- | -------------------------- | -------------------------- |
 | WA    | 4 of 3                     | 1 of 1                     |
 | OR    | 5 of 3                     | 2 of 1                     |
-| CA    | 1 of 3 (unmet, see below)  | 0 of 1 (unmet, see below)  |
+| CA    | 5 of 3                     | 3 of 1                     |
 | NV    | 3 of 3                     | 3 of 1                     |
 | AZ    | 2 of 3 (unmet, see below)  | 2 of 1                     |
 
 ## Per category (all letters, synthetic included)
 
-| Category                  | Letters (target 2)        |
-| ------------------------- | ------------------------- |
-| `renewal`                 | 14 of 2                   |
-| `work_requirements`       | 11 of 2                   |
-| `request_for_information` | 6 of 2                    |
-| `coverage_ending`         | 3 of 2                    |
-| `immigration`             | 4 of 2                    |
-| `deadline_on_later_page`  | 1 of 2 (unmet, see below) |
-| `phone_photo`             | 3 of 2                    |
-| `not_medicaid`            | 3 of 2                    |
+| Category                  | Letters (target 2) |
+| ------------------------- | ------------------ |
+| `renewal`                 | 16 of 2            |
+| `work_requirements`       | 12 of 2            |
+| `request_for_information` | 8 of 2             |
+| `coverage_ending`         | 3 of 2             |
+| `immigration`             | 6 of 2             |
+| `deadline_on_later_page`  | 2 of 2             |
+| `phone_photo`             | 3 of 2             |
+| `not_medicaid`            | 3 of 2             |
 
 ## Why a target is unmet
 
-- `CA-en`: DHCS blocks automated downloads; MC 216, MC 355 and the 2026 outreach letters are listed below and must be downloaded by hand.
-- `CA-es`: same block; MC 020 and MC 355 Spanish are listed below.
 - `AZ-en`: AHCCCS publishes 3 usable samples. The third, a 9-page discontinuance letter, names an eligibility worker with a direct phone and email who may be a real person, so it is left out.
-- `deadline_on_later_page`: no public sample prints its only deadline after page 1 with dates that agree. Oregon MED-001 (signature date on page 10) has demo dates that conflict; the Arizona discontinuance letter (appeal date on page 6) is left out as above.
 
 ## Where we looked
 

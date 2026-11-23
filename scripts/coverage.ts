@@ -33,9 +33,13 @@ export function coverageTables(labels: Label[]) {
     "phone_photo",
     "not_medicaid",
   ].map((c) => {
-    // Phone photos are copies by id, so count every entry for that one.
-    const pool = c === "phone_photo" ? labels : letters;
-    const n = pool.filter((l) => l.category.includes(c)).length;
+    // A letter has a category when any copy of it does: a later-page deadline may
+    // only show in the -full PDF, and phone_photo only on the -photo copy.
+    const n = new Set(
+      labels
+        .filter((l) => l.category.includes(c))
+        .map((l) => l.id.replace(/-(full|photo)$/, "")),
+    ).size;
     return `| \`${c}\` | ${cell(n, 2)} |`;
   });
   return [
