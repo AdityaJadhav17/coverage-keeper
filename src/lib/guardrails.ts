@@ -110,6 +110,33 @@ export const HEALTH_FALLBACK =
 export const HEALTH_FALLBACK_ES =
   "No podemos dar consejos de salud ni de salud mental. Pregúntele a su médico. Si está en crisis, llame o envíe un mensaje de texto al 988.";
 
+// Immigration advice: the person's status, public charge, visas, USCIS filings (#48).
+// What a letter asks for ("we could not verify your immigration status", "send a copy
+// of your green card") stays fine.
+const IMMIGRATION_PATTERNS: RegExp[] = [
+  String.raw`(?<!\b(?:if|whether|unless)\s)\byou(?:'re|\s+are)\s+(?:not\s+)?(?:a\s+|an\s+)?(?:lawful(?:ly)?\s+|legal(?:ly)?\s+)?(?:permanent\s+resident|undocumented|qualified\s+(?:non-?citizen|immigrant|alien)|refugee|asylee|lawfully\s+present|out\s+of\s+status)\b`,
+  String.raw`\byour\s+(?:immigration\s+)?status\s+(?:is|will\s+(?:not\s+)?be|won't\s+be)\s+(?:not\s+)?(?:lawful|legal|valid|safe|fine|ok(?:ay)?|protected|affected|at\s+risk|in\s+danger)\b`,
+  String.raw`\bpublic\s+charge\b`,
+  String.raw`\byou\s+(?:can|could|should|need\s+to|must|may|will)\s+(?:not\s+)?(?:apply\s+for|get|renew|obtain|keep|lose)\s+(?:a\s+|an\s+|your\s+)?(?:visa|green\s+card|work\s+permit|citizenship|asylum|daca)\b`,
+  String.raw`\b(?:file|submit|fill\s+out)\s+(?:a\s+|the\s+)?form\s+[IN]-\d`,
+  // "You should file with USCIS", not "we check it with USCIS".
+  String.raw`\byou\s+(?:can|could|should|need\s+to|must|may|will)\s+(?:not\s+)?(?:file|apply|submit)\b[^.]{0,40}\b(?:with|to)\s+(?:the\s+)?USCIS\b`,
+  String.raw`^\s*(?:file|apply|submit)\b(?![^.]{0,40}\b(?:we|they|the\s+state)\b)[^.]{0,40}\b(?:with|to)\s+(?:the\s+)?USCIS\b`,
+  String.raw`(?<!\bsi\s)\busted\s+(?:no\s+)?es\s+(?:un\s+|una\s+)?(?:residente\s+permanente|indocumentad[oa]|refugiad[oa]|inmigrante\s+calificad[oa])`,
+  // "su estado" alone is "your state"; only "estado migratorio" is a status.
+  String.raw`\bsu\s+(?:estatus(?:\s+migratorio)?|estado\s+migratorio)\s+(?:es|será|no\s+será)\s+(?:legal|válido|seguro|afectado)`,
+  String.raw`\bcarga\s+pública`,
+  String.raw`\b(?:puede|podría|debe|debería|necesita)\s+(?:solicitar|pedir|obtener|renovar)\s+(?:una\s+|la\s+|su\s+)?(?:visa|tarjeta\s+verde|green\s+card|ciudadanía|asilo|permiso\s+de\s+trabajo)`,
+  String.raw`\b(?:presente|presentar|llene|llenar)\s+(?:el\s+)?formulario\s+[IN]-\d`,
+  String.raw`\bante\s+(?:el\s+)?USCIS\b`,
+].map((p) => new RegExp(p, "iu"));
+
+export const IMMIGRATION_FALLBACK =
+  "We can't give immigration advice. Call the number on your letter, or find free legal help at justice.gov/eoir.";
+
+export const IMMIGRATION_FALLBACK_ES =
+  "No podemos dar asesoría de inmigración. Llame al número de su carta o busque ayuda legal gratuita en justice.gov/eoir.";
+
 export const SAFE_FALLBACK =
   "We can't decide if you qualify. Only the state can. Call the number on your letter to ask.";
 
@@ -157,6 +184,9 @@ export const findSelfDescriptions = (text: string): string[] =>
 export const findHealthCare = (text: string): string[] =>
   findAll(text, HEALTH_CARE_PATTERNS);
 
+export const findImmigrationAdvice = (text: string): string[] =>
+  findAll(text, IMMIGRATION_PATTERNS);
+
 // Each check with the sentence shown in place of a blocked text. The first hit wins.
 const CHECKS: {
   find: (text: string) => string[];
@@ -169,6 +199,10 @@ const CHECKS: {
   {
     find: findHealthCare,
     fallback: { en: HEALTH_FALLBACK, es: HEALTH_FALLBACK_ES },
+  },
+  {
+    find: findImmigrationAdvice,
+    fallback: { en: IMMIGRATION_FALLBACK, es: IMMIGRATION_FALLBACK_ES },
   },
 ];
 

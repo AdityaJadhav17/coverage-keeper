@@ -2,8 +2,12 @@ import { useLocale } from "@/i18n/LocaleContext";
 import type { LetterExtraction } from "@/lib/schema";
 import type { Region, StateRules } from "@/lib/states";
 import { Deadline } from "./Deadline";
-import { safe } from "./shared";
+import { aboutImmigration, safe } from "./shared";
 import { StatePicker } from "./StatePicker";
+
+// The Justice Department's list of free legal service providers (#48).
+const IMMIGRATION_HELP_URL =
+  "https://www.justice.gov/eoir/find-legal-representation";
 
 export function Result({
   data,
@@ -48,6 +52,14 @@ export function Result({
       <h2 id="result-title">{t.resultTitle}</h2>
       {aiLabel}
       <p className="lead">{safe(data.summary, locale)}</p>
+      {aboutImmigration(data) && (
+        <p className="ai-label" data-testid="no-immigration-advice">
+          {t.noImmigrationAdvice}{" "}
+          <a href={IMMIGRATION_HELP_URL} target="_blank" rel="noreferrer">
+            {t.immigrationHelp}
+          </a>
+        </p>
+      )}
       <StatePicker value={region} onChange={onRegion} />
 
       <Deadline data={data} phone={phone} rules={rules} />

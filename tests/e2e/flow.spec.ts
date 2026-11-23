@@ -277,3 +277,33 @@ test.describe("dark mode", () => {
     await expectNoSeriousA11yIssues(page);
   });
 });
+
+test("an immigration letter says we can't give immigration advice, with a referral (#48)", async ({
+  page,
+}) => {
+  await mockReader(page, {
+    ...fixture,
+    summary:
+      "The state could not verify your immigration status. Send proof by the date below.",
+  });
+  await start(page);
+  await scan(page);
+  const line = page.getByTestId("no-immigration-advice");
+  await expect(line).toContainText("We can't give immigration advice.");
+  await expect(
+    line.getByRole("link", { name: "Find free legal help near you." }),
+  ).toHaveAttribute(
+    "href",
+    "https://www.justice.gov/eoir/find-legal-representation",
+  );
+});
+
+test("a work-rules letter shows no immigration line (#48)", async ({
+  page,
+}) => {
+  await mockReader(page);
+  await start(page);
+  await scan(page);
+  await expect(page.getByTestId("ai-label")).toBeVisible();
+  await expect(page.getByTestId("no-immigration-advice")).toHaveCount(0);
+});
