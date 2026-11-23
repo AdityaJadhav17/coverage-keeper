@@ -244,6 +244,13 @@ describe("health and mental health care", () => {
     "Una nota de su médico sobre su condición de salud.",
     "Do you have a serious or disabling health condition?",
     "Ask your doctor to fill out the form.",
+    // Exemptions name conditions as a question, not a diagnosis.
+    "If you have a mental health condition, you may be exempt.",
+    "Tell the state if you have a mental illness that limits your work.",
+    "Ask whether you have a disorder that counts.",
+    "Unless you have a substance use disorder, you must report hours.",
+    "Si usted tiene un trastorno por uso de sustancias, puede estar exento.",
+    "Si tiene depresión, puede estar exento.",
   ])("allows %j", (text) => {
     expect(findHealthCare(text)).toEqual([]);
   });

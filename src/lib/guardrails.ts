@@ -95,10 +95,11 @@ const LOOKALIKE_TO = "aeopcyxijsdqwABEKMHOPCTXIJSoaikvptuxABEZHIKMNOPTYX";
 // Health and mental health care: a diagnosis, medicine advice or a treatment to try
 // (#49). Asking for a doctor's note and naming a "health condition" stay fine.
 const HEALTH_CARE_PATTERNS: RegExp[] = [
-  String.raw`\byou\s+(?:may|might|could|probably|likely|seem\s+to|appear\s+to)?\s*(?:have|suffer\s+from)\s+(?:a\s+|an\s+)?(?:depression|anxiety|ptsd|bipolar|schizophrenia|(?:\w+\s+)?(?:disorder|mental\s+illness)|mental\s+(?:health\s+)?(?:condition|disorder|illness))\b`,
+  // "if you have a mental health condition, you may be exempt" names an exemption.
+  String.raw`(?<!\b(?:if|whether|unless)\s)\byou\s+(?:may|might|could|probably|likely|seem\s+to|appear\s+to)?\s*(?:have|suffer\s+from)\s+(?:a\s+|an\s+)?(?:depression|anxiety|ptsd|bipolar|schizophrenia|(?:\w+\s+)?(?:disorder|mental\s+illness)|mental\s+(?:health\s+)?(?:condition|disorder|illness))\b`,
   String.raw`\b(?:stop|start|keep)\s+taking\s+(?:your\s+)?(?:medication|medicine|meds|pills|antidepressants)`,
   String.raw`\b(?:try|consider|start)\s+(?:therapy|counseling|antidepressants|medication)\b`,
-  String.raw`\busted\s+(?:podría\s+tener|tiene|probablemente\s+tiene|sufre\s+de)\s+(?:una\s+|un\s+)?(?:depresión|ansiedad|un\s+trastorno|trastorno|una\s+enfermedad\s+mental)`,
+  String.raw`(?<!\bsi\s)\busted\s+(?:podría\s+tener|tiene|probablemente\s+tiene|sufre\s+de)\s+(?:una\s+|un\s+)?(?:depresión|ansiedad|un\s+trastorno|trastorno|una\s+enfermedad\s+mental)`,
   String.raw`\b(?:deje|dejar|empiece|empezar|siga)\s+(?:de\s+|a\s+)?tomar\s+(?:su\s+)?(?:medicamento|medicina|pastillas|antidepresivos)`,
   String.raw`\bpruebe\s+(?:la\s+)?(?:terapia|consejería|medicación)`,
 ].map((p) => new RegExp(p, "iu"));
