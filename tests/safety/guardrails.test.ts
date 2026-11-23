@@ -2,7 +2,11 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { buildDoctorDraft } from "@/lib/doctor-draft";
-import { findForbiddenClaims, findHealthCare } from "@/lib/guardrails";
+import {
+  findForbiddenClaims,
+  findHealthCare,
+  findImmigrationAdvice,
+} from "@/lib/guardrails";
 import { messages } from "@/i18n/messages";
 import rules from "../../data/rules/or.json";
 import { STATE_CODES, stateRules, type StateCode } from "@/lib/states";
@@ -79,30 +83,26 @@ describe("shipped text contains no eligibility claims", () => {
   });
 });
 
-// The health check (#49) must not fire on our own text or the state rules.
-describe("shipped text gives no health or mental health advice", () => {
+// The health (#49) and immigration (#48) checks must not fire on our own text or the
+// state rules.
+describe.each([
+  ["health", findHealthCare],
+  ["immigration", findImmigrationAdvice],
+])("shipped text passes the %s check", (_, find) => {
   it.each(STATE_CODES)("%s rules", (code) => {
-    expect(findHealthCare(JSON.stringify(stateRules(code)))).toEqual([]);
+    expect(find(JSON.stringify(stateRules(code)))).toEqual([]);
   });
 
   it.each(["en", "es"] as const)("%s messages", (locale) => {
     const copy = JSON.stringify(messages[locale], (_, v) =>
       typeof v === "function" ? v(3, "x") : v,
     );
-    expect(findHealthCare(copy)).toEqual([]);
+    expect(find(copy)).toEqual([]);
   });
 
   it("recorded reader output", () => {
-    for (const file of readdirSync(
-      path.join(__dirname, "..", "fixtures", "reader"),
-    ))
-      expect(
-        findHealthCare(
-          readFileSync(
-            path.join(__dirname, "..", "fixtures", "reader", file),
-            "utf8",
-          ),
-        ),
-      ).toEqual([]);
+    const dir = path.join(__dirname, "..", "fixtures", "reader");
+    for (const file of readdirSync(dir))
+      expect(find(readFileSync(path.join(dir, file), "utf8"))).toEqual([]);
   });
 });

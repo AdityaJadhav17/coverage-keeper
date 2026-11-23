@@ -4,6 +4,9 @@ import {
   SAFE_FALLBACK_ES,
   enforceGuardrail,
   findHealthCare,
+  findImmigrationAdvice,
+  IMMIGRATION_FALLBACK,
+  IMMIGRATION_FALLBACK_ES,
   HEALTH_FALLBACK,
   HEALTH_FALLBACK_ES,
   findForbiddenClaims,
@@ -264,6 +267,57 @@ describe("health and mental health care", () => {
   it("points to a doctor and to 988, and passes every check itself", () => {
     for (const text of [HEALTH_FALLBACK, HEALTH_FALLBACK_ES]) {
       expect(text).toMatch(/988/);
+      expect(enforceGuardrail(text).blocked).toBe(false);
+    }
+  });
+});
+
+// No immigration advice: status, visas, public charge, USCIS filings (#48).
+describe("immigration advice", () => {
+  it.each([
+    "You are a lawful permanent resident.",
+    "You're a qualified non-citizen.",
+    "You are undocumented.",
+    "Your immigration status is safe.",
+    "Your status will not be affected.",
+    "Using Medicaid will not make you a public charge.",
+    "Public charge does not apply to you.",
+    "You should apply for a green card.",
+    "You can renew your visa.",
+    "File Form I-485 with USCIS.",
+    "Apply for citizenship with USCIS.",
+    "Usted es residente permanente.",
+    "Su estatus migratorio es seguro.",
+    "Usar Medicaid no afecta la carga pública.",
+    "Usted debería solicitar una tarjeta verde.",
+    "Presente el formulario I-485 ante USCIS.",
+  ])("blocks %j", (text) => {
+    expect(findImmigrationAdvice(text)).not.toHaveLength(0);
+    expect(enforceGuardrail(text)).toEqual({
+      text: IMMIGRATION_FALLBACK,
+      blocked: true,
+    });
+  });
+
+  // What immigration letters ask for must stay readable.
+  it.each([
+    "We could not verify your immigration status.",
+    "Send proof of your citizenship or immigration status.",
+    "Send a copy of your green card (I-551).",
+    "Send your I-94 record.",
+    "The state asks if you are a lawful permanent resident.",
+    "No pudimos verificar su estatus migratorio.",
+    "Envíe una copia de su tarjeta verde.",
+  ])("allows %j", (text) => {
+    expect(findImmigrationAdvice(text)).toEqual([]);
+  });
+
+  it("answers in Spanish, refers to free legal help, and passes every check", () => {
+    expect(enforceGuardrail("Usted es residente permanente.", "es").text).toBe(
+      IMMIGRATION_FALLBACK_ES,
+    );
+    for (const text of [IMMIGRATION_FALLBACK, IMMIGRATION_FALLBACK_ES]) {
+      expect(text).toMatch(/justice\.gov\/eoir/);
       expect(enforceGuardrail(text).blocked).toBe(false);
     }
   });
