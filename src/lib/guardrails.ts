@@ -31,6 +31,63 @@ const FORBIDDEN_PATTERNS_ES: RegExp[] = [
   String.raw`\b(?:usted\s+|tú\s+)?(?:no\s+)?tienes?\s+derecho\s+a\s+(?:medicaid|medi-cal|ohp|ahcccs|apple\s+health|(?:la\s+|su\s+)?cobertura|(?:una\s+)?exención|beneficios)`,
 ].map((p) => new RegExp(NOT_A_QUESTION_ES + p, "iu"));
 
+// Words we must never use for Coverage Keeper itself (legal checklist "Banned terms", #50).
+// Strict: no place anywhere in our own copy.
+const STRICT_TERMS = [
+  String.raw`notari[oa]s?(?:\s+p[uú]blic[oa]s?)?`,
+  String.raw`licenciad[oa]s?`,
+  String.raw`immigration\s+(?:consultant|assistant|specialist)s?`,
+  String.raw`consultor(?:a|es|as)?\s+de\s+inmigraci[oó]n`,
+  String.raw`abogad[oa]s?`,
+  String.raw`lawyers?`,
+  String.raw`paralegals?`,
+  String.raw`navigators?`,
+  String.raw`assisters?`,
+  String.raw`certified\s+application\s+counselors?`,
+  String.raw`enrollment\s+(?:counselor|facilitator)s?`,
+  String.raw`community\s+partners?`,
+  String.raw`nurses?`,
+  String.raw`counselors?`,
+  String.raw`consejer[oa]s?`,
+  String.raw`therapists?`,
+  String.raw`case\s*workers?`,
+  String.raw`hipaa[\s-]+compliant`,
+  String.raw`guaranteed`,
+  String.raw`licensed`,
+  String.raw`certified`,
+];
+// Fine when a letter or our copy names someone else ("ask your doctor", "the official
+// helpline"); banned only as a description of us. The Spanish forms are our translations
+// of the checklist's English terms.
+const CONTEXT_TERMS = [
+  String.raw`doctors?`,
+  String.raw`legal\s+aid`,
+  String.raw`legal\s+services`,
+  String.raw`accurate`,
+  String.raw`official`,
+  String.raw`m[eé]dic[oa]s?`,
+  String.raw`doctor(?:a|es|as)`,
+  String.raw`enfermer[oa]s?`,
+  String.raw`terapeutas?`,
+  String.raw`oficial(?:es)?`,
+  String.raw`garantizad[oa]s?`,
+  String.raw`certificad[oa]s?`,
+];
+const END = String.raw`(?![\p{L}\p{N}])`;
+
+export const STRICT_BANNED_TERMS: RegExp[] = STRICT_TERMS.map(
+  (t) => new RegExp(String.raw`(?<![\p{L}\p{N}])(?:${t})${END}`, "iu"),
+);
+
+const ANY_TERM = `(?:${[...STRICT_TERMS, ...CONTEXT_TERMS].join("|")})${END}`;
+// "We are (a team of) …", never "We are not …" or "We are sending your doctor …".
+const SELF_DESCRIPTION_PATTERNS: RegExp[] = [
+  String.raw`\b(?:i\s+am|i'm|we\s+are|we're|coverage\s+keeper\s+is|this\s+(?:app|tool|service|site|website)\s+is|our\s+(?:team|staff)\s+(?:is|are))(?!\s+(?:not|no|never)\b)\s+(?:(?:a|an|your|the)\s+(?:[\w-]+\s+){0,2}?)?${ANY_TERM}`,
+  String.raw`\bas\s+your\s+${ANY_TERM}\s*,`,
+  String.raw`(?<!\bno\s)\b(?:soy|somos|coverage\s+keeper\s+es|esta\s+(?:aplicaci[oó]n|herramienta|p[aá]gina)\s+es|nuestro\s+equipo\s+(?:es|est[aá]))\s+(?:(?:un|una|unos|unas|su|sus|el|la|los|las)\s+(?:[\p{L}-]+\s+){0,2}?)?${ANY_TERM}`,
+  String.raw`\bcomo\s+su\s+${ANY_TERM}\s*,`,
+].map((p) => new RegExp(p, "iu"));
+
 // Cyrillic and Greek letters that look Latin, so "еligible" can't pass for "eligible".
 const LOOKALIKE_FROM = "аеорсухіјѕԁԛԝАВЕКМНОРСТХІЈЅοαικνρτυχΑΒΕΖΗΙΚΜΝΟΡΤΥΧ";
 const LOOKALIKE_TO = "aeopcyxijsdqwABEKMHOPCTXIJSoaikvptuxABEZHIKMNOPTYX";
@@ -41,8 +98,10 @@ export const SAFE_FALLBACK =
 export const SAFE_FALLBACK_ES =
   "No podemos decidir si usted califica. Solo el estado puede hacerlo. Llame al número que aparece en su carta para preguntar.";
 
-export function findForbiddenClaims(text: string): string[] {
-  // Fold full-width forms and look-alike letters.
+// The text with full-width forms and look-alike letters folded. An invisible character
+// (zero-width space, soft hyphen) may sit inside a word or between two words, so each
+// text is checked both with it removed and with it read as a space.
+function variants(text: string): string[] {
   const folded = text
     .normalize("NFKC")
     .replace(/./gu, (c) => {
@@ -50,22 +109,32 @@ export function findForbiddenClaims(text: string): string[] {
       return i < 0 ? c : LOOKALIKE_TO[i]!;
     })
     .replace(/[’‘]/g, "'");
-  // An invisible character (zero-width space, soft hyphen) may sit inside a word or
-  // between two words, so check it both removed and read as a space.
-  const variants = [
-    folded.replace(/\p{Cf}/gu, ""),
-    folded.replace(/\p{Cf}/gu, " "),
-  ].map((t) => t.replace(/\s+/g, " "));
-  // Both languages always: the model may answer in either one.
-  const claims = [...FORBIDDEN_PATTERNS, ...FORBIDDEN_PATTERNS_ES].flatMap(
-    (pattern) =>
-      variants.flatMap((t) => {
-        const match = t.match(pattern);
-        return match ? [match[0]] : [];
-      }),
+  return [folded.replace(/\p{Cf}/gu, ""), folded.replace(/\p{Cf}/gu, " ")].map(
+    (t) => t.replace(/\s+/g, " "),
   );
-  return [...new Set(claims)];
 }
+
+const findAll = (text: string, patterns: RegExp[]): string[] => {
+  const texts = variants(text);
+  return [
+    ...new Set(
+      patterns.flatMap((pattern) =>
+        texts.flatMap((t) => {
+          const match = t.match(pattern);
+          return match ? [match[0]] : [];
+        }),
+      ),
+    ),
+  ];
+};
+
+// Both languages always: the model may answer in either one.
+export const findForbiddenClaims = (text: string): string[] =>
+  findAll(text, [...FORBIDDEN_PATTERNS, ...FORBIDDEN_PATTERNS_ES]);
+
+// Text that presents us as a professional, as official or as guaranteed (#50).
+export const findSelfDescriptions = (text: string): string[] =>
+  findAll(text, SELF_DESCRIPTION_PATTERNS);
 
 export function enforceGuardrail(
   text: string,
@@ -74,7 +143,8 @@ export function enforceGuardrail(
   text: string;
   blocked: boolean;
 } {
-  return findForbiddenClaims(text).length > 0
+  return findForbiddenClaims(text).length > 0 ||
+    findSelfDescriptions(text).length > 0
     ? {
         text: locale === "es" ? SAFE_FALLBACK_ES : SAFE_FALLBACK,
         blocked: true,

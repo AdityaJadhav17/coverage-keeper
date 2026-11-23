@@ -145,3 +145,30 @@ describe("independence line and phone labels (#46)", () => {
     expect(messages.es.fromLetter).toBe("de su carta");
   });
 });
+
+describe("AI label on every result (#45)", () => {
+  it.each([
+    [
+      "en",
+      "Oregon Health Plan (OHP)",
+      "Written by AI. It can make mistakes. Check your letter and call Oregon Health Plan (OHP).",
+    ],
+    [
+      "en",
+      null,
+      "Written by AI. It can make mistakes. Check your letter and call the number on it.",
+    ],
+    [
+      "es",
+      "Oregon Health Plan (OHP)",
+      "Escrito por IA. Puede cometer errores. Revise su carta y llame a Oregon Health Plan (OHP).",
+    ],
+    [
+      "es",
+      null,
+      "Escrito por IA. Puede cometer errores. Revise su carta y llame al número que aparece en ella.",
+    ],
+  ] as const)("%s with program %j", (locale, program, text) => {
+    expect(messages[locale].aiLabel(program)).toBe(text);
+  });
+});

@@ -379,6 +379,13 @@ textarea {
   color: var(--muted);
 }
 
+/* AI label on every result (#45): plain text, read before the summary. */
+.ai-label {
+  margin: 0 0 1rem;
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+
 .alert {
   margin-top: 1rem;
   padding: 0.75rem 1rem;
