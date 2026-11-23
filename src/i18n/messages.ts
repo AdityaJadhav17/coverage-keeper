@@ -25,6 +25,9 @@ const en = {
     // Legal checklist ISSUE-6 (#49).
     "Not a health or mental health service. In a crisis, call or text 988.",
   ],
+  // Under the facts, next to "Not legal advice" (legal checklist ISSUE-4, #47).
+  legalHelpLead: "Need legal help with your case?",
+  legalHelpLink: "Find free legal aid near you.",
   start: "Start with my letter",
   effort: "About a minute · No sign-up · Free",
   promiseLead: "Rather talk to a person?",
@@ -197,6 +200,8 @@ const es: Messages = {
     "No es asesoría legal. Solo su estado decide sobre su cobertura.",
     "No es un servicio de salud ni de salud mental. Si está en crisis, llame o envíe un mensaje de texto al 988.",
   ],
+  legalHelpLead: "¿Necesita ayuda legal con su caso?",
+  legalHelpLink: "Busque ayuda legal gratuita cerca de usted.",
   start: "Empezar con mi carta",
   effort: "Un minuto · Sin registrarse · Gratis",
   promiseLead: "¿Prefiere hablar con una persona?",

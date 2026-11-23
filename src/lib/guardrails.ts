@@ -137,6 +137,31 @@ export const IMMIGRATION_FALLBACK =
 export const IMMIGRATION_FALLBACK_ES =
   "No podemos dar asesoría de inmigración. Llame al número de su carta o busque ayuda legal gratuita en justice.gov/eoir.";
 
+// Legal strategy: whether to appeal, which option to pick, what the person "should" do
+// about the case (#47). Rights a letter states ("you can ask for a hearing") and its
+// instructions ("you must report your hours") stay fine.
+// Only case strategy: signing, accepting or choosing a plan is what renewal letters ask.
+const LEGAL_ACTION = String.raw`(?:appeal|ask\s+for\s+a\s+(?:fair\s+)?hearing|request\s+a\s+(?:fair\s+)?hearing|file\s+(?:an\s+appeal|a\s+complaint|a\s+grievance)|reapply|hire\s+a\s+lawyer|get\s+a\s+lawyer)`;
+const ACCION_LEGAL = String.raw`(?:apel(?:ar|e)|pedir\s+una\s+audiencia|pida\s+una\s+audiencia|solicit(?:ar|e)\s+una\s+audiencia|present(?:ar|e)\s+una\s+(?:apelación|queja)|volver?\s+a\s+solicitar|vuelva\s+a\s+solicitar|contrat(?:ar|e)\s+a\s+un\s+abogado)`;
+const LEGAL_STRATEGY_PATTERNS: RegExp[] = [
+  String.raw`\byou\s+(?:should|ought\s+to|shouldn't|should\s+not)\s+(?:not\s+)?${LEGAL_ACTION}\b`,
+  // "We recommend you keep a copy" is agency wording; only a strategy is advice.
+  String.raw`\b(?:we|i)\s+(?:recommend|suggest|advise)\s+(?:that\s+)?(?:you\s+)?(?:to\s+)?(?:not\s+)?${LEGAL_ACTION}\b`,
+  String.raw`\byour\s+best\s+(?:option|choice|bet|move)\s+is\b`,
+  String.raw`\bthe\s+best\s+(?:option|choice)\s+(?:for\s+you\s+)?is\b`,
+  String.raw`\bit(?:'s|\s+is|\s+would\s+be)\s+(?:best|better|wise|smart)\s+to\s+${LEGAL_ACTION}\b`,
+  String.raw`\b(?:usted\s+)?(?:debería|deberías)\s+(?:no\s+)?${ACCION_LEGAL}`,
+  String.raw`\b(?:le|te)\s+(?:recomendamos|recomiendo|aconsejamos|aconsejo|sugerimos|sugiero)\s+(?:que\s+)?(?:no\s+)?${ACCION_LEGAL}`,
+  String.raw`\b(?:su|tu)\s+mejor\s+opción\s+es\b`,
+  String.raw`\blo\s+mejor\s+(?:es|sería)\s+(?:que\s+)?${ACCION_LEGAL}`,
+].map((p) => new RegExp(p, "iu"));
+
+const LEGAL_HELP = "lsc.gov";
+
+export const LEGAL_FALLBACK = `We can't tell you what to do about your case. Call the number on your letter, or find free legal aid at ${LEGAL_HELP}.`;
+
+export const LEGAL_FALLBACK_ES = `No podemos decirle qué hacer con su caso. Llame al número de su carta o busque ayuda legal gratuita en ${LEGAL_HELP}.`;
+
 export const SAFE_FALLBACK =
   "We can't decide if you qualify. Only the state can. Call the number on your letter to ask.";
 
@@ -187,6 +212,9 @@ export const findHealthCare = (text: string): string[] =>
 export const findImmigrationAdvice = (text: string): string[] =>
   findAll(text, IMMIGRATION_PATTERNS);
 
+export const findLegalStrategy = (text: string): string[] =>
+  findAll(text, LEGAL_STRATEGY_PATTERNS);
+
 // Each check with the sentence shown in place of a blocked text. The first hit wins.
 const CHECKS: {
   find: (text: string) => string[];
@@ -203,6 +231,10 @@ const CHECKS: {
   {
     find: findImmigrationAdvice,
     fallback: { en: IMMIGRATION_FALLBACK, es: IMMIGRATION_FALLBACK_ES },
+  },
+  {
+    find: findLegalStrategy,
+    fallback: { en: LEGAL_FALLBACK, es: LEGAL_FALLBACK_ES },
   },
 ];
 
