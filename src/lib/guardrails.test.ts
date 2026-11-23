@@ -335,9 +335,9 @@ describe("legal strategy", () => {
     "You should not ask for a hearing.",
     "You should request a fair hearing.",
     "We recommend that you appeal.",
-    "I suggest you choose option 2.",
+    "I suggest you appeal.",
     "Your best option is to reapply.",
-    "It's best to sign the form.",
+    "It's best to appeal now.",
     "The best choice for you is to appeal.",
     "You should hire a lawyer.",
     "Usted debería apelar.",
@@ -362,6 +362,13 @@ describe("legal strategy", () => {
     "Usted tiene derecho a pedir una audiencia.",
     "Si no está de acuerdo, puede apelar.",
     "Debe enviar sus talones de pago.",
+    // Everyday renewal instructions and agency wording.
+    "You should sign the renewal form and send it back by March 1.",
+    "You should accept the new card when it arrives.",
+    "Usted debería firmar el formulario y enviarlo.",
+    "We recommend that you keep a copy of this letter.",
+    "We advise you to report changes within 10 days.",
+    "Le recomendamos que guarde una copia de esta carta.",
   ])("allows %j", (text) => {
     expect(findLegalStrategy(text)).toEqual([]);
   });
