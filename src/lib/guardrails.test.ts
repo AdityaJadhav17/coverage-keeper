@@ -3,6 +3,9 @@ import {
   SAFE_FALLBACK,
   SAFE_FALLBACK_ES,
   enforceGuardrail,
+  findHealthCare,
+  HEALTH_FALLBACK,
+  HEALTH_FALLBACK_ES,
   findForbiddenClaims,
   findSelfDescriptions,
 } from "./guardrails";
@@ -210,5 +213,51 @@ describe("banned self-descriptions (legal checklist ISSUE-7, #50)", () => {
     expect(enforceGuardrail("Somos notarios.", "es").text).toBe(
       SAFE_FALLBACK_ES,
     );
+  });
+});
+
+// Never act as a health or mental health professional; point to a doctor or 988 (#49).
+describe("health and mental health care", () => {
+  it.each([
+    "You may have depression.",
+    "You probably have an anxiety disorder.",
+    "You seem to have PTSD.",
+    "You have a mental illness.",
+    "You should stop taking your medication.",
+    "Start taking your antidepressants again.",
+    "Try therapy to feel better.",
+    "Usted podría tener depresión.",
+    "Usted tiene un trastorno de ansiedad.",
+    "Debería dejar de tomar su medicamento.",
+    "Pruebe la terapia para sentirse mejor.",
+  ])("blocks %j", (text) => {
+    expect(findHealthCare(text)).not.toHaveLength(0);
+    expect(enforceGuardrail(text)).toEqual({
+      text: HEALTH_FALLBACK,
+      blocked: true,
+    });
+  });
+
+  it.each([
+    "Send a note from your doctor about your health condition.",
+    "Proof of a medical condition that limits your work.",
+    "Una nota de su médico sobre su condición de salud.",
+    "Do you have a serious or disabling health condition?",
+    "Ask your doctor to fill out the form.",
+  ])("allows %j", (text) => {
+    expect(findHealthCare(text)).toEqual([]);
+  });
+
+  it("answers in Spanish when Spanish is selected", () => {
+    expect(enforceGuardrail("Usted podría tener depresión.", "es").text).toBe(
+      HEALTH_FALLBACK_ES,
+    );
+  });
+
+  it("points to a doctor and to 988, and passes every check itself", () => {
+    for (const text of [HEALTH_FALLBACK, HEALTH_FALLBACK_ES]) {
+      expect(text).toMatch(/988/);
+      expect(enforceGuardrail(text).blocked).toBe(false);
+    }
   });
 });

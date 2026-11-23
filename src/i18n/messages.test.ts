@@ -184,3 +184,11 @@ describe("the Spanish says it was machine-assisted (#52)", () => {
     expect(findForbiddenClaims(messages.es.machineAssisted)).toEqual([]);
   });
 });
+
+describe("the welcome screen points to 988 in a crisis (#49)", () => {
+  it.each(["en", "es"] as const)("%s", (locale) => {
+    const fact = messages[locale].facts.find((f) => f.includes("988"));
+    expect(fact).toMatch(/mental/);
+    expect(findForbiddenClaims(fact!)).toEqual([]);
+  });
+});
