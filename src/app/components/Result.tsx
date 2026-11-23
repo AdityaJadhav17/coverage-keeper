@@ -23,10 +23,17 @@ export function Result({
   onRetake: () => void;
 }) {
   const { t, locale } = useLocale();
+  // Says the text below is AI-written, before any of it (#45).
+  const aiLabel = (
+    <p className="ai-label" data-testid="ai-label">
+      {t.aiLabel(rules?.program ?? null)}
+    </p>
+  );
   if (data.notice_type === "not_medicaid") {
     return (
       <section aria-labelledby="result-title">
         <h2 id="result-title">{t.notMedicaidTitle}</h2>
+        {aiLabel}
         <p className="lead">{t.notMedicaidText(phone)}</p>
         <button type="button" className="primary" onClick={onRetake}>
           {t.scanAnother}
@@ -39,6 +46,7 @@ export function Result({
     <section aria-labelledby="result-title" className="result">
       <p className="kind">{t.noticeLabels[data.notice_type]}</p>
       <h2 id="result-title">{t.resultTitle}</h2>
+      {aiLabel}
       <p className="lead">{safe(data.summary, locale)}</p>
       <StatePicker value={region} onChange={onRegion} />
 
