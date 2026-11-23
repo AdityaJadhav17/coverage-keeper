@@ -308,6 +308,8 @@ describe("immigration advice", () => {
     "The state asks if you are a lawful permanent resident.",
     "No pudimos verificar su estatus migratorio.",
     "Envíe una copia de su tarjeta verde.",
+    "Submit it and we check it with USCIS.",
+    "Su estado es seguro.",
   ])("allows %j", (text) => {
     expect(findImmigrationAdvice(text)).toEqual([]);
   });

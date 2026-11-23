@@ -3,11 +3,11 @@ import type { LetterExtraction } from "@/lib/schema";
 import type { Region, StateRules } from "@/lib/states";
 import { Deadline } from "./Deadline";
 import { aboutImmigration, safe } from "./shared";
+import { StatePicker } from "./StatePicker";
 
 // The Justice Department's list of free legal service providers (#48).
 const IMMIGRATION_HELP_URL =
   "https://www.justice.gov/eoir/find-legal-representation";
-import { StatePicker } from "./StatePicker";
 
 export function Result({
   data,
