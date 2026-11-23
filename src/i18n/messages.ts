@@ -154,6 +154,8 @@ const en = {
   draftOpen: "Draft a note to my doctor",
   draftLabel: "Note to your doctor. Edit it before you send it.",
   draftInEnglish: "",
+  // Shown on every screen in Spanish only, until a fluent review (#52).
+  machineAssisted: "",
   copy: "Copy",
   copied: "Copied",
   copyFailed: "Couldn't copy. Press and hold the text to copy it.",
@@ -325,6 +327,8 @@ const es: Messages = {
   draftOpen: "Escribir una nota para mi médico",
   draftLabel: "Nota para su médico. Revísela antes de enviarla.",
   draftInEnglish: "La nota está en inglés para que su médico la pueda leer.",
+  machineAssisted:
+    "Este texto en español se tradujo con ayuda de una computadora y todavía no lo ha revisado una persona que hable español con fluidez. Si algo no está claro, llame al número de su carta.",
   copy: "Copiar",
   copied: "Copiado",
   copyFailed: "No se pudo copiar. Mantenga presionado el texto para copiarlo.",

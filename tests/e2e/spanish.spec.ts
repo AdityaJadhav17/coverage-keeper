@@ -36,7 +36,12 @@ test("a Spanish phone gets the app in Spanish, and can switch to English (US-060
     ),
   ).toBeVisible();
   await expect(page.getByText(/a través de Vercel/)).toBeVisible();
+  // Until a fluent speaker reviews it, the Spanish says it was machine-assisted (#52).
+  await expect(page.getByTestId("machine-assisted")).toHaveText(
+    "Este texto en español se tradujo con ayuda de una computadora y todavía no lo ha revisado una persona que hable español con fluidez. Si algo no está claro, llame al número de su carta.",
+  );
   await page.getByRole("button", { name: "English" }).click();
+  await expect(page.getByTestId("machine-assisted")).toHaveCount(0);
   await expect(
     page.getByRole("heading", {
       name: "Got a letter about your health coverage?",

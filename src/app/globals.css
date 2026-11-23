@@ -650,6 +650,13 @@ mark {
   font-size: 0.9375rem;
 }
 
+/* The Spanish machine-assisted note and the independence line read as one block (#52). */
+.independent + .independent {
+  margin-top: 0.5rem;
+  padding-top: 0;
+  border-top: 0;
+}
+
 .callbar a::before {
   content: "";
   width: 1.25rem;

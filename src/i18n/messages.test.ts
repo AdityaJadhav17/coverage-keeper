@@ -172,3 +172,15 @@ describe("AI label on every result (#45)", () => {
     expect(messages[locale].aiLabel(program)).toBe(text);
   });
 });
+
+describe("the Spanish says it was machine-assisted (#52)", () => {
+  it("shows a note in Spanish and none in English", () => {
+    expect(messages.es.machineAssisted).toMatch(/computadora/);
+    expect(messages.es.machineAssisted).toMatch(/llame al número de su carta/);
+    expect(messages.en.machineAssisted).toBe("");
+  });
+
+  it("makes no eligibility claim", () => {
+    expect(findForbiddenClaims(messages.es.machineAssisted)).toEqual([]);
+  });
+});

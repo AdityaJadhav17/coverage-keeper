@@ -284,6 +284,11 @@ export default function Home() {
             }
           />
         )}
+        {t.machineAssisted && (
+          <p className="independent" data-testid="machine-assisted">
+            {t.machineAssisted}
+          </p>
+        )}
         {/* On every screen: who runs this, and who doesn't (#46). */}
         <p className="independent" data-testid="independent">
           {t.notPartOf(
