@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { findForbiddenClaims } from "@/lib/guardrails";
+import { STATE_CODES, stateRules } from "@/lib/states";
 import { messages, pickLocale, type Messages } from "./messages";
 
 describe("pickLocale", () => {
@@ -88,5 +89,117 @@ describe("consent facts say where the letter goes and how long it may be kept (#
 
   it("both languages list the same number of facts", () => {
     expect(messages.es.facts).toHaveLength(messages.en.facts.length);
+  });
+});
+
+describe("independence line and phone labels (#46)", () => {
+  it.each(["en", "es"] as const)(
+    "%s names each state's program, agency and state",
+    (locale) => {
+      const t = messages[locale];
+      for (const code of STATE_CODES) {
+        const { program, agency } = stateRules(code);
+        const line = t.notPartOf({
+          program,
+          agency,
+          state: t.stateNames[code],
+        });
+        for (const part of [program, agency, t.stateNames[code]])
+          expect(line).toContain(part);
+        expect(line).toMatch(
+          /^Coverage Keeper (is independent|es independiente)\./,
+        );
+      }
+    },
+  );
+
+  it("has a line for when no state is known", () => {
+    expect(messages.en.notPartOf(null)).toBe(
+      "Coverage Keeper is independent. It is not part of, approved by, or endorsed by any state Medicaid program or government agency.",
+    );
+    expect(messages.es.notPartOf(null)).toContain(
+      "ningún programa estatal de Medicaid",
+    );
+  });
+
+  it("matches the wording the California research asks for", () => {
+    expect(
+      messages.en.notPartOf({
+        program: "Medi-Cal",
+        agency: "California Department of Health Care Services",
+        state: "California",
+      }),
+    ).toBe(
+      "Coverage Keeper is independent. It is not part of, approved by, or endorsed by Medi-Cal, the California Department of Health Care Services or the State of California.",
+    );
+  });
+
+  it("labels a state line as official and a letter number as the letter's", () => {
+    expect(messages.en.official("OHP Customer Service")).toBe(
+      "OHP Customer Service (official)",
+    );
+    expect(messages.es.official("OHP Customer Service")).toBe(
+      "OHP Customer Service (oficial)",
+    );
+    expect(messages.en.fromLetter).toBe("from your letter");
+    expect(messages.es.fromLetter).toBe("de su carta");
+  });
+});
+
+describe("AI label on every result (#45)", () => {
+  it.each([
+    [
+      "en",
+      "Oregon Health Plan (OHP)",
+      "Written by AI. It can make mistakes. Check your letter and call Oregon Health Plan (OHP).",
+    ],
+    [
+      "en",
+      null,
+      "Written by AI. It can make mistakes. Check your letter and call the number on it.",
+    ],
+    [
+      "es",
+      "Oregon Health Plan (OHP)",
+      "Escrito por IA. Puede cometer errores. Revise su carta y llame a Oregon Health Plan (OHP).",
+    ],
+    [
+      "es",
+      null,
+      "Escrito por IA. Puede cometer errores. Revise su carta y llame al número que aparece en ella.",
+    ],
+  ] as const)("%s with program %j", (locale, program, text) => {
+    expect(messages[locale].aiLabel(program)).toBe(text);
+  });
+});
+
+describe("the Spanish says it was machine-assisted (#52)", () => {
+  it("shows a note in Spanish and none in English", () => {
+    expect(messages.es.machineAssisted).toMatch(/computadora/);
+    expect(messages.es.machineAssisted).toMatch(/llame al número de su carta/);
+    expect(messages.en.machineAssisted).toBe("");
+  });
+
+  it("makes no eligibility claim", () => {
+    expect(findForbiddenClaims(messages.es.machineAssisted)).toEqual([]);
+  });
+});
+
+describe("the welcome screen points to 988 in a crisis (#49)", () => {
+  it.each(["en", "es"] as const)("%s", (locale) => {
+    const fact = messages[locale].facts.find((f) => f.includes("988"));
+    expect(fact).toMatch(/mental/);
+    expect(findForbiddenClaims(fact!)).toEqual([]);
+  });
+});
+
+describe("the welcome screen points to free legal aid (#47)", () => {
+  it.each(["en", "es"] as const)("%s", (locale) => {
+    const t = messages[locale];
+    expect(t.legalHelpLead).toBeTruthy();
+    expect(t.legalHelpLink).toBeTruthy();
+    expect(
+      findForbiddenClaims(`${t.legalHelpLead} ${t.legalHelpLink}`),
+    ).toEqual([]);
   });
 });

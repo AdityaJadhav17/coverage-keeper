@@ -175,7 +175,14 @@ export default function Home() {
       : null;
   // The letter's own number (often a local office), else the state's line, else
   // "the number on your letter" (US-084), as the welcome screen promises.
-  const phone = letterPhone(data) || rules?.contact.phone || "";
+  const letterNumber = letterPhone(data);
+  const phone = letterNumber || rules?.contact.phone || "";
+  // Whose number the call bar shows: the letter's, or the state's official line (#46).
+  const phoneFrom = letterNumber
+    ? t.fromLetter
+    : rules
+      ? t.official(rules.contact.name)
+      : null;
   const phoneText = phone || t.letterNumber;
   // Switching language also translates the letter: from memory if this language
   // was already read, otherwise one new read of the same pages (US-061).
@@ -277,12 +284,28 @@ export default function Home() {
             }
           />
         )}
+        {t.machineAssisted && (
+          <p className="independent" data-testid="machine-assisted">
+            {t.machineAssisted}
+          </p>
+        )}
+        {/* On every screen: who runs this, and who doesn't (#46). */}
+        <p className="independent" data-testid="independent">
+          {t.notPartOf(
+            rules && {
+              program: rules.program,
+              agency: rules.agency,
+              state: t.stateNames[rules.state],
+            },
+          )}
+        </p>
       </main>
       <footer className="callbar">
         {phone ? (
           <>
             <span>{t.questions}</span>
             <a href={phoneHref(phone) ?? undefined}>{phone}</a>
+            {phoneFrom && <span className="who">{phoneFrom}</span>}
           </>
         ) : (
           <span>

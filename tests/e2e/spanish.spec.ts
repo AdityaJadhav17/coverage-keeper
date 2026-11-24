@@ -26,6 +26,9 @@ test("a Spanish phone gets the app in Spanish, and can switch to English (US-060
     }),
   ).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("lang", "es");
+  await expect(page.getByTestId("independent")).toHaveText(
+    "Coverage Keeper es independiente. No forma parte de ningún programa estatal de Medicaid ni de ninguna agencia del gobierno, y ninguno de ellos lo ha aprobado ni respaldado.",
+  );
   // The consent names who handles the letter and how long it may be kept (#44).
   await expect(
     page.getByText(
@@ -33,7 +36,12 @@ test("a Spanish phone gets the app in Spanish, and can switch to English (US-060
     ),
   ).toBeVisible();
   await expect(page.getByText(/a través de Vercel/)).toBeVisible();
+  // Until a fluent speaker reviews it, the Spanish says it was machine-assisted (#52).
+  await expect(page.getByTestId("machine-assisted")).toHaveText(
+    "Este texto en español se tradujo con ayuda de una computadora y todavía no lo ha revisado una persona que hable español con fluidez. Si algo no está claro, llame al número de su carta.",
+  );
   await page.getByRole("button", { name: "English" }).click();
+  await expect(page.getByTestId("machine-assisted")).toHaveCount(0);
   await expect(
     page.getByRole("heading", {
       name: "Got a letter about your health coverage?",
@@ -55,6 +63,9 @@ test("Spanish result and exemption questions (US-061, US-063)", async ({
   await expect(
     page.getByRole("heading", { name: "Esto es lo que dice su carta" }),
   ).toBeVisible();
+  await expect(page.getByTestId("ai-label")).toHaveText(
+    "Escrito por IA. Puede cometer errores. Revise su carta y llame a Oregon Health Plan (OHP).",
+  );
   // The quoted line stays exactly as printed on the letter.
   await expect(page.getByTestId("deadline")).toContainText(
     fixture.deadline_quote,

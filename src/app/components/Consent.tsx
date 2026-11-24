@@ -1,5 +1,9 @@
 import { useLocale } from "@/i18n/LocaleContext";
 
+// Legal Services Corporation's finder for free civil legal aid (#47).
+const LEGAL_AID_URL =
+  "https://www.lsc.gov/about-lsc/what-legal-aid/i-need-legal-help";
+
 // Welcome screen. Tapping "Start with my letter" is the consent: everything the
 // person agrees to is on this screen above the button (US-055).
 export function Consent({ onAccept }: { onAccept: () => void }) {
@@ -21,6 +25,12 @@ export function Consent({ onAccept }: { onAccept: () => void }) {
           <li key={fact}>{fact}</li>
         ))}
       </ul>
+      <p className="legal-help" data-testid="legal-help">
+        {t.legalHelpLead}{" "}
+        <a href={LEGAL_AID_URL} target="_blank" rel="noreferrer">
+          {t.legalHelpLink}
+        </a>
+      </p>
       <button type="button" className="primary" onClick={onAccept}>
         {t.start}
       </button>

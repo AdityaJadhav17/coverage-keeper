@@ -11,6 +11,11 @@ test("home page shows the product and who to call, with no serious a11y issues",
   await expect(page.locator(".callbar")).toContainText(
     "Questions? Call the number on your letter",
   );
+  // Before any state is known, the page still says it isn't a government site (#46).
+  await expect(page.getByTestId("independent")).toHaveText(
+    "Coverage Keeper is independent. It is not part of, approved by, or endorsed by any state Medicaid program or government agency.",
+  );
+  await expect(page.locator(".callbar")).not.toContainText("(official)");
 
   // Screen fade-ins would otherwise be measured at half opacity.
   await page.evaluate(() =>
@@ -94,7 +99,7 @@ test("welcome facts are a scannable list with room around the button", async ({
     Promise.all(document.getAnimations().map((a) => a.finished)),
   );
   const facts = page.getByRole("list", { name: "Before you start" });
-  await expect(facts.getByRole("listitem")).toHaveCount(5);
+  await expect(facts.getByRole("listitem")).toHaveCount(6);
   const list = (await facts.boundingBox())!;
   const button = (await page
     .getByRole("button", { name: "Start with my letter" })
@@ -104,4 +109,16 @@ test("welcome facts are a scannable list with room around the button", async ({
     .boundingBox())!;
   expect(button.y - (list.y + list.height)).toBeGreaterThanOrEqual(20);
   expect(promise.y - (button.y + button.height)).toBeGreaterThanOrEqual(40);
+});
+
+test("the welcome screen points to free legal aid (#47)", async ({ page }) => {
+  await page.goto("/");
+  const line = page.getByTestId("legal-help");
+  await expect(line).toContainText("Need legal help with your case?");
+  await expect(
+    line.getByRole("link", { name: "Find free legal aid near you." }),
+  ).toHaveAttribute(
+    "href",
+    "https://www.lsc.gov/about-lsc/what-legal-aid/i-need-legal-help",
+  );
 });

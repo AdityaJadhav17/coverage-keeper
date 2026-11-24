@@ -22,7 +22,12 @@ const en = {
     "You decide what to send. We never contact the state for you.",
     "Free and independent. Not run by any state agency.",
     "Not legal advice. Only your state decides your coverage.",
+    // Legal checklist ISSUE-6 (#49).
+    "Not a health or mental health service. In a crisis, call or text 988.",
   ],
+  // Under the facts, next to "Not legal advice" (legal checklist ISSUE-4, #47).
+  legalHelpLead: "Need legal help with your case?",
+  legalHelpLink: "Find free legal aid near you.",
   start: "Start with my letter",
   effort: "About a minute · No sign-up · Free",
   promiseLead: "Rather talk to a person?",
@@ -87,6 +92,9 @@ const en = {
   notMedicaidText: (phone: string) =>
     `If it came from your state's Medicaid program, call ${phone} and they can tell you what it means.`,
   resultTitle: "Here's what your letter says",
+  // On every result (legal checklist ISSUE-2, #45). null: no state chosen yet.
+  aiLabel: (program: string | null) =>
+    `Written by AI. It can make mistakes. Check your letter and call ${program ?? "the number on it"}.`,
   askTitle: "What the letter asks you to do",
   papersTitle: "Papers to send",
   notSure: "Not sure. Check the letter or call.",
@@ -151,12 +159,25 @@ const en = {
   draftOpen: "Draft a note to my doctor",
   draftLabel: "Note to your doctor. Edit it before you send it.",
   draftInEnglish: "",
+  // On results about immigration (legal checklist ISSUE-5, #48).
+  noImmigrationAdvice: "We can't give immigration advice.",
+  immigrationHelp: "Find free legal help near you.",
+  // Shown on every screen in Spanish only, until a fluent review (#52).
+  machineAssisted: "",
   copy: "Copy",
   copied: "Copied",
   copyFailed: "Couldn't copy. Press and hold the text to copy it.",
   share: "Share",
 
   questions: "Questions? Call",
+  // Under the call bar number: whose number it is (legal checklist ISSUE-3, #46).
+  official: (name: string) => `${name} (official)`,
+  fromLetter: "from your letter",
+  // On every screen (#46). null: no state chosen yet.
+  notPartOf: (s: { program: string; agency: string; state: string } | null) =>
+    s
+      ? `Coverage Keeper is independent. It is not part of, approved by, or endorsed by ${s.program}, the ${s.agency} or the State of ${s.state}.`
+      : "Coverage Keeper is independent. It is not part of, approved by, or endorsed by any state Medicaid program or government agency.",
 };
 
 export type Messages = typeof en;
@@ -177,7 +198,10 @@ const es: Messages = {
     "Usted decide qué enviar. Nunca nos comunicamos con el estado por usted.",
     "Gratis e independiente. No lo maneja ninguna agencia del estado.",
     "No es asesoría legal. Solo su estado decide sobre su cobertura.",
+    "No es un servicio de salud ni de salud mental. Si está en crisis, llame o envíe un mensaje de texto al 988.",
   ],
+  legalHelpLead: "¿Necesita ayuda legal con su caso?",
+  legalHelpLink: "Busque ayuda legal gratuita cerca de usted.",
   start: "Empezar con mi carta",
   effort: "Un minuto · Sin registrarse · Gratis",
   promiseLead: "¿Prefiere hablar con una persona?",
@@ -244,6 +268,10 @@ const es: Messages = {
   notMedicaidText: (phone: string) =>
     `Si la envió el programa de Medicaid de su estado, llame al ${phone} y le explicarán qué significa.`,
   resultTitle: "Esto es lo que dice su carta",
+  aiLabel: (program) =>
+    program
+      ? `Escrito por IA. Puede cometer errores. Revise su carta y llame a ${program}.`
+      : "Escrito por IA. Puede cometer errores. Revise su carta y llame al número que aparece en ella.",
   askTitle: "Lo que la carta le pide",
   papersTitle: "Documentos para enviar",
   notSure: "No estamos seguros. Revise la carta o llame.",
@@ -310,12 +338,22 @@ const es: Messages = {
   draftOpen: "Escribir una nota para mi médico",
   draftLabel: "Nota para su médico. Revísela antes de enviarla.",
   draftInEnglish: "La nota está en inglés para que su médico la pueda leer.",
+  noImmigrationAdvice: "No podemos dar asesoría de inmigración.",
+  immigrationHelp: "Busque ayuda legal gratuita cerca de usted.",
+  machineAssisted:
+    "Este texto en español se tradujo con ayuda de una computadora y todavía no lo ha revisado una persona que hable español con fluidez. Si algo no está claro, llame al número de su carta.",
   copy: "Copiar",
   copied: "Copiado",
   copyFailed: "No se pudo copiar. Mantenga presionado el texto para copiarlo.",
   share: "Compartir",
 
   questions: "¿Preguntas? Llame al",
+  official: (name) => `${name} (oficial)`,
+  fromLetter: "de su carta",
+  notPartOf: (s) =>
+    s
+      ? `Coverage Keeper es independiente. No forma parte de ${s.program}, ${s.agency} ni del estado de ${s.state}, y ninguno de ellos lo ha aprobado ni respaldado.`
+      : "Coverage Keeper es independiente. No forma parte de ningún programa estatal de Medicaid ni de ninguna agencia del gobierno, y ninguno de ellos lo ha aprobado ni respaldado.",
 };
 
 export const messages: Record<Locale, Messages> = { en, es };

@@ -1,12 +1,22 @@
 import { describe, expect, it } from "vitest";
 import {
-  HIDDEN_PAPER,
-  HIDDEN_PAPER_ES,
-  SAFE_FALLBACK,
-  SAFE_FALLBACK_ES,
   enforceGuardrail,
   findForbiddenClaims,
+  findHealthCare,
+  findImmigrationAdvice,
+  findLegalStrategy,
+  findSelfDescriptions,
+  HEALTH_FALLBACK,
+  HEALTH_FALLBACK_ES,
+  HIDDEN_PAPER,
+  HIDDEN_PAPER_ES,
+  IMMIGRATION_FALLBACK,
+  IMMIGRATION_FALLBACK_ES,
+  LEGAL_FALLBACK,
+  LEGAL_FALLBACK_ES,
   paperOrNotice,
+  SAFE_FALLBACK,
+  SAFE_FALLBACK_ES,
   shownOrNull,
 } from "./guardrails";
 
@@ -155,6 +165,226 @@ describe("claims that used to slip past", () => {
 
   it("still defaults to the English fallback", () => {
     expect(enforceGuardrail("Usted es elegible").text).toBe(SAFE_FALLBACK);
+  });
+});
+
+describe("banned self-descriptions (legal checklist ISSUE-7, #50)", () => {
+  it.each([
+    "I am a licensed counselor and can help.",
+    "As your nurse, I recommend sending the form.",
+    "We are certified application counselors.",
+    "We're navigators for Apple Health.",
+    "Coverage Keeper is an official Medi-Cal tool.",
+    "Coverage Keeper is HIPAA compliant.",
+    "This app is guaranteed to be accurate.",
+    "I'm your case worker for this renewal.",
+    "We are immigration consultants.",
+    "Our team is licensed in Nevada.",
+    "Soy notario y puedo ayudarle.",
+    "Somos abogados de inmigración.",
+    "Como su consejera, le recomiendo enviar el formulario.",
+    "Coverage Keeper es un servicio oficial del estado.",
+    "Somos consultores de inmigración certificados.",
+  ])("finds %j", (text) => {
+    expect(findSelfDescriptions(text)).not.toHaveLength(0);
+    expect(enforceGuardrail(text).blocked).toBe(true);
+  });
+
+  it.each([
+    // What a letter may ask for, or who it names: not about us.
+    "Ask your doctor to fill out the form.",
+    "Send a note from a licensed health professional.",
+    "Call a certified application counselor at the number on your letter.",
+    "A navigator or assister can help you renew for free.",
+    "Legal aid can help you with an appeal.",
+    "Send a certified copy of your birth certificate.",
+    "Make sure the information is accurate.",
+    "Call the official Medi-Cal Helpline.",
+    "Your case worker is listed at the top of the letter.",
+    "Pida a su médico que llene el formulario.",
+    "Un abogado de ayuda legal puede ayudarle con la apelación.",
+    // Saying what we are not is fine.
+    "We are not lawyers, and this is not legal advice.",
+    "Coverage Keeper is not an official state site.",
+    "No somos abogados.",
+    "Coverage Keeper no es un servicio oficial.",
+    "I am sending this as your doctor requested.",
+  ])("leaves %j alone", (text) => {
+    expect(findSelfDescriptions(text)).toEqual([]);
+    expect(enforceGuardrail(text)).toEqual({ text, blocked: false });
+  });
+
+  it("sees through look-alike letters and invisible characters", () => {
+    expect(findSelfDescriptions("We are nоtarios.")).not.toHaveLength(0);
+    expect(findSelfDescriptions("We are thera​pists.")).not.toHaveLength(0);
+  });
+
+  it("uses the reply's language for the fallback", () => {
+    expect(enforceGuardrail("Somos notarios.", "es").text).toBe(
+      SAFE_FALLBACK_ES,
+    );
+  });
+});
+
+// Never act as a health or mental health professional; point to a doctor or 988 (#49).
+describe("health and mental health care", () => {
+  it.each([
+    "You may have depression.",
+    "You probably have an anxiety disorder.",
+    "You seem to have PTSD.",
+    "You have a mental illness.",
+    "You should stop taking your medication.",
+    "Start taking your antidepressants again.",
+    "Try therapy to feel better.",
+    "Usted podría tener depresión.",
+    "Usted tiene un trastorno de ansiedad.",
+    "Debería dejar de tomar su medicamento.",
+    "Pruebe la terapia para sentirse mejor.",
+  ])("blocks %j", (text) => {
+    expect(findHealthCare(text)).not.toHaveLength(0);
+    expect(enforceGuardrail(text)).toEqual({
+      text: HEALTH_FALLBACK,
+      blocked: true,
+    });
+  });
+
+  it.each([
+    "Send a note from your doctor about your health condition.",
+    "Proof of a medical condition that limits your work.",
+    "Una nota de su médico sobre su condición de salud.",
+    "Do you have a serious or disabling health condition?",
+    "Ask your doctor to fill out the form.",
+    // Exemptions name conditions as a question, not a diagnosis.
+    "If you have a mental health condition, you may be exempt.",
+    "Tell the state if you have a mental illness that limits your work.",
+    "Ask whether you have a disorder that counts.",
+    "Unless you have a substance use disorder, you must report hours.",
+    "Si usted tiene un trastorno por uso de sustancias, puede estar exento.",
+    "Si tiene depresión, puede estar exento.",
+  ])("allows %j", (text) => {
+    expect(findHealthCare(text)).toEqual([]);
+  });
+
+  it("answers in Spanish when Spanish is selected", () => {
+    expect(enforceGuardrail("Usted podría tener depresión.", "es").text).toBe(
+      HEALTH_FALLBACK_ES,
+    );
+  });
+
+  it("points to a doctor and to 988, and passes every check itself", () => {
+    for (const text of [HEALTH_FALLBACK, HEALTH_FALLBACK_ES]) {
+      expect(text).toMatch(/988/);
+      expect(enforceGuardrail(text).blocked).toBe(false);
+    }
+  });
+});
+
+// No immigration advice: status, visas, public charge, USCIS filings (#48).
+describe("immigration advice", () => {
+  it.each([
+    "You are a lawful permanent resident.",
+    "You're a qualified non-citizen.",
+    "You are undocumented.",
+    "Your immigration status is safe.",
+    "Your status will not be affected.",
+    "Using Medicaid will not make you a public charge.",
+    "Public charge does not apply to you.",
+    "You should apply for a green card.",
+    "You can renew your visa.",
+    "File Form I-485 with USCIS.",
+    "Apply for citizenship with USCIS.",
+    "Usted es residente permanente.",
+    "Su estatus migratorio es seguro.",
+    "Usar Medicaid no afecta la carga pública.",
+    "Usted debería solicitar una tarjeta verde.",
+    "Presente el formulario I-485 ante USCIS.",
+  ])("blocks %j", (text) => {
+    expect(findImmigrationAdvice(text)).not.toHaveLength(0);
+    expect(enforceGuardrail(text)).toEqual({
+      text: IMMIGRATION_FALLBACK,
+      blocked: true,
+    });
+  });
+
+  // What immigration letters ask for must stay readable.
+  it.each([
+    "We could not verify your immigration status.",
+    "Send proof of your citizenship or immigration status.",
+    "Send a copy of your green card (I-551).",
+    "Send your I-94 record.",
+    "The state asks if you are a lawful permanent resident.",
+    "No pudimos verificar su estatus migratorio.",
+    "Envíe una copia de su tarjeta verde.",
+    "Submit it and we check it with USCIS.",
+    "Su estado es seguro.",
+  ])("allows %j", (text) => {
+    expect(findImmigrationAdvice(text)).toEqual([]);
+  });
+
+  it("answers in Spanish, refers to free legal help, and passes every check", () => {
+    expect(enforceGuardrail("Usted es residente permanente.", "es").text).toBe(
+      IMMIGRATION_FALLBACK_ES,
+    );
+    for (const text of [IMMIGRATION_FALLBACK, IMMIGRATION_FALLBACK_ES]) {
+      expect(text).toMatch(/justice\.gov\/eoir/);
+      expect(enforceGuardrail(text).blocked).toBe(false);
+    }
+  });
+});
+
+// No legal strategy: whether to appeal, which option to pick, what to "do" (#47).
+describe("legal strategy", () => {
+  it.each([
+    "You should appeal this decision.",
+    "You should not ask for a hearing.",
+    "You should request a fair hearing.",
+    "We recommend that you appeal.",
+    "I suggest you appeal.",
+    "Your best option is to reapply.",
+    "It's best to appeal now.",
+    "The best choice for you is to appeal.",
+    "You should hire a lawyer.",
+    "Usted debería apelar.",
+    "Le recomendamos que pida una audiencia.",
+    "Su mejor opción es volver a solicitar.",
+    "Lo mejor es apelar.",
+  ])("blocks %j", (text) => {
+    expect(findLegalStrategy(text)).not.toHaveLength(0);
+    expect(enforceGuardrail(text)).toEqual({
+      text: LEGAL_FALLBACK,
+      blocked: true,
+    });
+  });
+
+  // Rights and instructions a letter states are not strategy.
+  it.each([
+    "If you disagree, you can ask for a hearing.",
+    "You have the right to appeal within 90 days.",
+    "Send your pay stubs by February 15.",
+    "You must report your hours every month.",
+    "You should get a renewal form in the mail.",
+    "Usted tiene derecho a pedir una audiencia.",
+    "Si no está de acuerdo, puede apelar.",
+    "Debe enviar sus talones de pago.",
+    // Everyday renewal instructions and agency wording.
+    "You should sign the renewal form and send it back by March 1.",
+    "You should accept the new card when it arrives.",
+    "Usted debería firmar el formulario y enviarlo.",
+    "We recommend that you keep a copy of this letter.",
+    "We advise you to report changes within 10 days.",
+    "Le recomendamos que guarde una copia de esta carta.",
+  ])("allows %j", (text) => {
+    expect(findLegalStrategy(text)).toEqual([]);
+  });
+
+  it("answers in Spanish, points to legal aid, and passes every check", () => {
+    expect(enforceGuardrail("Usted debería apelar.", "es").text).toBe(
+      LEGAL_FALLBACK_ES,
+    );
+    for (const text of [LEGAL_FALLBACK, LEGAL_FALLBACK_ES]) {
+      expect(text).toMatch(/lsc\.gov/);
+      expect(enforceGuardrail(text).blocked).toBe(false);
+    }
   });
 });
 

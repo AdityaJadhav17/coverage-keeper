@@ -64,6 +64,9 @@ test("photo to explanation shows summary, deadline, checklist and phone", async 
   await expect(
     page.getByRole("heading", { name: "Here's what your letter says" }),
   ).toBeVisible();
+  await expect(page.getByTestId("ai-label")).toHaveText(
+    "Written by AI. It can make mistakes. Check your letter and call Oregon Health Plan (OHP).",
+  );
   const deadline = page.getByTestId("deadline");
   await expect(deadline).toContainText("Feb 15, 2027");
   await expect(deadline).toContainText("5 days left");
@@ -71,6 +74,12 @@ test("photo to explanation shows summary, deadline, checklist and phone", async 
   await expect(page.getByRole("checkbox")).toHaveCount(2);
   await expect(page.getByLabel("Pay stubs for January 2027")).toBeVisible();
   await expect(page.getByRole("link", { name: "800-699-9075" })).toBeVisible();
+  // This number was read from the letter, so it's labeled as the letter's, not as official (#46).
+  await expect(page.locator(".callbar")).toContainText("from your letter");
+  await expect(page.locator(".callbar")).not.toContainText("(official)");
+  await expect(page.getByTestId("independent")).toContainText(
+    "Oregon Health Plan (OHP), the Oregon Health Authority or the State of Oregon.",
+  );
   expect(calls()).toBe(1);
   await expectNoSeriousA11yIssues(page);
 });
@@ -117,7 +126,35 @@ test("unrelated letter says it is not an OHP letter", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: /doesn't look like a Medicaid/ }),
   ).toBeVisible();
+  await expect(page.getByTestId("ai-label")).toContainText("Written by AI.");
   await expect(page.getByTestId("deadline")).toHaveCount(0);
+});
+
+test("the AI label follows the chosen state, or points to the letter (#45)", async ({
+  page,
+}) => {
+  await mockReader(page, { ...fixture, state: null });
+  await start(page);
+  await scan(page);
+  const label = page.getByTestId("ai-label");
+  await expect(label).toHaveText(
+    "Written by AI. It can make mistakes. Check your letter and call the number on it.",
+  );
+  await page.getByLabel("State that sent this letter").selectOption("WA");
+  await expect(label).toHaveText(
+    "Written by AI. It can make mistakes. Check your letter and call Apple Health (Medicaid).",
+  );
+  // Read before the summary, right under the heading.
+  const order = await page.evaluate(() =>
+    [
+      ...document.querySelectorAll(
+        "#result-title, [data-testid=ai-label], .lead",
+      ),
+    ].map((el) =>
+      el.id ? "title" : el.classList.contains("lead") ? "summary" : "label",
+    ),
+  );
+  expect(order).toEqual(["title", "label", "summary"]);
 });
 
 test("eligibility claims from the reader are replaced", async ({ page }) => {
@@ -272,4 +309,34 @@ test.describe("dark mode", () => {
     await expect(page.getByTestId("may-apply")).toHaveCount(1);
     await expectNoSeriousA11yIssues(page);
   });
+});
+
+test("an immigration letter says we can't give immigration advice, with a referral (#48)", async ({
+  page,
+}) => {
+  await mockReader(page, {
+    ...fixture,
+    summary:
+      "The state could not verify your immigration status. Send proof by the date below.",
+  });
+  await start(page);
+  await scan(page);
+  const line = page.getByTestId("no-immigration-advice");
+  await expect(line).toContainText("We can't give immigration advice.");
+  await expect(
+    line.getByRole("link", { name: "Find free legal help near you." }),
+  ).toHaveAttribute(
+    "href",
+    "https://www.justice.gov/eoir/find-legal-representation",
+  );
+});
+
+test("a work-rules letter shows no immigration line (#48)", async ({
+  page,
+}) => {
+  await mockReader(page);
+  await start(page);
+  await scan(page);
+  await expect(page.getByTestId("ai-label")).toBeVisible();
+  await expect(page.getByTestId("no-immigration-advice")).toHaveCount(0);
 });

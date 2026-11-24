@@ -2,7 +2,13 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { buildDoctorDraft } from "@/lib/doctor-draft";
-import { findForbiddenClaims } from "@/lib/guardrails";
+import {
+  findForbiddenClaims,
+  findHealthCare,
+  findImmigrationAdvice,
+  findLegalStrategy,
+} from "@/lib/guardrails";
+import { messages } from "@/i18n/messages";
 import rules from "../../data/rules/or.json";
 import { STATE_CODES, stateRules, type StateCode } from "@/lib/states";
 
@@ -76,5 +82,30 @@ describe("shipped text contains no eligibility claims", () => {
   it.each(uiFiles)("fixed UI strings in src/app/%s", (file) => {
     const ui = readFileSync(path.join(appDir, file), "utf8");
     expect(findForbiddenClaims(ui)).toEqual([]);
+  });
+});
+
+// The health (#49), immigration (#48) and legal strategy (#47) checks must not fire on our own text or the
+// state rules.
+describe.each([
+  ["health", findHealthCare],
+  ["immigration", findImmigrationAdvice],
+  ["legal strategy", findLegalStrategy],
+])("shipped text passes the %s check", (_, find) => {
+  it.each(STATE_CODES)("%s rules", (code) => {
+    expect(find(JSON.stringify(stateRules(code)))).toEqual([]);
+  });
+
+  it.each(["en", "es"] as const)("%s messages", (locale) => {
+    const copy = JSON.stringify(messages[locale], (_, v) =>
+      typeof v === "function" ? v(3, "x") : v,
+    );
+    expect(find(copy)).toEqual([]);
+  });
+
+  it("recorded reader output", () => {
+    const dir = path.join(__dirname, "..", "fixtures", "reader");
+    for (const file of readdirSync(dir))
+      expect(find(readFileSync(path.join(dir, file), "utf8"))).toEqual([]);
   });
 });
