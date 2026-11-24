@@ -85,32 +85,66 @@ const LOSSES_ES = es([
   String.raw`(?<!\bno\s)\b${SUBJECT}(?:(?:va|vas)\sa\sperder\sla|perderá\s(?:su|tu|la)|perderás\s(?:su|tu|la))\scobertura\b`,
 ]);
 
-// The reason for a loss, in the same sentence. "sí" (yes) is not "si" (if), and
-// "without a doubt" / "sin duda" is no reason. "or" counts only directly before the
-// loss ("Renew by March 1 or you will lose…"), not as in "one or two reasons".
-const REASON =
-  /\b(?:if|unless|otherwise)\b|\bwithout\s(?!(?:a\s)?(?:doubt|question)\b)|(?<![\p{L}])si\s|(?<![\p{L}])sin\s(?!duda)|\ba\smenos\sque\b|\bde\slo\scontrario\b/iu;
-const OR_BEFORE = /(?:\bor|(?<![\p{L}])o)\s$/iu;
-// A period inside "Feb. 15" or "5 p.m. on" does not end a sentence. A doubtful break
-// keeps the sentence whole, which only ever lets a warning with a reason through.
+// A loss is excused only when its condition is something the person does or sends:
+// "If you do not renew by March 1, you will lose your coverage". Any "if" was not
+// enough: "If you ask me, you will lose your coverage" is a claim (review of #65).
+const ACTION =
+  /\b(?:renew(?:al|ed|s|ing)?|send|sent|reply|replied|respond|response|return(?:ed|s)?|report(?:ed|s|ing)?|submit(?:ted)?|complete[ds]?|sign(?:ed|s)?|forms?|paperwork|proof|papers?|documents?|information|pay(?:s|ing)?|paid|payment|premium|apply|application|hours|works?|worked|working|deadline|late)\b|(?<![\p{L}])(?:renuev[ae]n?|renovación|renovar|envía|envíe|envie|enviar|envió|responde|responda|responder|respuesta|devuelve|devuelva|devolver|formularios?|reporta|reporte|reportar|informa|informe|completa|complete|completar|firma|firme|firmar|paga|pague|pagar|pago|prima|documentos?|pruebas?|información|horas|trabaj\p{L}*|solicitud|fecha\slímite|tarde)(?![\p{L}])/iu;
+// Words that open a condition after them ("if you do not renew") or point back to one
+// before them ("Renew by March 1, otherwise…"). "sí" (yes) is not "si" (if).
+const FORWARD =
+  /\b(?:if|unless|without)\b|(?<![\p{L}])(?:si|sin)\s|\ba\smenos\sque\b/giu;
+const BACKWARD =
+  /\b(?:otherwise|or)\b|(?<![\p{L}])o\s|\bde\slo\scontrario\b/giu;
+// A period inside "Feb. 15" or "5 p.m. on" does not end a sentence.
 const SENTENCE_END = /[.!?;]["')\]]*(?=\s+[\p{Lu}¿¡"'(•-]|\s*$)/gu;
+const CLAUSE_END = /[,;]/;
 
-// The sentence around position `at`, and where it starts.
-function sentenceAt(text: string, at: number): { start: number; text: string } {
+// Sentence boundaries [start, end) around position `at`, and the one before it.
+function sentences(text: string, at: number) {
+  let previous = 0;
   let start = 0;
   for (const m of text.matchAll(SENTENCE_END)) {
-    if (m.index >= at) return { start, text: text.slice(start, m.index) };
+    if (m.index >= at) return { previous, start, end: m.index };
+    previous = start;
     start = m.index + m[0].length;
   }
-  return { start, text: text.slice(start) };
+  return { previous, start, end: text.length };
 }
 
-const hasReason = (text: string, at: number) => {
-  const sentence = sentenceAt(text, at);
-  return (
-    REASON.test(sentence.text) || OR_BEFORE.test(text.slice(sentence.start, at))
-  );
-};
+function hasReason(text: string, at: number, length: number): boolean {
+  const { previous, start, end } = sentences(text, at);
+  const sentence = text.slice(start, end);
+  const lossStart = at - start;
+  const lossEnd = lossStart + length;
+  // "if …" up to the next comma, never into the loss itself.
+  for (const m of sentence.matchAll(FORWARD)) {
+    if (m.index >= lossStart && m.index < lossEnd) continue;
+    const rest = sentence.slice(m.index);
+    const stop = rest.search(CLAUSE_END);
+    let clause = stop < 0 ? rest : rest.slice(0, stop);
+    if (m.index < lossStart) clause = clause.slice(0, lossStart - m.index);
+    if (ACTION.test(clause)) return true;
+  }
+  // "…, otherwise" and "… or" directly before the loss point back to what comes
+  // before them, or to the previous sentence when they open this one.
+  const before = sentence.slice(0, lossStart);
+  for (const m of before.matchAll(BACKWARD)) {
+    if (
+      before
+        .slice(m.index + m[0].length)
+        .trim()
+        .replace(/^,/, "")
+        .trim()
+    )
+      continue;
+    const clause = before.slice(0, m.index).trim()
+      ? before.slice(0, m.index)
+      : text.slice(previous, start);
+    if (ACTION.test(clause)) return true;
+  }
+  return false;
+}
 
 // Words we must never use for Coverage Keeper itself (legal checklist "Banned terms", #50).
 // Strict: no place anywhere in our own copy.
@@ -287,7 +321,7 @@ export function findForbiddenClaims(text: string): string[] {
     ),
     ...[...LOSSES_EN, ...LOSSES_ES].flatMap((pattern) =>
       [...t.matchAll(pattern)]
-        .filter((m) => !hasReason(t, m.index))
+        .filter((m) => !hasReason(t, m.index, m[0].length))
         .map((m) => m[0]),
     ),
   ]);

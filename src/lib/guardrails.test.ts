@@ -607,7 +607,7 @@ describe("third pass: findings dressed as requests, and coverage by this program
     "Without your renewal form, you will lose your coverage on June 30.",
     "If you do not renew by March 1,\nyou will lose your coverage.",
     "Renueve antes del 1 de marzo o perderá su cobertura.",
-    "De lo contrario, perderá su cobertura.",
+    "Envíe el formulario antes del 1 de marzo. De lo contrario, perderá su cobertura.",
     "Sin su formulario, usted perderá su cobertura el 30 de junio.",
   ])("allows %j", (text) => {
     expect(findForbiddenClaims(text)).toEqual([]);
@@ -633,5 +633,38 @@ describe("fourth pass: nothing main blocked gets through", () => {
     "If you need help, call (1-800-699-9075.) You will lose your coverage.",
   ])("blocks %j", (text) => {
     expect(findForbiddenClaims(text)).not.toHaveLength(0);
+  });
+});
+
+// Review of #65: the reason must be something the person does, not any "if".
+describe("a loss is excused only by the person's own action", () => {
+  it.each([
+    "If you ask me, you will lose your coverage.",
+    "You will lose your coverage, if you ask me.",
+    "If you have questions, call us, you will lose your coverage.",
+    "You will lose your coverage if you don't mind me saying so.",
+    "Unless something changes, you will lose your coverage.",
+    "If we are honest, you will lose your coverage.",
+    "Otherwise, you will lose your coverage.",
+    "De lo contrario, perderá su cobertura.",
+    "Si quiere saberlo, perderá su cobertura.",
+    "Si tiene preguntas, llámenos; perderá su cobertura.",
+  ])("blocks %j", (text) => {
+    expect(findForbiddenClaims(text)).not.toHaveLength(0);
+  });
+
+  it.each([
+    "If you do not renew by March 1, you will lose your coverage.",
+    "You will lose your coverage on June 30 if you have not sent the form.",
+    "You will lose your coverage if you do not report your work hours.",
+    "If no one in your home works 80 hours, you will lose your coverage.",
+    "If you live in the U.S. and do not renew, you will lose your coverage.",
+    "You must renew by March 1, otherwise you will lose your coverage.",
+    "If you do not sign and return the form, you will lose your coverage.",
+    "If you do not pay your premium, you will lose your coverage.",
+    "Si no envía sus talones de pago, perderá su cobertura.",
+    "Si no reporta sus horas de trabajo, perderá su cobertura.",
+  ])("allows %j", (text) => {
+    expect(findForbiddenClaims(text)).toEqual([]);
   });
 });
