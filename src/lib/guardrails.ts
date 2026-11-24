@@ -89,16 +89,29 @@ const LOSSES_ES = es([
 // "If you do not renew by March 1, you will lose your coverage". Any "if" was not
 // enough: "If you ask me, you will lose your coverage" is a claim (review of #65).
 const ACTION =
-  /\b(?:renew(?:al|ed|s|ing)?|send|sent|reply|replied|respond|response|return(?:ed|s)?|report(?:ed|s|ing)?|submit(?:ted)?|complete[ds]?|sign(?:ed|s)?|forms?|paperwork|proof|papers?|documents?|information|pay(?:s|ing)?|paid|payment|premium|apply|application|hours|works?|worked|working|deadline|late)\b|(?<![\p{L}])(?:renuev[ae]n?|renovación|renovar|envía|envíe|envie|enviar|envió|responde|responda|responder|respuesta|devuelve|devuelva|devolver|formularios?|reporta|reporte|reportar|informa|informe|completa|complete|completar|firma|firme|firmar|paga|pague|pagar|pago|prima|documentos?|pruebas?|información|horas|trabaj\p{L}*|solicitud|fecha\slímite|tarde)(?![\p{L}])/iu;
+  /\b(?:renew(?:al|ed|s|ing)?|send|sent|reply|replied|respond|response|return(?:ed|s)?|report(?:ed|s|ing)?|submit(?:ted)?|complete[ds]?|sign(?:ed|s)?|forms?|paperwork|proof|papers?|documents?|information|pay(?:s|ing)?|paid|payment|premium|apply|application|hours|works?|worked|working|deadline|due\sdate|late|provide[ds]?|fill(?:ed)?\sout|turn(?:ed)?\sin|mail(?:ed)?|upload(?:ed)?|verify|review|packet|receive[ds]?|hear\sfrom\syou)\b|(?<![\p{L}])(?:renuev[ae]n?|renovación|renovar|envía|envíe|envie|enviar|envió|responde|responda|responder|respuesta|devuelve|devuelva|devolver|formularios?|reporta|reporte|reportar|informa|informe|completa|complete|completar|firma|firme|firmar|paga|pague|pagar|pago|prima|documentos?|pruebas?|información|horas|trabaj\p{L}*|solicitud|fecha\slímite|tarde|llen[ae]|llenar|mand[ae]|mandar|entreg(?:a|ue)|entregar|present[ae]|presentar|proporcion[ae]|proporcionar|paquete)(?![\p{L}])/iu;
 // Words that open a condition after them ("if you do not renew") or point back to one
 // before them ("Renew by March 1, otherwise…"). "sí" (yes) is not "si" (if).
+// "without" / "sin" count before a thing the person sends ("without your renewal
+// form"), not before a manner ("without paying attention").
 const FORWARD =
-  /\b(?:if|unless|without)\b|(?<![\p{L}])(?:si|sin)\s|\ba\smenos\sque\b/giu;
+  /\b(?:if|unless)\b|\bwithout\s(?=(?:your|the|a|an|any)\s)|(?<![\p{L}])si\s|(?<![\p{L}])sin\s(?=(?:su|sus|el|la|los|las|un|una)\s)|\ba\smenos\sque\b/giu;
+// After "if" / "si" the step must be one the person misses: "If you work full time,
+// you will lose your coverage" states a fact about them, not a deadline.
+const MISSED =
+  /\b(?:not|never|fail(?:s|ed)?\sto|miss(?:es|ed)?|late)\b|n't\b|(?<![\p{L}])no(?![\p{L}])/iu;
+const EVEN = /\b(?:even|aun|aún|incluso)\s$/iu;
+// "If you don't, …" / "Si no lo hace, …" points back to the step before it.
+const PRO_FORM =
+  /^\s*(?:not|(?:you|we)\s(?:don't|do\snot|didn't|did\snot)|(?:usted\s)?no(?:\slo\shace)?)\s*$/iu;
+// A date between commas ("If, by March 1, you do not renew") is part of the condition.
+const TIME =
+  /^\s*(?:(?:by|before|after|on|until|no\slater\sthan|antes\sdel?|para\sel|el)\b[^,;]*|\d{1,4}(?:st|nd|rd|th)?)?\s*$/iu;
 const BACKWARD =
   /\b(?:otherwise|or)\b|(?<![\p{L}])o\s|\bde\slo\scontrario\b/giu;
 // A period inside "Feb. 15" or "5 p.m. on" does not end a sentence.
 const SENTENCE_END = /[.!?;]["')\]]*(?=\s+[\p{Lu}¿¡"'(•-]|\s*$)/gu;
-const CLAUSE_END = /[,;]/;
+const CLAUSE_SPLIT = /[,;]/;
 
 // Sentence boundaries [start, end) around position `at`, and the one before it.
 function sentences(text: string, at: number) {
@@ -117,13 +130,27 @@ function hasReason(text: string, at: number, length: number): boolean {
   const sentence = text.slice(start, end);
   const lossStart = at - start;
   const lossEnd = lossStart + length;
-  // "if …" up to the next comma, never into the loss itself.
+  // "if …" up to the next comma (past a date between commas), never into the loss.
   for (const m of sentence.matchAll(FORWARD)) {
     if (m.index >= lossStart && m.index < lossEnd) continue;
-    const rest = sentence.slice(m.index);
-    const stop = rest.search(CLAUSE_END);
-    let clause = stop < 0 ? rest : rest.slice(0, stop);
+    if (EVEN.test(sentence.slice(0, m.index))) continue;
+    const segments = sentence.slice(m.index + m[0].length).split(CLAUSE_SPLIT);
+    let last = segments.shift() ?? "";
+    let body = last;
+    while (TIME.test(last) && segments.length) {
+      last = segments.shift()!;
+      body += "," + last;
+    }
+    let clause = m[0] + body;
     if (m.index < lossStart) clause = clause.slice(0, lossStart - m.index);
+    const isIf = /^(?:if|si)\b/iu.test(m[0]);
+    if (isIf && PRO_FORM.test(clause.slice(m[0].length))) {
+      const earlier = sentence.slice(0, m.index).replace(/[\s,;]+$/, "");
+      if (ACTION.test(earlier.trim() ? earlier : text.slice(previous, start)))
+        return true;
+      continue;
+    }
+    if (isIf && !MISSED.test(clause)) continue;
     if (ACTION.test(clause)) return true;
   }
   // "…, otherwise" and "… or" directly before the loss point back to what comes

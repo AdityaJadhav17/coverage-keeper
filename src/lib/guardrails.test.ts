@@ -668,3 +668,48 @@ describe("a loss is excused only by the person's own action", () => {
     expect(findForbiddenClaims(text)).toEqual([]);
   });
 });
+
+// Second review of #65: "if" must be about a step the person misses, not a fact.
+describe("a loss after 'if' needs a missed step", () => {
+  it.each([
+    "If you work full time, you will lose your coverage.",
+    "If you return to work, you will lose your coverage.",
+    "If you are paid more than $2,000 a month, you will lose your coverage.",
+    "If you sign up for Medicare, you will lose your coverage.",
+    "If you apply for SSI, you will lose your coverage.",
+    "If you report more income, you will lose your coverage.",
+    "Even if you renew, you will lose your coverage.",
+    "Si trabaja tiempo completo, perderá su cobertura.",
+    "Si vuelve a trabajar, perderá su cobertura.",
+    "If you work with us, you will lose your coverage.",
+    "Without paying attention, you will lose your coverage.",
+  ])("blocks %j", (text) => {
+    expect(findForbiddenClaims(text)).not.toHaveLength(0);
+  });
+
+  it.each([
+    // A date between commas does not cut the condition off.
+    "If, by March 1, you do not renew, you will lose your coverage.",
+    "If by March 1, 2027, you have not renewed, you will lose your coverage.",
+    // "If you don't" points back to the step before it.
+    "Send your renewal form by March 1. If you don't, you will lose your coverage.",
+    "Send your renewal form by March 1. If not, you will lose your coverage.",
+    "Report your hours each month; if not, you will lose your coverage.",
+    "Envíe el formulario. Si no lo hace, perderá su cobertura.",
+    // Agency wording for the same steps.
+    "If we don't hear from you by March 1, you will lose your coverage.",
+    "If you don't fill out the packet, you will lose your coverage.",
+    "If you don't turn in the packet, you will lose your coverage.",
+    "If you don't mail it back, you will lose your coverage.",
+    "If you don't provide the requested items by May 5, you will lose your coverage.",
+    "If you don't verify your income, you will lose your coverage.",
+    "If you miss the due date, you will lose your coverage.",
+    "Fill out the packet by March 1, or you will lose your coverage.",
+    "Si no llena el paquete, perderá su cobertura.",
+    "Si no manda los papeles, perderá su cobertura.",
+    "Si no entrega los papeles, perderá su cobertura.",
+    "Si no presenta los comprobantes, perderá su cobertura.",
+  ])("allows %j", (text) => {
+    expect(findForbiddenClaims(text)).toEqual([]);
+  });
+});
