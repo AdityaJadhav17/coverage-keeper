@@ -64,6 +64,7 @@ describe("shipped text contains no eligibility claims", () => {
       deadline,
       today: new Date("2027-02-10T10:00:00-08:00"),
       rules: stateRules(state),
+      timeZone: "America/Los_Angeles",
     });
     expect(findForbiddenClaims(draft)).toEqual([]);
   });

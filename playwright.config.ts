@@ -9,6 +9,8 @@ export default defineConfig({
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
   use: {
     baseURL: `http://localhost:${PORT}`,
+    // Days-left math follows the device's zone; pin it so CI (UTC) and laptops agree.
+    timezoneId: "America/Los_Angeles",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
   },

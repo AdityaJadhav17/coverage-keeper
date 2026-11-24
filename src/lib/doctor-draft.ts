@@ -4,7 +4,7 @@ import type { StateRules } from "./states";
 export const CONDITION_PLACEHOLDER =
   "[describe your condition in your own words]";
 
-const date = (d: Date, timeZone: string) =>
+const date = (d: Date, timeZone?: string) =>
   d.toLocaleDateString("en-US", {
     timeZone,
     month: "short",
@@ -18,12 +18,15 @@ export function buildDoctorDraft({
   deadline,
   today,
   rules,
+  timeZone,
 }: {
   deadline: string | null;
   today: Date;
   rules: Pick<StateRules, "program" | "source_url">;
+  // The person's zone; the device's own when left out.
+  timeZone?: string;
 }): string {
-  const { status } = deadlineStatus(deadline, today);
+  const { status } = deadlineStatus(deadline, today, timeZone);
   const by =
     status === "unknown"
       ? null
@@ -31,7 +34,7 @@ export function buildDoctorDraft({
         ? "I need this as soon as possible."
         : `I need this by ${date(new Date(`${deadline}T00:00:00Z`), "UTC")}.`;
   return [
-    `Date: ${date(today, "America/Los_Angeles")}`,
+    `Date: ${date(today, timeZone)}`,
     "",
     "Hello Dr. [doctor's name],",
     "",

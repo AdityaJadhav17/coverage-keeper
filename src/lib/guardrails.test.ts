@@ -1,19 +1,23 @@
 import { describe, expect, it } from "vitest";
 import {
-  SAFE_FALLBACK,
-  SAFE_FALLBACK_ES,
   enforceGuardrail,
+  findForbiddenClaims,
   findHealthCare,
   findImmigrationAdvice,
   findLegalStrategy,
-  LEGAL_FALLBACK,
-  LEGAL_FALLBACK_ES,
-  IMMIGRATION_FALLBACK,
-  IMMIGRATION_FALLBACK_ES,
+  findSelfDescriptions,
   HEALTH_FALLBACK,
   HEALTH_FALLBACK_ES,
-  findForbiddenClaims,
-  findSelfDescriptions,
+  HIDDEN_PAPER,
+  HIDDEN_PAPER_ES,
+  IMMIGRATION_FALLBACK,
+  IMMIGRATION_FALLBACK_ES,
+  LEGAL_FALLBACK,
+  LEGAL_FALLBACK_ES,
+  paperOrNotice,
+  SAFE_FALLBACK,
+  SAFE_FALLBACK_ES,
+  shownOrNull,
 } from "./guardrails";
 
 describe("findForbiddenClaims", () => {
@@ -381,5 +385,331 @@ describe("legal strategy", () => {
       expect(text).toMatch(/lsc\.gov/);
       expect(enforceGuardrail(text).blocked).toBe(false);
     }
+  });
+});
+
+// Review 2026-11-21: one adverb or contraction used to defeat the check, and ordinary
+// instructions from a letter were erased.
+describe("claims with an adverb, a contraction or another tense", () => {
+  it.each([
+    "You are no longer eligible for Medicaid.",
+    "You no longer qualify for Apple Health.",
+    "You've been approved for Medicaid.",
+    "You aren't eligible for coverage.",
+    "You are still eligible.",
+    "You are now eligible for full coverage.",
+    "You are currently eligible.",
+    "You are already exempt.",
+    "You are likely exempt.",
+    "You remain eligible.",
+    "You are approved.",
+    "You are not covered.",
+    "You still qualify.",
+    "You probably qualify for an exemption.",
+    "You definitely qualify.",
+    "You do qualify.",
+    "You'll qualify.",
+    "You have qualified for an exemption.",
+    "You have been found eligible.",
+    "You have been denied.",
+    "You were denied coverage.",
+    "You'll be covered starting January 1.",
+    "You will lose your coverage on January 31.",
+    "You lost your coverage.",
+    "Usted sigue siendo elegible.",
+    "Usted perderá su cobertura el 31 de enero.",
+    "Usted va a perder la cobertura.",
+    "Usted quedará exento.",
+    "Usted está cubierto.",
+    "Usted fue denegado.",
+    // A condition elsewhere does not excuse a plain claim.
+    "If you read this, you are eligible.",
+    "Send it and you qualify.",
+    "The letter says that you are eligible.",
+    "Si lee esto, usted es elegible.",
+    "If you have questions, call us. You will lose your coverage.",
+  ])("blocks %j", (text) => {
+    expect(findForbiddenClaims(text)).not.toHaveLength(0);
+  });
+});
+
+describe("what a letter asks for, or warns about, is not a claim", () => {
+  it.each([
+    // A question or a condition, not an answer.
+    "Fill out the form to find out whether or not you qualify.",
+    "The state will decide whether or not you are eligible.",
+    "Unless you qualify for an exemption, you must report hours.",
+    "El estado necesita revisar si todavía califica.",
+    "Complete el formulario para ver si todavía califica.",
+    "Envíe los documentos para saber si su hijo es elegible.",
+    // What happens if the person does or does not act.
+    "If you do not renew by March 1, you will lose your coverage.",
+    "Si no renueva antes del 1 de marzo, perderá su cobertura.",
+    "Send the form so you can keep your coverage.",
+  ])("allows %j", (text) => {
+    expect(findForbiddenClaims(text)).toEqual([]);
+  });
+});
+
+describe("a blocked field is hidden, not replaced by our own sentence", () => {
+  it("keeps a clean quote or action and drops a blocked one", () => {
+    expect(shownOrNull("Please send this by February 15, 2027.")).toBe(
+      "Please send this by February 15, 2027.",
+    );
+    expect(shownOrNull("You are eligible, no need to reply.")).toBeNull();
+    expect(shownOrNull(null)).toBeNull();
+    expect(shownOrNull("")).toBeNull();
+  });
+
+  it("keeps a clean paper and swaps a blocked one for a pointer to the letter", () => {
+    expect(paperOrNotice("Pay stubs for January 2027")).toBe(
+      "Pay stubs for January 2027",
+    );
+    expect(paperOrNotice("Nothing needed, you're exempt")).toBe(HIDDEN_PAPER);
+    expect(paperOrNotice("Nada, usted está exento", "es")).toBe(
+      HIDDEN_PAPER_ES,
+    );
+  });
+
+  it("the pointers themselves pass the check", () => {
+    for (const text of [HIDDEN_PAPER, HIDDEN_PAPER_ES])
+      expect(findForbiddenClaims(text)).toEqual([]);
+  });
+});
+
+// Second review of this fix: the exemptions must not excuse an assertion.
+describe("an exemption does not excuse an assertion", () => {
+  it.each([
+    // "confirm", "show", "prove" as what the letter or the records say.
+    "This letter confirms that you are approved.",
+    "This letter is to confirm that you are eligible for Medicaid.",
+    "This letter confirms you qualify for Apple Health.",
+    "We confirm that you are eligible for Medicaid.",
+    "Our records show that you are eligible.",
+    "Records show you qualify.",
+    "Documents show you are eligible.",
+    "Evidence confirms you are exempt.",
+    "The evidence shows you are exempt.",
+    "This proves you are exempt.",
+    "It shows that you are exempt.",
+    "The review showed you are eligible.",
+    "Your documents confirm you are exempt.",
+    "Your papers show that you are approved.",
+    "We have proof that you are eligible.",
+    "Verification that you are eligible is complete.",
+    "Show you are eligible.",
+    "Esta carta es para confirmar que usted es elegible para Medicaid.",
+    "Podemos confirmar que usted califica.",
+    "Tenemos pruebas de que usted es elegible.",
+    "Se pudo verificar que usted califica.",
+    "La constancia de que usted está exento fue recibida.",
+    // A good outcome is a claim whatever else the sentence says.
+    "You will be approved, call if you have questions.",
+    "You will keep your coverage - if you have questions call 1-800-699-9075.",
+    "Call us if you have questions and you will be approved",
+    "You will be approved once the state reads this.",
+    "You will be covered when you see this.",
+    "If so, you will be approved.",
+    "You will be covered until June 30 only if you return the form.",
+    "Usted será elegible cuando reciba esta carta.",
+    "You will be approved\nIf you have questions call us",
+    // A loss with no condition about what the person does.
+    "You will be denied, no matter when you send it.",
+    // An opener is not a licence.
+    "When you are approved (which you are), the state mails a card.",
+    "Once you qualify, as you now do, ignore this letter.",
+    "Ya revisamos si califica y usted es elegible.",
+    "Si lee esto usted es elegible.",
+    "Si señor usted califica.",
+    "You have lost your coverage.",
+  ])("blocks %j", (text) => {
+    expect(findForbiddenClaims(text)).not.toHaveLength(0);
+  });
+
+  it.each([
+    // An abbreviation's period does not cut the condition off.
+    "If you do not send the form by Feb. 15, you will lose your coverage.",
+    "If you do not renew by 5 p.m. on March 1, you will lose your coverage.",
+    "If you live in the U.S. and do not renew, you will lose your coverage.",
+    "Si no renueva antes del 1.º de marzo, perderá su cobertura.",
+    "Unless you renew by March 1, you will lose your coverage.",
+    // Other coverage and income are not about this program's decision.
+    "You are also covered by Medicare, send your Medicare card.",
+    "Proof of other health insurance you are also covered by",
+    "You have exempt income? List it.",
+  ])("allows %j", (text) => {
+    expect(findForbiddenClaims(text)).toEqual([]);
+  });
+});
+
+// The check fails closed. These are things a letter can rightly say, but no pattern
+// told them apart from a finding ("we have proof that you are eligible") without
+// letting real claims through. Blocked, they are hidden on screen, never reworded.
+describe("blocked on purpose: asked-to-prove wording", () => {
+  it.each([
+    "Send proof that you are exempt by June 30.",
+    "Send documents to show you are exempt.",
+    "Letter showing you qualify for SNAP",
+    "Proof that you were approved for disability",
+    "You must show you meet the work requirement.",
+    "Send proof showing how you meet the work requirements.",
+    "The letter asks you to prove you meet the work requirements.",
+    "Comprobante de que usted califica",
+    "Envíe pruebas de que usted está exento antes del 30 de junio.",
+    "If you think you are exempt, call us.",
+    "If you do not send the form, you will not be covered after June 30.",
+    "If we do not hear from you by June 1, you will not be covered.",
+  ])("blocks %j", (text) => {
+    expect(findForbiddenClaims(text)).not.toHaveLength(0);
+  });
+});
+
+describe("third pass: findings dressed as requests, and coverage by this program", () => {
+  it.each([
+    "This goes to show you are eligible.",
+    "The state is able to prove that you qualify.",
+    "We can show you are eligible.",
+    "Your papers are enough to show you are exempt.",
+    "Records showing you are eligible exist.",
+    "A letter proving you qualify was received.",
+    "Esta carta es para demostrar que usted califica.",
+    "Usted no necesita demostrar que es elegible.",
+    "Proof that you are eligible is on file.",
+    "Proof that you are eligible has been received.",
+    "You must know we have proof that you are eligible.",
+    "Bring this letter as proof that you are eligible.",
+    "Presente esta carta como comprobante de que usted es elegible.",
+    "You are covered by Medicaid.",
+    "You're covered by OHP through June 30.",
+    "You will be covered by Medicaid starting July 1.",
+    "You have been covered by Medi-Cal since May.",
+    "If you were wondering, you will not be eligible.",
+    "If you want to know, you will be denied.",
+    "Si quiere saberlo, usted no será elegible.",
+    "Si no usted no es elegible.",
+    "Si ya usted califica no haga nada.",
+    "You will soon be approved.",
+    "You will always be covered.",
+    "You are going to be approved.",
+    "You will be losing your coverage.",
+  ])("blocks %j", (text) => {
+    expect(findForbiddenClaims(text)).not.toHaveLength(0);
+  });
+
+  // A loss with its reason in the same sentence is the warning the person needs.
+  it.each([
+    "Renew by March 1 or you will lose your coverage.",
+    "You must renew by March 1, otherwise you will lose your coverage.",
+    "You will lose your coverage if the form is not returned by June 30.",
+    "You will lose your coverage unless your renewal is received by June 30.",
+    "If your form is late, you will lose your coverage.",
+    "If the state does not get your form by June 30, you will lose your coverage.",
+    "Without your renewal form, you will lose your coverage on June 30.",
+    "If you do not renew by March 1,\nyou will lose your coverage.",
+    "Renueve antes del 1 de marzo o perderá su cobertura.",
+    "Envíe el formulario antes del 1 de marzo. De lo contrario, perderá su cobertura.",
+    "Sin su formulario, usted perderá su cobertura el 30 de junio.",
+  ])("allows %j", (text) => {
+    expect(findForbiddenClaims(text)).toEqual([]);
+  });
+});
+
+describe("fourth pass: nothing main blocked gets through", () => {
+  it.each([
+    "You have been not approved.",
+    "You have been not covered.",
+    "You are lose coverage.",
+    "You are keep coverage.",
+    "Usted va a perder su cobertura si no renueva.",
+    "Si me pregunta, va a perder su cobertura.",
+    "Vas a perder tu cobertura sin duda.",
+    // A loss with a word that only looks like a reason.
+    "You will lose your coverage for one or two reasons.",
+    "You'll lose your coverage in 30 days or less.",
+    "You will lose coverage without a doubt.",
+    "Without question you will lose your coverage.",
+    "Usted perderá su cobertura sin duda.",
+    'The letter says "call if you need help." You will lose your coverage.',
+    "If you need help, call (1-800-699-9075.) You will lose your coverage.",
+  ])("blocks %j", (text) => {
+    expect(findForbiddenClaims(text)).not.toHaveLength(0);
+  });
+});
+
+// Review of #65: the reason must be something the person does, not any "if".
+describe("a loss is excused only by the person's own action", () => {
+  it.each([
+    "If you ask me, you will lose your coverage.",
+    "You will lose your coverage, if you ask me.",
+    "If you have questions, call us, you will lose your coverage.",
+    "You will lose your coverage if you don't mind me saying so.",
+    "Unless something changes, you will lose your coverage.",
+    "If we are honest, you will lose your coverage.",
+    "Otherwise, you will lose your coverage.",
+    "De lo contrario, perderá su cobertura.",
+    "Si quiere saberlo, perderá su cobertura.",
+    "Si tiene preguntas, llámenos; perderá su cobertura.",
+  ])("blocks %j", (text) => {
+    expect(findForbiddenClaims(text)).not.toHaveLength(0);
+  });
+
+  it.each([
+    "If you do not renew by March 1, you will lose your coverage.",
+    "You will lose your coverage on June 30 if you have not sent the form.",
+    "You will lose your coverage if you do not report your work hours.",
+    "If no one in your home works 80 hours, you will lose your coverage.",
+    "If you live in the U.S. and do not renew, you will lose your coverage.",
+    "You must renew by March 1, otherwise you will lose your coverage.",
+    "If you do not sign and return the form, you will lose your coverage.",
+    "If you do not pay your premium, you will lose your coverage.",
+    "Si no envía sus talones de pago, perderá su cobertura.",
+    "Si no reporta sus horas de trabajo, perderá su cobertura.",
+  ])("allows %j", (text) => {
+    expect(findForbiddenClaims(text)).toEqual([]);
+  });
+});
+
+// Second review of #65: "if" must be about a step the person misses, not a fact.
+describe("a loss after 'if' needs a missed step", () => {
+  it.each([
+    "If you work full time, you will lose your coverage.",
+    "If you return to work, you will lose your coverage.",
+    "If you are paid more than $2,000 a month, you will lose your coverage.",
+    "If you sign up for Medicare, you will lose your coverage.",
+    "If you apply for SSI, you will lose your coverage.",
+    "If you report more income, you will lose your coverage.",
+    "Even if you renew, you will lose your coverage.",
+    "Si trabaja tiempo completo, perderá su cobertura.",
+    "Si vuelve a trabajar, perderá su cobertura.",
+    "If you work with us, you will lose your coverage.",
+    "Without paying attention, you will lose your coverage.",
+  ])("blocks %j", (text) => {
+    expect(findForbiddenClaims(text)).not.toHaveLength(0);
+  });
+
+  it.each([
+    // A date between commas does not cut the condition off.
+    "If, by March 1, you do not renew, you will lose your coverage.",
+    "If by March 1, 2027, you have not renewed, you will lose your coverage.",
+    // "If you don't" points back to the step before it.
+    "Send your renewal form by March 1. If you don't, you will lose your coverage.",
+    "Send your renewal form by March 1. If not, you will lose your coverage.",
+    "Report your hours each month; if not, you will lose your coverage.",
+    "Envíe el formulario. Si no lo hace, perderá su cobertura.",
+    // Agency wording for the same steps.
+    "If we don't hear from you by March 1, you will lose your coverage.",
+    "If you don't fill out the packet, you will lose your coverage.",
+    "If you don't turn in the packet, you will lose your coverage.",
+    "If you don't mail it back, you will lose your coverage.",
+    "If you don't provide the requested items by May 5, you will lose your coverage.",
+    "If you don't verify your income, you will lose your coverage.",
+    "If you miss the due date, you will lose your coverage.",
+    "Fill out the packet by March 1, or you will lose your coverage.",
+    "Si no llena el paquete, perderá su cobertura.",
+    "Si no manda los papeles, perderá su cobertura.",
+    "Si no entrega los papeles, perderá su cobertura.",
+    "Si no presenta los comprobantes, perderá su cobertura.",
+  ])("allows %j", (text) => {
+    expect(findForbiddenClaims(text)).toEqual([]);
   });
 });

@@ -18,7 +18,7 @@ Stack: Vitest (unit, integration, safety), fast-check (property tests), Playwrig
 - Fast, deterministic, no network, no real clock, no randomness without a seed.
 - Arrange / Act / Assert, one behavior per test.
 - Name: `it("<does what> when <condition>")`, e.g. `it("returns null deadline when the letter shows MM/DD/YYYY")`.
-- Inject the clock: functions take `now: Date` instead of calling `new Date()`. Time zone for deadline math is `America/Los_Angeles`.
+- Inject the clock: functions take `now: Date` instead of calling `new Date()`. Deadline math uses the device's own time zone; tests pass a zone explicitly.
 - Table-driven cases with `it.each` for parsers and rules.
 - Property tests (fast-check) for date parsing: any valid date formatted in a supported style parses back to the same ISO date; output is never a date before 2000 or after 2100.
 
@@ -59,7 +59,7 @@ it("works", async () => {
 | Case                                                         | Expected behavior                                                           |
 | ------------------------------------------------------------ | --------------------------------------------------------------------------- |
 | Model returns malformed JSON or extra fields                 | Treated as unsure (US-013); no crash                                        |
-| Model returns an eligibility claim in any string             | Replaced by safe fallback (US-050)                                          |
+| Model returns an eligibility claim in any string             | Summary replaced by safe fallback; quote, action or paper hidden (US-050)   |
 | Timeout / 429 rate limit / 5xx                               | One retry with backoff for 429/5xx; then a friendly error with phone number |
 | Provider outage                                              | Error screen; fixture mode available for demos                              |
 | Partial result (deadline missing)                            | Other fields shown; deadline marked unsure                                  |

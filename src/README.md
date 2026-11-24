@@ -17,18 +17,18 @@ Application code: the Next.js pages and API routes, the logic they share, and th
 
 ## lib
 
-| Module             | Purpose                                                                                 |
-| ------------------ | --------------------------------------------------------------------------------------- |
-| `schema.ts`        | Zod contract for the extraction (notice type, summary, deadline, documents, confidence) |
-| `letter-reader.ts` | Calls the vision model (`claude-opus-5-5`) and returns a validated extraction           |
-| `guardrails.ts`    | Detects phrases that state or deny eligibility and swaps in a safe fallback             |
-| `screening.ts`     | `mayApply`: returns the exemptions the user answered "yes" to                           |
-| `deadline.ts`      | Day counts and deadline status in the America/Los_Angeles time zone                     |
-| `doctor-draft.ts`  | Template text for asking a doctor for a letter, no model call                           |
-| `image.ts`         | File checks, resize limits, JPEG conversion before upload                               |
-| `phone.ts`         | Turns a phone number into a `tel:` link, falls back to OHP Customer Service             |
-| `rate-limit.ts`    | Fixed-window counter used by the read route                                             |
-| `site.ts`          | Site URL, title and description                                                         |
+| Module             | Purpose                                                                                                   |
+| ------------------ | --------------------------------------------------------------------------------------------------------- |
+| `schema.ts`        | Zod contract for the extraction (notice type, summary, deadline, documents, confidence)                   |
+| `letter-reader.ts` | Calls the vision model (`claude-opus-5-5`) and returns a validated extraction                             |
+| `guardrails.ts`    | Detects phrases that state or deny eligibility; the summary gets a safe fallback, other fields are hidden |
+| `screening.ts`     | `mayApply`: returns the exemptions the user answered "yes" to                                             |
+| `deadline.ts`      | Day counts and deadline status in the device's own time zone (a zone can be passed)                       |
+| `doctor-draft.ts`  | Template text for asking a doctor for a letter, no model call                                             |
+| `image.ts`         | File checks, resize limits, JPEG conversion before upload                                                 |
+| `phone.ts`         | Turns a phone number into a `tel:` link, falls back to OHP Customer Service                               |
+| `rate-limit.ts`    | Fixed-window counter used by the read route                                                               |
+| `site.ts`          | Site URL, title and description                                                                           |
 
 Each module has a `*.test.ts` file beside it.
 
