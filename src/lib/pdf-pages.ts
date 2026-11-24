@@ -29,8 +29,6 @@ const unescape = (s: string) =>
 
 type Found = { pages: Set<string>; counts: number[] };
 
-// Each "N G obj ... endobj", in order. Stops at the first object with no "endobj":
-// no later object can have one either.
 const WORD = /[A-Za-z0-9_]/;
 // The next "endobj" that stands alone: "/xendobj" is a name, not the end of an object.
 function endOfObject(text: string, from: number): number {
@@ -44,14 +42,23 @@ function endOfObject(text: string, from: number): number {
   return -1;
 }
 
-function* objects(text: string): Generator<[num: string, body: string]> {
+// Each "N G obj ... endobj", in order, or null when an object has another object's
+// header inside it: "1 0 obj junk" before each page would otherwise file every page
+// under object 1 and hide it from the count. Stops at the first object with no
+// "endobj": no later object can have one either.
+const NESTED = new RegExp(OBJECT_START.source);
+function objects(text: string): [num: string, body: string][] | null {
   const start = new RegExp(OBJECT_START.source, "g");
+  const list: [string, string][] = [];
   for (let m = start.exec(text); m; m = start.exec(text)) {
     const end = endOfObject(text, start.lastIndex);
-    if (end < 0) return;
-    yield [m[1]!, text.slice(start.lastIndex, end)];
+    if (end < 0) break;
+    const body = text.slice(start.lastIndex, end);
+    if (NESTED.test(body)) return null;
+    list.push([m[1]!, body]);
     start.lastIndex = end + "endobj".length;
   }
+  return list;
 }
 
 // One object: a page adds its number (an edited PDF repeats objects under the same
@@ -71,7 +78,9 @@ function scan(num: string, body: string, found: Found) {
 function scanStream(head: string, text: string, found: Found): boolean {
   const first = Number(/\/First\s+(\d+)/.exec(head)?.[1]);
   if (!Number.isFinite(first)) {
-    for (const [num, body] of objects(text)) scan(num, body, found);
+    const all = objects(text);
+    if (!all) return false;
+    for (const [num, body] of all) scan(num, body, found);
     return true;
   }
   const pairs = text.slice(0, first).trim().split(/\s+/).map(Number);
@@ -102,7 +111,9 @@ export function pdfPageCount(data: Uint8Array): number | null {
   const text = unescape(raw);
   if (uncountable(text)) return null;
   const found: Found = { pages: new Set(), counts: [] };
-  for (const [num, body] of objects(text)) scan(num, body, found);
+  const all = objects(text);
+  if (!all) return null;
+  for (const [num, body] of all) scan(num, body, found);
   let budget = INFLATE_BUDGET;
   // Every lookup only moves forward through the file, and each stream's dictionary is
   // read from the previous stream keyword at the earliest, so the slices never overlap.

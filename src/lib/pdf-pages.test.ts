@@ -123,24 +123,25 @@ describe("pdfPageCount (security audit M1)", () => {
 });
 
 // One upload must not pin the server: every scan stays linear in the file size.
-// Before the fix the first two took about 170 s and 80 s at this size.
+// 1 MB keeps each case fast on a slow CI runner and still shows a quadratic scan:
+// before the fix the first case alone took about 10 s at this size.
 describe("pdfPageCount finishes fast on hostile files", () => {
   const MB = 1024 * 1024;
   const fill = (unit: string, bytes: number) =>
     enc("%PDF-1.7\n" + unit.repeat(Math.ceil(bytes / unit.length)));
 
   it.each([
-    ["objects that never end", fill("1 0 obj ", 4 * MB)],
-    ["streams with no object before them", fill("stream\n", 4 * MB)],
+    ["objects that never end", fill("1 0 obj ", MB)],
+    ["streams with no object before them", fill("stream\n", MB)],
     [
       "object streams that never end",
       enc(
         "%PDF-1.7\n9 0 obj << /Type /ObjStm /Filter /FlateDecode >> " +
-          "stream\n".repeat((4 * MB) / 7),
+          "stream\n".repeat(MB / 7),
       ),
     ],
-    ["comments that never end", fill("/Type%", 4 * MB)],
-    ["one long run of digits", fill("1", 4 * MB)],
+    ["comments that never end", fill("/Type%", MB)],
+    ["one long run of digits", fill("1", MB)],
     [
       "an offset table that points every object at the whole stream",
       objStm(
@@ -152,22 +153,20 @@ describe("pdfPageCount finishes fast on hostile files", () => {
     ],
     [
       "names inside a run of comments, in an object",
-      enc(
-        "%PDF-1.7\n1 0 obj /Type" + "%/Type\n".repeat((4 * MB) / 7) + " endobj",
-      ),
+      enc("%PDF-1.7\n1 0 obj /Type" + "%/Type\n".repeat(MB / 7) + " endobj"),
     ],
-    ["names inside a run of comments, no object", fill("%/Type\n", 4 * MB)],
-    ["escaped bytes before every stream", fill("#41stream\n", 4 * MB)],
+    ["names inside a run of comments, no object", fill("%/Type\n", MB)],
+    ["escaped bytes before every stream", fill("#41stream\n", MB)],
     [
       "a tiny object stream that inflates to a run of comments",
       objStm(
-        deflateSync(enc("1 0 /Type" + "%/Type\n".repeat((8 * MB) / 7))),
+        deflateSync(enc("1 0 /Type" + "%/Type\n".repeat((2 * MB) / 7))),
         "/FlateDecode /First 4",
       ),
     ],
     [
       "one long run of spaces between numbers",
-      fill("1" + " ".repeat(4096), 4 * MB),
+      fill("1" + " ".repeat(4096), MB),
     ],
     [
       "many streams before one far endstream",
@@ -183,8 +182,8 @@ describe("pdfPageCount finishes fast on hostile files", () => {
   ])("%s", (_, data) => {
     const started = performance.now();
     pdfPageCount(data);
-    // These took 80 s to hours before; 10 s leaves room for a slow CI runner.
-    expect(performance.now() - started).toBeLessThan(10_000);
+    // Linear runs take well under 0.1 s here; quadratic ones took 10 s or more.
+    expect(performance.now() - started).toBeLessThan(2000);
   });
 
   it("still counts pages that sit after an object with no endobj", () => {
@@ -237,5 +236,25 @@ describe("pdfPageCount finishes fast on hostile files", () => {
     expect(
       pdfPageCount(objStm(body, `/FlateDecode /First ${table.length}`)),
     ).toBeNull();
+  });
+
+  // Review of #65: an unterminated "1 0 obj" before each page used to file every page
+  // under object 1, so 30 pages counted as 1.
+  it("gives up when an object has another object's header inside it", () => {
+    expect(
+      pdfPageCount(
+        hidden(
+          (i) => `1 0 obj junk\n${i + 3} 0 obj << /Type /Page >> endobj\n`,
+        ),
+      ),
+    ).toBeNull();
+  });
+
+  it("gives up on the same trick inside an object stream with no /First", () => {
+    const inner = Array.from(
+      { length: 30 },
+      (_, i) => `1 0 obj junk ${i + 3} 0 obj << /Type /Page >> endobj `,
+    ).join("");
+    expect(pdfPageCount(objStm(deflateSync(enc(inner))))).toBeNull();
   });
 });
