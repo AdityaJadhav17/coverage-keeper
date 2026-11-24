@@ -7,12 +7,13 @@ import {
   SAFE_FALLBACK,
   SAFE_FALLBACK_ES,
 } from "@/lib/guardrails";
+import { readLetter } from "@/lib/letter-reader";
 import { LetterExtraction } from "@/lib/schema";
 import adversarial from "../fixtures/adversarial/eligible-summary.json";
 
 vi.mock("@/lib/letter-reader", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/letter-reader")>()),
-  readLetter: async () => LetterExtraction.parse(adversarial),
+  readLetter: vi.fn(async () => LetterExtraction.parse(adversarial)),
 }));
 
 async function read(lang?: string) {
@@ -51,5 +52,23 @@ describe("route output guardrail (US-050, US-052, US-062)", () => {
       lang === "es" ? HIDDEN_PAPER_ES : HIDDEN_PAPER,
     ]);
     expect(findForbiddenClaims(JSON.stringify(body))).toEqual([]);
+  });
+});
+
+describe("the phone field is guarded too", () => {
+  it("drops a phone field that carries a claim", async () => {
+    vi.mocked(readLetter).mockResolvedValueOnce(
+      LetterExtraction.parse({
+        ...adversarial,
+        contact_phone: "You are eligible",
+      }),
+    );
+    const body = await read();
+    expect(body.contact_phone).toBeNull();
+  });
+
+  it("keeps a real phone number", async () => {
+    const body = await read();
+    expect(body.contact_phone).toBe(adversarial.contact_phone);
   });
 });
