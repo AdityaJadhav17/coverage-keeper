@@ -257,4 +257,38 @@ describe("pdfPageCount finishes fast on hostile files", () => {
     ).join("");
     expect(pdfPageCount(objStm(deflateSync(enc(inner))))).toBeNull();
   });
+
+  // Second review of #65: page objects the walker can't pair still count, because
+  // every page dictionary in the file is a lower bound on the pages.
+  it.each([
+    [
+      "a comment inside a nested header",
+      (i: number) =>
+        `1 0 obj junk\n${i + 3} 0 %c\nobj << /Type /Page >> endobj\n`,
+    ],
+    [
+      "a comment inside every header",
+      (i: number) => `${i + 3} 0 %c\nobj << /Type /Page >> endobj\n`,
+    ],
+    [
+      "pages with no endobj",
+      (i: number) => `${i + 3} 0 obj << /Type /Page >>\n`,
+    ],
+    [
+      "headers with no space before obj",
+      (i: number) => `${i + 3} 0obj << /Type /Page >> endobj\n`,
+    ],
+  ])("counts every page dictionary: %s", (_, page) => {
+    const n = pdfPageCount(hidden(page));
+    expect(n === null || n >= 30).toBe(true);
+  });
+
+  it("counts page dictionaries inside an object stream it cannot walk", () => {
+    const inner = Array.from(
+      { length: 30 },
+      (_, i) => `${i + 3} 0 %c\nobj << /Type /Page >> endobj `,
+    ).join("");
+    const n = pdfPageCount(objStm(deflateSync(enc(inner))));
+    expect(n === null || n >= 30).toBe(true);
+  });
 });

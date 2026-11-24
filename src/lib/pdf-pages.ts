@@ -27,7 +27,7 @@ const unescape = (s: string) =>
     String.fromCharCode(parseInt(h, 16)),
   );
 
-type Found = { pages: Set<string>; counts: number[] };
+type Found = { pages: Set<string>; counts: number[]; loose: number };
 
 const WORD = /[A-Za-z0-9_]/;
 // The next "endobj" that stands alone: "/xendobj" is a name, not the end of an object.
@@ -46,19 +46,30 @@ function endOfObject(text: string, from: number): number {
 // header inside it: "1 0 obj junk" before each page would otherwise file every page
 // under object 1 and hide it from the count. Stops at the first object with no
 // "endobj": no later object can have one either.
-const NESTED = new RegExp(OBJECT_START.source);
-function objects(text: string): [num: string, body: string][] | null {
+// Another header inside a body, also with comments between its tokens or no space
+// before "obj"; each gap is bounded, so the work per start stays bounded.
+const TOKEN_GAP = String.raw`(?:\s|%[^\r\n]{0,200}[\r\n]){1,8}`;
+const NESTED = new RegExp(
+  String.raw`\d{1,10}${TOKEN_GAP}\d{1,10}(?:\s|%[^\r\n]{0,200}[\r\n]){0,8}obj\b`,
+);
+type Walk = { list: [num: string, body: string][]; outside: string };
+function objects(text: string): Walk | null {
   const start = new RegExp(OBJECT_START.source, "g");
   const list: [string, string][] = [];
+  // Text that is in no paired object: where a page with a broken header would sit.
+  let outside = "";
+  let from = 0;
   for (let m = start.exec(text); m; m = start.exec(text)) {
     const end = endOfObject(text, start.lastIndex);
     if (end < 0) break;
     const body = text.slice(start.lastIndex, end);
     if (NESTED.test(body)) return null;
     list.push([m[1]!, body]);
-    start.lastIndex = end + "endobj".length;
+    outside += text.slice(from, m.index) + " ";
+    from = end + "endobj".length;
+    start.lastIndex = from;
   }
-  return list;
+  return { list, outside: outside + text.slice(from) };
 }
 
 // One object: a page adds its number (an edited PDF repeats objects under the same
@@ -78,9 +89,10 @@ function scan(num: string, body: string, found: Found) {
 function scanStream(head: string, text: string, found: Found): boolean {
   const first = Number(/\/First\s+(\d+)/.exec(head)?.[1]);
   if (!Number.isFinite(first)) {
-    const all = objects(text);
-    if (!all) return false;
-    for (const [num, body] of all) scan(num, body, found);
+    const walk = objects(text);
+    if (!walk) return false;
+    for (const [num, body] of walk.list) scan(num, body, found);
+    found.loose += pageDictionaries(walk.outside);
     return true;
   }
   const pairs = text.slice(0, first).trim().split(/\s+/).map(Number);
@@ -105,15 +117,22 @@ function scanStream(head: string, text: string, found: Found): boolean {
 // inside Flate object streams; an object stream in any other filter makes it give up.
 // shortcut: a byte scan, not a PDF parser; deleted pages from old revisions still count,
 // so the cap sits above real letters (the longest eval letter is 14 pages).
+const PAGE_ALL = new RegExp(PAGE.source, "g");
+const pageDictionaries = (text: string) => text.match(PAGE_ALL)?.length ?? 0;
+
 export function pdfPageCount(data: Uint8Array): number | null {
   const buf = Buffer.from(data.buffer, data.byteOffset, data.byteLength);
   const raw = buf.toString("latin1");
   const text = unescape(raw);
   if (uncountable(text)) return null;
-  const found: Found = { pages: new Set(), counts: [] };
-  const all = objects(text);
-  if (!all) return null;
-  for (const [num, body] of all) scan(num, body, found);
+  const found: Found = { pages: new Set(), counts: [], loose: 0 };
+  const walk = objects(text);
+  if (!walk) return null;
+  for (const [num, body] of walk.list) scan(num, body, found);
+  // A page dictionary outside every paired object still counts: a comment inside
+  // "3 0 obj", or no "endobj", must not hide a page (review of #65). Pages inside
+  // paired objects are counted once per number, since edits repeat them.
+  found.loose += pageDictionaries(walk.outside);
   let budget = INFLATE_BUDGET;
   // Every lookup only moves forward through the file, and each stream's dictionary is
   // read from the previous stream keyword at the earliest, so the slices never overlap.
@@ -153,12 +172,13 @@ export function pdfPageCount(data: Uint8Array): number | null {
   }
   // A file with no numbered objects is malformed: count its page dictionaries as-is.
   if (found.pages.size === 0 && found.counts.length === 0) {
+    found.loose = 0; // counted again just below, over the whole text
     found.pages = new Set(
       [...text.matchAll(new RegExp(PAGE.source, "g"))].map((_, i) => `${i}`),
     );
     const loose = [...text.matchAll(new RegExp(COUNT.source, "g"))];
     found.counts = loose.map((m) => Number(m[1]));
   }
-  const pages = Math.max(found.pages.size, ...found.counts);
+  const pages = Math.max(found.pages.size + found.loose, ...found.counts);
   return pages > 0 ? pages : null;
 }
